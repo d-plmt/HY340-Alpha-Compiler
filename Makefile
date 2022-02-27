@@ -5,6 +5,12 @@ all:
 	$(GCC) test.c -o test
 
 clean:
-	@rm test test.c
+	@rm -f test test.c
 	@echo "Cleanup complete"
 
+a:
+	@rm -f test test.c
+	$(FLEX) -o test.c scanner.l
+	$(GCC) test.c -o test
+	@echo "Executing program:"
+	@./test

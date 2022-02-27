@@ -1,24 +1,36 @@
 %{
-
+int total_lines = 0;
+int total_tokens = 0;
 %}
+
+%option yylineno
+
+INT         [0-9]+  
+REAL        {INT}\.{1}{INT}
+STRING      (\")([.\\]|[^"]|(\\\"))*(\")
+IDENTIFIER  [A-Za-z]{1}[A-Za-z0-9_]*
+LINE_COMM   (\/){1}(\/){1}[^\\\n]*[\\\n]{1}
+BLOCK_COMM  (\/){1}(\*){1}*.*(\*){1}(\/){1}
 
 %%
 
-"if"            {printf("KEYWORD ");}
-"else"          {printf("KEYWORD ");}
-"while"         {printf("KEYWORD ");}
-"for"           {printf("KEYWORD ");}
-"function"      {printf("KEYWORD ");}
-"return"        {printf("KEYWORD ");}
-"break"         {printf("KEYWORD ");}
-"continue"      {printf("KEYWORD ");}
-"and"           {printf("KEYWORD ");}
-"not"           {printf("KEYWORD ");}
-"or"            {printf("KEYWORD ");}
-"local"         {printf("KEYWORD ");}
-"true"          {printf("KEYWORD ");}
-"false"         {printf("KEYWORD ");}
-"nil"           {printf("KEYWORD ");}
+
+\n              {++total_lines; ++total_tokens;}
+if              {printf("KEYWORD ");}
+else            {printf("KEYWORD ");}
+while           {printf("KEYWORD ");}
+for             {printf("KEYWORD ");}
+function        {printf("KEYWORD ");}
+return          {printf("KEYWORD ");}
+break           {printf("KEYWORD ");}
+continue        {printf("KEYWORD ");}
+and             {printf("KEYWORD ");}
+not             {printf("KEYWORD ");}
+or              {printf("KEYWORD ");}
+local           {printf("KEYWORD ");}
+true            {printf("KEYWORD ");}
+false           {printf("KEYWORD ");}
+nil             {printf("KEYWORD ");}
 "="             {printf("OPERATOR ");}
 "+"             {printf("OPERATOR ");}
 "-"             {printf("OPERATOR ");}
@@ -42,30 +54,30 @@
 ";"             {printf("PUNCTUATION ");}
 ","             {printf("PUNCTUATION ");}
 ":"             {printf("PUNCTUATION ");}
-"::"             {printf("PUNCTUATION ");}
+"::"            {printf("PUNCTUATION ");}
 "."             {printf("PUNCTUATION ");}
-".."             {printf("PUNCTUATION ");}
+".."            {printf("PUNCTUATION ");}
 
-[0-9]+              {return printf("INT ");}
-[0-9]+\.{1}[0-9]+   {return printf("REAL ");}
-(\")([.\\]|[^"]|(\\\"))*(\")   {return printf("STRING ");}
-[A-Za-z]{1}[A-Za-z0-9_]*    {return printf("IDENTIFIER ");}
-[ ]                 {/*do nothing*/}
-.                   {return printf("-1");}
-(\/){1}(\/){1}[^\\\n]*[\\\n]{1}   {return printf("LINE COMMENT ");}
-(\/){1}(\*){1}*.*(\*){1}(\/){1}    {return printf("COMMENT ");}
+{INT}           {printf("INT ");}
+{REAL}          {printf("REAL ");}
+{STRING}        {printf("STRING ");}
+{IDENTIFIER}    {printf("IDENTIFIER ");}
+{LINE_COMM}     {printf("LINE COMMENT ");}
+{BLOCK_COMM}    {printf("COMMENT ");}
+.               {++total_tokens;}
+
 %%
 
 yywrap() {}
 
-int main() {
-
-    while (1) {
-        int a = yylex();
-        if (a == -1) {
-            return -1;
-            
-        }
+int main(int argc, char** argv) {
+    
+    if (argc != 1) {
+        yyin = fopen(argv[1], "r");
     }
-    return 1;
+    else {
+        yyin = stdin;
+    }
+    yylex();
+    return 0;
 }
