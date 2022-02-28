@@ -553,7 +553,7 @@ char *yytext;
 #line 2 "scanner.l"
     #include "decl.h"
 
-    int total_lines = 0;
+    int total_lines = 1;
     int total_tokens = 0;
     
 #line 560 "test.c"
@@ -849,12 +849,12 @@ case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
 #line 22 "scanner.l"
-{++total_lines; ++total_tokens;}
+{++total_lines;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
 #line 23 "scanner.l"
-{printf("KEYWORD ");}
+{add_alpha_token_t(++total_tokens, total_lines, "KEYWORD", strdup(yytext));}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
@@ -2131,33 +2131,34 @@ void yyfree (void * ptr )
 
 yywrap() {}
 
-struct alpha_token_t *head = NULL;
-void add_alpha_token_t(int line, char *type, char *tiexei){
+    struct alpha_token_t *head = NULL;
+    struct alpha_token_t *tail = NULL;
+
+/*add new token to struct alpha_token_t*/
+void add_alpha_token_t(int token_number, int line, char *type, char *tiexei){
 
     struct alpha_token_t * newtoken = (struct alpha_token_t *)malloc(sizeof(struct alpha_token_t));
-    struct alpha_token_t * temp = NULL;
 
     newtoken->token_line = line;
-    newtoken->token_number++;
+    newtoken->token_number = token_number;
     newtoken->token_type = type;
     newtoken->token_tiexeimesa = tiexei;
 
     if(head == NULL){
         head = newtoken;
+        tail = newtoken;
         head->next_token = NULL;
+        tail->next_token = NULL;
     }else{
-        for(temp=head; temp->next_token!=NULL; temp=temp->next_token){
-            temp->next_token = newtoken;
-            newtoken->next_token = NULL;
-        }
+        tail->next_token = newtoken;
+        newtoken->next_token = NULL;
+        tail = newtoken;
     }
 
 }
 
 int main(int argc, char** argv) {
-    tokens = (alpha_token_t*)malloc(sizeof(alpha_token_t));
-    printf("%d",tokens->token_number);
-    
+        
     if (argc != 1) {
         yyin = fopen(argv[1], "r");
     }
@@ -2165,6 +2166,13 @@ int main(int argc, char** argv) {
         yyin = stdin;
     }
     yylex();
+
+    struct alpha_token_t *temp = head;
+    while (temp != NULL) {
+        printf("%s\t%d\n",temp->token_tiexeimesa, temp->token_line);
+        temp = temp->next_token;
+    }
+
     free(tokens);
     return 0;
 }
