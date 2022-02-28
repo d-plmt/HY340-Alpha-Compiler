@@ -1,6 +1,6 @@
-#line 2 "test.c"
+#line 2 "al.c"
 
-#line 4 "test.c"
+#line 4 "al.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -342,6 +342,9 @@ void yyfree ( void *  );
 #define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE->yy_at_bol)
 
 /* Begin user sect3 */
+
+#define yywrap() (/*CONSTCOND*/1)
+#define YY_SKIP_YYWRAP
 typedef flex_uint8_t YY_CHAR;
 
 FILE *yyin = NULL, *yyout = NULL;
@@ -549,8 +552,8 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "scanner.l"
-#line 2 "scanner.l"
+#line 1 "al.l"
+#line 2 "al.l"
     #include "decl.h"
 
     #define YY_DECL int alpha_yylex(void *yyval)
@@ -558,8 +561,8 @@ char *yytext;
     int total_lines = 1;
     int total_tokens = 0;
     
-#line 562 "test.c"
-#line 563 "test.c"
+#line 565 "al.c"
+#line 566 "al.c"
 
 #define INITIAL 0
 
@@ -776,11 +779,11 @@ YY_DECL
 		}
 
 	{
-#line 21 "scanner.l"
+#line 22 "al.l"
 
 
 
-#line 784 "test.c"
+#line 787 "al.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -850,263 +853,263 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 24 "scanner.l"
+#line 25 "al.l"
 {++total_lines;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 25 "scanner.l"
+#line 26 "al.l"
 {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD", strdup(yytext));}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 26 "scanner.l"
+#line 27 "al.l"
 {printf("KEYWORD ");}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 27 "scanner.l"
+#line 28 "al.l"
 {printf("KEYWORD ");}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 28 "scanner.l"
+#line 29 "al.l"
 {printf("KEYWORD ");}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 29 "scanner.l"
+#line 30 "al.l"
 {printf("KEYWORD ");}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 30 "scanner.l"
+#line 31 "al.l"
 {printf("KEYWORD ");}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 31 "scanner.l"
+#line 32 "al.l"
 {printf("KEYWORD ");}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 32 "scanner.l"
+#line 33 "al.l"
 {printf("KEYWORD ");}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 33 "scanner.l"
+#line 34 "al.l"
 {printf("KEYWORD ");}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 34 "scanner.l"
+#line 35 "al.l"
 {printf("KEYWORD ");}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 35 "scanner.l"
+#line 36 "al.l"
 {printf("KEYWORD ");}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 36 "scanner.l"
+#line 37 "al.l"
 {printf("KEYWORD ");}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 37 "scanner.l"
+#line 38 "al.l"
 {printf("KEYWORD ");}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 38 "scanner.l"
+#line 39 "al.l"
 {printf("KEYWORD ");}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 39 "scanner.l"
+#line 40 "al.l"
 {printf("KEYWORD ");}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 40 "scanner.l"
+#line 41 "al.l"
 {printf("OPERATOR ");}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 41 "scanner.l"
+#line 42 "al.l"
 {printf("OPERATOR ");}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 42 "scanner.l"
+#line 43 "al.l"
 {printf("OPERATOR ");}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 43 "scanner.l"
+#line 44 "al.l"
 {printf("OPERATOR ");}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 44 "scanner.l"
+#line 45 "al.l"
 {printf("OPERATOR ");}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 45 "scanner.l"
+#line 46 "al.l"
 {printf("OPERATOR ");}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 46 "scanner.l"
+#line 47 "al.l"
 {printf("OPERATOR ");}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 47 "scanner.l"
+#line 48 "al.l"
 {printf("OPERATOR ");}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 48 "scanner.l"
+#line 49 "al.l"
 {printf("OPERATOR ");}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 49 "scanner.l"
+#line 50 "al.l"
 {printf("OPERATOR ");}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 50 "scanner.l"
+#line 51 "al.l"
 {printf("OPERATOR ");}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 51 "scanner.l"
+#line 52 "al.l"
 {printf("OPERATOR ");}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 52 "scanner.l"
+#line 53 "al.l"
 {printf("OPERATOR ");}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 53 "scanner.l"
+#line 54 "al.l"
 {printf("OPERATOR ");}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 54 "scanner.l"
+#line 55 "al.l"
 {printf("PUNCTUATION ");}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 55 "scanner.l"
+#line 56 "al.l"
 {printf("PUNCTUATION ");}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 56 "scanner.l"
+#line 57 "al.l"
 {printf("PUNCTUATION ");}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 57 "scanner.l"
+#line 58 "al.l"
 {printf("PUNCTUATION ");}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 58 "scanner.l"
+#line 59 "al.l"
 {printf("PUNCTUATION ");}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 59 "scanner.l"
+#line 60 "al.l"
 {printf("PUNCTUATION ");}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 60 "scanner.l"
+#line 61 "al.l"
 {printf("PUNCTUATION ");}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 61 "scanner.l"
+#line 62 "al.l"
 {printf("PUNCTUATION ");}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 62 "scanner.l"
+#line 63 "al.l"
 {printf("PUNCTUATION ");}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 63 "scanner.l"
+#line 64 "al.l"
 {printf("PUNCTUATION ");}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 64 "scanner.l"
+#line 65 "al.l"
 {printf("PUNCTUATION ");}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 65 "scanner.l"
+#line 66 "al.l"
 {printf("PUNCTUATION ");}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 67 "scanner.l"
+#line 68 "al.l"
 {printf("INT ");}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 68 "scanner.l"
+#line 69 "al.l"
 {printf("REAL ");}
 	YY_BREAK
 case 45:
 /* rule 45 can match eol */
 YY_RULE_SETUP
-#line 69 "scanner.l"
+#line 70 "al.l"
 {add_alpha_token_t(++total_tokens, total_lines, "STRING", string_reformatting(strdup(yytext)));}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 70 "scanner.l"
+#line 71 "al.l"
 {printf("IDENTIFIER ");}
 	YY_BREAK
 case 47:
 /* rule 47 can match eol */
 YY_RULE_SETUP
-#line 71 "scanner.l"
+#line 72 "al.l"
 {printf("LINE COMMENT ");}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 72 "scanner.l"
+#line 73 "al.l"
 {printf("COMMENT ");}
 	YY_BREAK
 case 49:
 /* rule 49 can match eol */
 YY_RULE_SETUP
-#line 73 "scanner.l"
+#line 74 "al.l"
 {}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 76 "scanner.l"
+#line 77 "al.l"
 {++total_tokens; printf("Undefined input %s line %d\n",strdup(yytext),total_lines);}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 79 "scanner.l"
+#line 80 "al.l"
 ECHO;
 	YY_BREAK
-#line 1110 "test.c"
+#line 1113 "al.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2123,10 +2126,8 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 79 "scanner.l"
+#line 80 "al.l"
 
-
-yywrap() {}
 
 struct alpha_token_t *head = NULL;
 struct alpha_token_t *tail = NULL;
@@ -2192,12 +2193,8 @@ void add_alpha_token_t(int token_number, int line, char *type, char *tiexei){
 
 }
 
-void print_tokens(alpha_token_t *head) {
-    
-}
 
 int main(int argc, char** argv) {
-    printf("%d\n",argc);
     if (argc > 0) {
         yyin = fopen(argv[1], "r");
     }

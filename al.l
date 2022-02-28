@@ -9,6 +9,7 @@
 %}
 
 %option yylineno
+%option noyywrap
 
 
 INT         [0-9]+  
@@ -78,8 +79,6 @@ nil             {printf("KEYWORD ");}
 
 %%
 
-yywrap() {}
-
 struct alpha_token_t *head = NULL;
 struct alpha_token_t *tail = NULL;
 
@@ -144,12 +143,8 @@ void add_alpha_token_t(int token_number, int line, char *type, char *tiexei){
 
 }
 
-void print_tokens(alpha_token_t *head) {
-    
-}
 
 int main(int argc, char** argv) {
-    printf("%d\n",argc);
     if (argc > 0) {
         yyin = fopen(argv[1], "r");
     }

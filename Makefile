@@ -1,7 +1,7 @@
 GCC =gcc
 FLEX =flex
 all:
-	$(FLEX) -o al.c scanner.l
+	$(FLEX) -o al.c al.l
 	$(GCC) al.c -o al
 
 clean:
@@ -10,7 +10,7 @@ clean:
 
 a:
 	@rm -f al al.c
-	$(FLEX) -o al.c scanner.l
+	$(FLEX) -o al.c al.l
 	$(GCC) al.c -o al
 	@echo "Executing program:"
 	@./al input.txt output.txt
