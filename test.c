@@ -2131,6 +2131,29 @@ void yyfree (void * ptr )
 
 yywrap() {}
 
+struct alpha_token_t *head = NULL;
+void add_alpha_token_t(int line, char *type, char *tiexei){
+
+    struct alpha_token_t * newtoken = (struct alpha_token_t *)malloc(sizeof(struct alpha_token_t));
+    struct alpha_token_t * temp = NULL;
+
+    newtoken->token_line = line;
+    newtoken->token_number++;
+    newtoken->token_type = type;
+    newtoken->token_tiexeimesa = tiexei;
+
+    if(head == NULL){
+        head = newtoken;
+        head->next_token = NULL;
+    }else{
+        for(temp=head; temp->next_token!=NULL; temp=temp->next_token){
+            temp->next_token = newtoken;
+            newtoken->next_token = NULL;
+        }
+    }
+
+}
+
 int main(int argc, char** argv) {
     tokens = (alpha_token_t*)malloc(sizeof(alpha_token_t));
     printf("%d",tokens->token_number);
