@@ -1,16 +1,16 @@
 GCC =gcc
 FLEX =flex
 all:
-	$(FLEX) -o test.c scanner.l
-	$(GCC) test.c -o test
+	$(FLEX) -o al.c scanner.l
+	$(GCC) al.c -o al
 
 clean:
-	@rm -f test test.c
+	@rm -f al al.c
 	@echo "Cleanup complete"
 
 a:
-	@rm -f test test.c
-	$(FLEX) -o test.c scanner.l
-	$(GCC) test.c -o test
+	@rm -f al al.c
+	$(FLEX) -o al.c scanner.l
+	$(GCC) al.c -o al
 	@echo "Executing program:"
-	@./test
+	@./al input.txt output.txt

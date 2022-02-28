@@ -1,6 +1,8 @@
 %{
     #include "decl.h"
 
+    #define YY_DECL int alpha_yylex(void *yyval)
+
     int total_lines = 1;
     int total_tokens = 0;
     
@@ -64,22 +66,62 @@ nil             {printf("KEYWORD ");}
 
 {INT}           {printf("INT ");}
 {REAL}          {printf("REAL ");}
-{STRING}        {printf("STRING ");}
+{STRING}        {add_alpha_token_t(++total_tokens, total_lines, "STRING", string_reformatting(strdup(yytext)));}
 {IDENTIFIER}    {printf("IDENTIFIER ");}
 {LINE_COMM}     {printf("LINE COMMENT ");}
 {BLOCK_COMM}    {printf("COMMENT ");}
 {WHITESPACE}    {}
 
 
-.               {++total_tokens;}
+.               {++total_tokens; printf("Undefined input %s line %d\n",strdup(yytext),total_lines);}
 
 
 %%
 
 yywrap() {}
 
-    struct alpha_token_t *head = NULL;
-    struct alpha_token_t *tail = NULL;
+struct alpha_token_t *head = NULL;
+struct alpha_token_t *tail = NULL;
+
+char *string_reformatting(char *initial_string) {
+    char *formatted_string;
+    char *current;
+    int i,j;
+    
+    j=0;
+    formatted_string = malloc(sizeof(char)); //tha to xrhsimopoihsoume sto telos gia to \0
+    current = initial_string;
+    for (i=0; i<strlen(initial_string);i++) {
+        
+        formatted_string = realloc(formatted_string, sizeof(char));
+        if (*current == '\\') {
+            if (*(current+1) == 'n') {
+                formatted_string[j] = '\n';
+            }
+            else if (*(current+1) == 't') {
+                formatted_string[j] = '\t';
+            }
+            else if (*(current+1) == '\\') {
+                formatted_string[j] = '\\';
+            }
+            else {
+                formatted_string = realloc(formatted_string, sizeof(char));
+                formatted_string[j] = *current;
+                formatted_string[++j] = *(current+1);
+                printf("Warning: Invalid escape character %c\n",formatted_string[j]);
+            }
+            *(current++);
+        }
+        else {
+            formatted_string[j] = *current;
+        }
+        j++;
+        *(current++);
+    }
+    formatted_string[j] = '\0';
+
+    return formatted_string;
+}
 
 /*add new token to struct alpha_token_t*/
 void add_alpha_token_t(int token_number, int line, char *type, char *tiexei){
@@ -90,36 +132,41 @@ void add_alpha_token_t(int token_number, int line, char *type, char *tiexei){
     newtoken->token_number = token_number;
     newtoken->token_type = type;
     newtoken->token_tiexeimesa = tiexei;
+    newtoken->next_token = NULL;
 
     if(head == NULL){
         head = newtoken;
         tail = newtoken;
-        head->next_token = NULL;
-        tail->next_token = NULL;
     }else{
         tail->next_token = newtoken;
-        newtoken->next_token = NULL;
         tail = newtoken;
     }
 
 }
 
+void print_tokens(alpha_token_t *head) {
+    
+}
+
 int main(int argc, char** argv) {
-        
-    if (argc != 1) {
+    printf("%d\n",argc);
+    if (argc > 0) {
         yyin = fopen(argv[1], "r");
     }
     else {
-        yyin = stdin;
+        printf("ERROR. No input file specified\n");
     }
-    yylex();
+    alpha_yylex(head);
+
+    //edw allagh me stdout
 
     struct alpha_token_t *temp = head;
+    
+    printf("  Line\tToken#\t  Content\tCategory\n");
     while (temp != NULL) {
-        printf("%s\t%d\n",temp->token_tiexeimesa, temp->token_line);
+        printf("  %d\t#%d\t  %s\t\t%s\n",temp->token_line,temp->token_number,temp->token_tiexeimesa, temp->token_type);
         temp = temp->next_token;
     }
 
-    free(tokens);
     return 0;
 }
