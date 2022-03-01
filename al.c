@@ -1091,7 +1091,7 @@ YY_RULE_SETUP
 case 48:
 YY_RULE_SETUP
 #line 73 "al.l"
-{printf("COMMENT ");}
+{nested_comment_checker(strdup(yytext));}
 	YY_BREAK
 case 49:
 /* rule 49 can match eol */
@@ -2132,6 +2132,19 @@ void yyfree (void * ptr )
 struct alpha_token_t *head = NULL;
 struct alpha_token_t *tail = NULL;
 
+void nested_comment_checker(char *full_comment) {
+    int opening_comments = 0;
+    int closing_comments = 0;
+    int i;
+    char *current;
+
+    current = full_comment+2;
+    for (i=2; i<strlen(full_comment)-2; i++) {
+        printf("%c", *current);
+        *(current++);
+    }
+}
+
 char *string_reformatting(char *initial_string) {
     char *formatted_string;
     char *current;
@@ -2207,7 +2220,7 @@ int main(int argc, char** argv) {
 
     struct alpha_token_t *temp = head;
     
-    printf("  Line\tToken#\t  Content\tCategory\n");
+    printf("\n  Line\tToken#\t  Content\tCategory\n");
     while (temp != NULL) {
         printf("  %d\t#%d\t  %s\t\t%s\n",temp->token_line,temp->token_number,temp->token_tiexeimesa, temp->token_type);
         temp = temp->next_token;

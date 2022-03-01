@@ -70,7 +70,7 @@ nil             {printf("KEYWORD ");}
 {STRING}        {add_alpha_token_t(++total_tokens, total_lines, "STRING", string_reformatting(strdup(yytext)));}
 {IDENTIFIER}    {printf("IDENTIFIER ");}
 {LINE_COMM}     {printf("LINE COMMENT ");}
-{BLOCK_COMM}    {printf("COMMENT ");}
+{BLOCK_COMM}    {nested_comment_checker(strdup(yytext));}
 {WHITESPACE}    {}
 
 
@@ -81,6 +81,19 @@ nil             {printf("KEYWORD ");}
 
 struct alpha_token_t *head = NULL;
 struct alpha_token_t *tail = NULL;
+
+void nested_comment_checker(char *full_comment) {
+    int opening_comments = 0;
+    int closing_comments = 0;
+    int i;
+    char *current;
+
+    current = full_comment+2;   //ksekiname meta to 1o /*
+    for (i=2; i<strlen(full_comment)-2; i++) {  //pame mexri prin to teleutaio */
+        printf("%c", *current);
+        *(current++);
+    }
+}
 
 char *string_reformatting(char *initial_string) {
     char *formatted_string;
@@ -157,7 +170,7 @@ int main(int argc, char** argv) {
 
     struct alpha_token_t *temp = head;
     
-    printf("  Line\tToken#\t  Content\tCategory\n");
+    printf("\n  Line\tToken#\t  Content\tCategory\n");
     while (temp != NULL) {
         printf("  %d\t#%d\t  %s\t\t%s\n",temp->token_line,temp->token_number,temp->token_tiexeimesa, temp->token_type);
         temp = temp->next_token;
