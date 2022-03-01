@@ -68,9 +68,9 @@ nil             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   NIL",
 {INT}           {add_alpha_token_t(++total_tokens, total_lines, "INTCONST", strdup(yytext));}
 {REAL}          {add_alpha_token_t(++total_tokens, total_lines, "DOUBLECONST", strdup(yytext));}
 {STRING}        {add_alpha_token_t(++total_tokens, total_lines, "STRING", string_reformatting(strdup(yytext)));}
-{IDENTIFIER}    {printf("IDENTIFIER ");}
+{IDENTIFIER}    {add_alpha_token_t(++total_tokens, total_lines, "IDENTIFIER", strdup(yytext));}
 {LINE_COMM}     {printf("LINE COMMENT ");}
-{BLOCK_COMM}    {nested_comment_checker(strdup(yytext));}
+{BLOCK_COMM}    {}
 {WHITESPACE}    {}
 
 

@@ -859,217 +859,217 @@ YY_RULE_SETUP
 case 2:
 YY_RULE_SETUP
 #line 26 "al.l"
-{add_alpha_token_t(++total_tokens, total_lines, "KEYWORD", strdup(yytext));}
+{add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   IF", strdup(yytext));}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
 #line 27 "al.l"
-{printf("KEYWORD ");}
+{add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   ELSE", strdup(yytext));}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
 #line 28 "al.l"
-{printf("KEYWORD ");}
+{add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   WHILE", strdup(yytext));}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
 #line 29 "al.l"
-{printf("KEYWORD ");}
+{add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   FOR", strdup(yytext));}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
 #line 30 "al.l"
-{printf("KEYWORD ");}
+{add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   FUNCTION", strdup(yytext));}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
 #line 31 "al.l"
-{printf("KEYWORD ");}
+{add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   RETURN", strdup(yytext));}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
 #line 32 "al.l"
-{printf("KEYWORD ");}
+{add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   BREAK", strdup(yytext));}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 33 "al.l"
-{printf("KEYWORD ");}
+{add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   CONTINUE", strdup(yytext));}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 34 "al.l"
-{printf("KEYWORD ");}
+{add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   AND", strdup(yytext));}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
 #line 35 "al.l"
-{printf("KEYWORD ");}
+{add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   NOT", strdup(yytext));}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 36 "al.l"
-{printf("KEYWORD ");}
+{add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   OR", strdup(yytext));}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
 #line 37 "al.l"
-{printf("KEYWORD ");}
+{add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   LOCAL", strdup(yytext));}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 38 "al.l"
-{printf("KEYWORD ");}
+{add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   TRUE", strdup(yytext));}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 39 "al.l"
-{printf("KEYWORD ");}
+{add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   FALSE", strdup(yytext));}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 40 "al.l"
-{printf("KEYWORD ");}
+{add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   NIL", strdup(yytext));}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 41 "al.l"
-{printf("OPERATOR ");}
+{add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   EQUALS", strdup(yytext));}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 42 "al.l"
-{printf("OPERATOR ");}
+{add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   PLUS", strdup(yytext));}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
 #line 43 "al.l"
-{printf("OPERATOR ");}
+{add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   MINUS", strdup(yytext));}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
 #line 44 "al.l"
-{printf("OPERATOR ");}
+{add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   ASTERISK", strdup(yytext));}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
 #line 45 "al.l"
-{printf("OPERATOR ");}
+{add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   SLASH", strdup(yytext));}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
 #line 46 "al.l"
-{printf("OPERATOR ");}
+{add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   PERCENTAGE", strdup(yytext));}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
 #line 47 "al.l"
-{printf("OPERATOR ");}
+{add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   EQUALS EQUALS", strdup(yytext));}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
 #line 48 "al.l"
-{printf("OPERATOR ");}
+{add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   EXCLAMATION EQUALS", strdup(yytext));}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
 #line 49 "al.l"
-{printf("OPERATOR ");}
+{add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   PLUS PLUS", strdup(yytext));}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
 #line 50 "al.l"
-{printf("OPERATOR ");}
+{add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   MINUS MINUS", strdup(yytext));}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
 #line 51 "al.l"
-{printf("OPERATOR ");}
+{add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   GREATER", strdup(yytext));}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
 #line 52 "al.l"
-{printf("OPERATOR ");}
+{add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   LESSER", strdup(yytext));}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
 #line 53 "al.l"
-{printf("OPERATOR ");}
+{add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   GREATER EQUALS", strdup(yytext));}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
 #line 54 "al.l"
-{printf("OPERATOR ");}
+{add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   LESSER EQUALS", strdup(yytext));}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
 #line 55 "al.l"
-{printf("PUNCTUATION ");}
+{add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION LEFT BRACE", strdup(yytext));}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
 #line 56 "al.l"
-{printf("PUNCTUATION ");}
+{add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION RIGHT BRACE", strdup(yytext));}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
 #line 57 "al.l"
-{printf("PUNCTUATION ");}
+{add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION LEFT BRACKET", strdup(yytext));}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
 #line 58 "al.l"
-{printf("PUNCTUATION ");}
+{add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION RIGHT BRACKET", strdup(yytext));}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
 #line 59 "al.l"
-{printf("PUNCTUATION ");}
+{add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION LEFT PARENTHESIS", strdup(yytext));}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
 #line 60 "al.l"
-{printf("PUNCTUATION ");}
+{add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION RIGHT PARENTHESIS", strdup(yytext));}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
 #line 61 "al.l"
-{printf("PUNCTUATION ");}
+{add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION SEMICOLON", strdup(yytext));}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
 #line 62 "al.l"
-{printf("PUNCTUATION ");}
+{add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION COMMA", strdup(yytext));}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
 #line 63 "al.l"
-{printf("PUNCTUATION ");}
+{add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION COLON", strdup(yytext));}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
 #line 64 "al.l"
-{printf("PUNCTUATION ");}
+{add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION COLON COLON", strdup(yytext));}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
 #line 65 "al.l"
-{printf("PUNCTUATION ");}
+{add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION DOT", strdup(yytext));}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
 #line 66 "al.l"
-{printf("PUNCTUATION ");}
+{add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION DOT DOT", strdup(yytext));}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
 #line 68 "al.l"
-{printf("INT ");}
+{add_alpha_token_t(++total_tokens, total_lines, "INTCONST", strdup(yytext));}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
 #line 69 "al.l"
-{printf("REAL ");}
+{add_alpha_token_t(++total_tokens, total_lines, "DOUBLECONST", strdup(yytext));}
 	YY_BREAK
 case 45:
 /* rule 45 can match eol */
@@ -1080,7 +1080,7 @@ YY_RULE_SETUP
 case 46:
 YY_RULE_SETUP
 #line 71 "al.l"
-{printf("IDENTIFIER ");}
+{add_alpha_token_t(++total_tokens, total_lines, "IDENTIFIER", strdup(yytext));}
 	YY_BREAK
 case 47:
 /* rule 47 can match eol */
@@ -1091,7 +1091,7 @@ YY_RULE_SETUP
 case 48:
 YY_RULE_SETUP
 #line 73 "al.l"
-{nested_comment_checker(strdup(yytext));}
+{}
 	YY_BREAK
 case 49:
 /* rule 49 can match eol */
@@ -2129,11 +2129,7 @@ void yyfree (void * ptr )
 #line 80 "al.l"
 
 
-struct alpha_token_t *head = NULL;
-struct alpha_token_t *tail = NULL;
-
-
-void nested_comment_checker(char *full_comment) {
+/*void nested_comment_checker(char *full_comment) {
     struct nested_comments *opening_head = NULL;   //oura me ptr sta emfwleumena
     struct nested_comments *opening_tail = NULL;
     struct nested_comments *comments;
@@ -2143,7 +2139,7 @@ void nested_comment_checker(char *full_comment) {
     char *current;
 
     current = full_comment+2;   //ksekiname meta to 1o /*
-    for (i=2; i<strlen(full_comment)-2; i++) {  //pame mexri prin to teleutaio */
+    for (i=2; i<strlen(full_comment)-2; i++) {  //pame mexri prin to teleutaio
         printf("%c", *current);
 
         if (*current == '/' && (*(current+1) == '*')) {
@@ -2166,8 +2162,12 @@ void nested_comment_checker(char *full_comment) {
 
         *(current++);
     }
+    
+    while(opening_comments > closing_comments) {
+        printf("ERROR. Unclosed ")
+    }
     printf("%c",opening_head);
-}
+}*/
 
 char *string_reformatting(char *initial_string) {
     char *formatted_string;
@@ -2210,6 +2210,9 @@ char *string_reformatting(char *initial_string) {
 }
 
 /*add new token to struct alpha_token_t*/
+struct alpha_token_t *head = NULL;
+struct alpha_token_t *tail = NULL;
+
 void add_alpha_token_t(int token_number, int line, char *type, char *tiexei){
 
     struct alpha_token_t * newtoken = (struct alpha_token_t *)malloc(sizeof(struct alpha_token_t));
