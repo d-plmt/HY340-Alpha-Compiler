@@ -23,50 +23,50 @@ WHITESPACE  [ ]|"\t"|"\n"
 
 
 \n              {++total_lines;}
-if              {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD", strdup(yytext));}
-else            {printf("KEYWORD ");}
-while           {printf("KEYWORD ");}
-for             {printf("KEYWORD ");}
-function        {printf("KEYWORD ");}
-return          {printf("KEYWORD ");}
-break           {printf("KEYWORD ");}
-continue        {printf("KEYWORD ");}
-and             {printf("KEYWORD ");}
-not             {printf("KEYWORD ");}
-or              {printf("KEYWORD ");}
-local           {printf("KEYWORD ");}
-true            {printf("KEYWORD ");}
-false           {printf("KEYWORD ");}
-nil             {printf("KEYWORD ");}
-"="             {printf("OPERATOR ");}
-"+"             {printf("OPERATOR ");}
-"-"             {printf("OPERATOR ");}
-"*"             {printf("OPERATOR ");}
-"/"             {printf("OPERATOR ");}
-"%"             {printf("OPERATOR ");}
-"=="            {printf("OPERATOR ");}
-"!="            {printf("OPERATOR ");}
-"++"            {printf("OPERATOR ");}
-"--"            {printf("OPERATOR ");}
-">"             {printf("OPERATOR ");}
-"<"             {printf("OPERATOR ");}
-">="            {printf("OPERATOR ");}
-"<="            {printf("OPERATOR ");}
-"{"             {printf("PUNCTUATION ");}
-"}"             {printf("PUNCTUATION ");}
-"["             {printf("PUNCTUATION ");}
-"]"             {printf("PUNCTUATION ");}
-"("             {printf("PUNCTUATION ");}
-")"             {printf("PUNCTUATION ");}
-";"             {printf("PUNCTUATION ");}
-","             {printf("PUNCTUATION ");}
-":"             {printf("PUNCTUATION ");}
-"::"            {printf("PUNCTUATION ");}
-"."             {printf("PUNCTUATION ");}
-".."            {printf("PUNCTUATION ");}
+if              {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   IF", strdup(yytext));}
+else            {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   ELSE", strdup(yytext));}
+while           {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   WHILE", strdup(yytext));}
+for             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   FOR", strdup(yytext));}
+function        {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   FUNCTION", strdup(yytext));}
+return          {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   RETURN", strdup(yytext));}
+break           {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   BREAK", strdup(yytext));}
+continue        {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   CONTINUE", strdup(yytext));}
+and             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   AND", strdup(yytext));}
+not             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   NOT", strdup(yytext));}
+or              {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   OR", strdup(yytext));}
+local           {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   LOCAL", strdup(yytext));}
+true            {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   TRUE", strdup(yytext));}
+false           {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   FALSE", strdup(yytext));}
+nil             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   NIL", strdup(yytext));}
+"="             {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   EQUALS", strdup(yytext));}
+"+"             {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   PLUS", strdup(yytext));}
+"-"             {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   MINUS", strdup(yytext));}
+"*"             {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   ASTERISK", strdup(yytext));}
+"/"             {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   SLASH", strdup(yytext));}
+"%"             {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   PERCENTAGE", strdup(yytext));}
+"=="            {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   EQUALS EQUALS", strdup(yytext));}
+"!="            {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   EXCLAMATION EQUALS", strdup(yytext));}
+"++"            {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   PLUS PLUS", strdup(yytext));}
+"--"            {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   MINUS MINUS", strdup(yytext));}
+">"             {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   GREATER", strdup(yytext));}
+"<"             {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   LESSER", strdup(yytext));}
+">="            {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   GREATER EQUALS", strdup(yytext));}
+"<="            {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   LESSER EQUALS", strdup(yytext));}
+"{"             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION LEFT BRACE", strdup(yytext));}
+"}"             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION RIGHT BRACE", strdup(yytext));}
+"["             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION LEFT BRACKET", strdup(yytext));}
+"]"             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION RIGHT BRACKET", strdup(yytext));}
+"("             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION LEFT PARENTHESIS", strdup(yytext));}
+")"             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION RIGHT PARENTHESIS", strdup(yytext));}
+";"             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION SEMICOLON", strdup(yytext));}
+","             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION COMMA", strdup(yytext));}
+":"             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION COLON", strdup(yytext));}
+"::"            {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION COLON COLON", strdup(yytext));}
+"."             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION DOT", strdup(yytext));}
+".."            {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION DOT DOT", strdup(yytext));}
 
-{INT}           {printf("INT ");}
-{REAL}          {printf("REAL ");}
+{INT}           {add_alpha_token_t(++total_tokens, total_lines, "INTCONST", strdup(yytext));}
+{REAL}          {add_alpha_token_t(++total_tokens, total_lines, "DOUBLECONST", strdup(yytext));}
 {STRING}        {add_alpha_token_t(++total_tokens, total_lines, "STRING", string_reformatting(strdup(yytext)));}
 {IDENTIFIER}    {printf("IDENTIFIER ");}
 {LINE_COMM}     {printf("LINE COMMENT ");}
@@ -78,10 +78,6 @@ nil             {printf("KEYWORD ");}
 
 
 %%
-
-struct alpha_token_t *head = NULL;
-struct alpha_token_t *tail = NULL;
-
 
 /*void nested_comment_checker(char *full_comment) {
     struct nested_comments *opening_head = NULL;   //oura me ptr sta emfwleumena
@@ -164,6 +160,9 @@ char *string_reformatting(char *initial_string) {
 }
 
 /*add new token to struct alpha_token_t*/
+struct alpha_token_t *head = NULL;
+struct alpha_token_t *tail = NULL;
+
 void add_alpha_token_t(int token_number, int line, char *type, char *tiexei){
 
     struct alpha_token_t * newtoken = (struct alpha_token_t *)malloc(sizeof(struct alpha_token_t));
