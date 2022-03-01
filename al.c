@@ -2132,17 +2132,41 @@ void yyfree (void * ptr )
 struct alpha_token_t *head = NULL;
 struct alpha_token_t *tail = NULL;
 
+
 void nested_comment_checker(char *full_comment) {
+    struct nested_comments *opening_head = NULL;   //oura me ptr sta emfwleumena
+    struct nested_comments *opening_tail = NULL;
+    struct nested_comments *comments;
     int opening_comments = 0;
     int closing_comments = 0;
     int i;
     char *current;
 
-    current = full_comment+2;
-    for (i=2; i<strlen(full_comment)-2; i++) {
+    current = full_comment+2;   //ksekiname meta to 1o /*
+    for (i=2; i<strlen(full_comment)-2; i++) {  //pame mexri prin to teleutaio */
         printf("%c", *current);
+
+        if (*current == '/' && (*(current+1) == '*')) {
+            opening_comments++;
+
+            comments = (struct nested_comments*)malloc(sizeof(struct nested_comments));
+            comments = (struct nested_comments*)current;
+            comments->next_comment = NULL;
+            if (opening_head == NULL) {
+                opening_head = (struct nested_comments*)current;
+            }
+            else {
+                opening_tail->next_comment = current;
+            }
+            opening_tail = (struct nested_comments*)current;
+        }
+        else if (*current == '*' && (*(current+1) == '\\')) {
+            closing_comments++;
+        }
+
         *(current++);
     }
+    printf("%c",opening_head);
 }
 
 char *string_reformatting(char *initial_string) {
