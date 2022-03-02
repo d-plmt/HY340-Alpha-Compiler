@@ -1,2 +1,2 @@
-/*e
-*/
+if {} else "asd\n" //dsadasd
+/* if while /* else */*/

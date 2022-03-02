@@ -1,5 +1,6 @@
 %{
     #include "decl.h"
+    #include <stdio.h>
 
     #define YY_DECL int alpha_yylex(void *yyval)
 
@@ -18,10 +19,7 @@ REAL        {INT}\.{1}{INT}
 STRING      (\")([.\\]|[^"]|(\\\"))*(\")
 IDENTIFIER  [A-Za-z]{1}[0-9A-Za-z_]*
 LINE_COMM   "//".*
-/*BLOCK_COMM  "\/\*"[^("\/\*")]*"\*\/"
-NESTED_COMM ("\/\*"[^("\/\*")]*){2,}"\*\/"{2,}
-LINE_COMM   (\/){1}(\/){1}[^\\\n]*[\\\n]{1}*/
-BLOCK_COMM  "\/\*"*[."\n"]*"\*\/"
+BLOCK_COMM  (\/\*)+(.|(\n)|(\r)|(\r\n))*(\*\/)+
 WHITESPACE  [ ]|"\t"|"\n"
 
 %%
@@ -76,9 +74,7 @@ nil             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   NIL",
 {IDENTIFIER}    {add_alpha_token_t(++total_tokens, total_lines, "IDENTIFIER", strdup(yytext));}
 {LINE_COMM}     {add_alpha_token_t(++total_tokens, total_lines, "LINE COMMENT", strdup(yytext));}
 {BLOCK_COMM}    {nested_comment_checker(strdup(yytext));}
-
-"321313123123"   {add_alpha_token_t(++total_tokens, total_lines, "NESTED COMMENT", strdup(yytext));}
-{WHITESPACE}    {add_alpha_token_t(++total_tokens, total_lines, "WHITESPACE", strdup(yytext));}
+{WHITESPACE}    {;}
 
 
 
@@ -91,11 +87,11 @@ void nested_comment_checker(char *full_comment) {
     int opening_nested = 0;
     int closing_nested = 0;
     char *current, *tmp;
-    int i;
-    printf("%s",full_comment);
+    int i, nested_flag;
 
+    nested_flag = 0;
     add_alpha_token_t(++total_tokens, total_lines, "BLOCK COMMENT", strdup(yytext));
-    tmp = malloc(sizeof(sizeof(full_comment)));
+    tmp = (char *)malloc(sizeof(strlen(full_comment)));
     strncpy(tmp,(full_comment+2),strlen(full_comment)-4);
 
     current = tmp;
@@ -105,6 +101,7 @@ void nested_comment_checker(char *full_comment) {
         }
         else if (*current == '/' && (*(current+1) == '*')) {
             opening_nested++;
+            nested_flag = total_lines;
         }
         else if (*current == '*' && (*(current+1) == '/')) {
             closing_nested++;
@@ -115,51 +112,10 @@ void nested_comment_checker(char *full_comment) {
     if (opening_nested > closing_nested) {
         printf("Warning: Unclosed block comment\n");
     }
-    else if (opening_nested == closing_nested) {
-        add_alpha_token_t(++total_tokens, total_lines, "NESTED COMMENT", "");
+    else if (opening_nested == closing_nested && (opening_nested>0)) {
+        add_alpha_token_t(++total_tokens, nested_flag, "NESTED COMMENT", "");
     }
 }
-
-/*void nested_comment_checker(char *full_comment) {
-    struct nested_comments *opening_head = NULL;   //oura me ptr sta emfwleumena
-    struct nested_comments *opening_tail = NULL;
-    struct nested_comments *comments;
-    int opening_comments = 0;
-    int closing_comments = 0;
-    int i;
-    char *current;
-
-    current = full_comment+2;   //ksekiname meta to 1o /*
-    for (i=2; i<strlen(full_comment)-2; i++) {  //pame mexri prin to teleutaio
-        printf("%c", *current);
-
-        if (*current == '/' && (*(current+1) == '*')) {
-            opening_comments++;
-
-            comments = (struct nested_comments*)malloc(sizeof(struct nested_comments));
-            comments = (struct nested_comments*)current;
-            comments->next_comment = NULL;
-            if (opening_head == NULL) {
-                opening_head = (struct nested_comments*)current;
-            }
-            else {
-                opening_tail->next_comment = current;
-            }
-            opening_tail = (struct nested_comments*)current;
-        }
-        else if (*current == '*' && (*(current+1) == '\\')) {
-            closing_comments++;
-        }
-
-        *(current++);
-    }
-    
-    while(opening_comments > closing_comments) {
-        printf("ERROR. Unclosed ")
-    }
-    printf("%c",opening_head);
-}*/
-
 
 char *string_reformatting(char *initial_string) {
     char *formatted_string;
@@ -227,22 +183,36 @@ void add_alpha_token_t(int token_number, int line, char *type, char *tiexei){
 
 
 int main(int argc, char** argv) {
-    if (argc > 0) {
+    if (argc > 1) {
         yyin = fopen(argv[1], "r");
+        printf("Reading from input file \"%s\"\n",argv[1]);
     }
     else {
         printf("ERROR. No input file specified\n");
     }
     alpha_yylex(head);
 
-    //edw allagh me stdout
 
-    struct alpha_token_t *temp = head;
     
-    printf("\n  Line\tToken#\t  Content\tCategory\n");
-    while (temp != NULL) {
-        printf("  %d\t#%d\t  %s\t\t%s\n",temp->token_line,temp->token_number,temp->token_tiexeimesa, temp->token_type);
-        temp = temp->next_token;
+    struct alpha_token_t *temp = head;
+    if (argc > 2) {
+        FILE *fp;
+
+        fp = fopen(argv[2], "w+");
+        fprintf(fp, "\n  Line\tToken#\t  Content\tCategory\n");
+        while (temp != NULL) {
+            fprintf(fp, "  %d\t#%d\t  %s\t\t%s\n",temp->token_line,temp->token_number,temp->token_tiexeimesa, temp->token_type);
+            temp = temp->next_token;
+        }
+        fclose(fp);
+        printf("Output saved to file \"%s\"\n",argv[2]);
+    }
+    else {
+        printf("\n  Line\tToken#\t  Content\tCategory\n");
+        while (temp != NULL) {
+            printf("  %d\t#%d\t  %s\t\t%s\n",temp->token_line,temp->token_number,temp->token_tiexeimesa, temp->token_type);
+            temp = temp->next_token;
+        }
     }
 
     return 0;
