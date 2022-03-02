@@ -18,14 +18,13 @@ REAL        {INT}\.{1}{INT}
 STRING      (\")([.\\]|[^"]|(\\\"))*(\")
 IDENTIFIER  [A-Za-z]{1}[0-9A-Za-z_]*
 LINE_COMM   "//".*
-BLOCK_COMM  "\/\*"[^("\/\*")]*"\*\/"
+/*BLOCK_COMM  "\/\*"[^("\/\*")]*"\*\/"
 NESTED_COMM ("\/\*"[^("\/\*")]*){2,}"\*\/"{2,}
-/*LINE_COMM   (\/){1}(\/){1}[^\\\n]*[\\\n]{1}
-BLOCK_COMM  (\/){1}(\*){1}*.*(\*){1}(\/){1}*/
+LINE_COMM   (\/){1}(\/){1}[^\\\n]*[\\\n]{1}*/
+BLOCK_COMM  (\/){1}(\*){1}*.*(\*){1}(\/){1}
 WHITESPACE  [ ]|"\t"|"\n"
 
 %%
-
 
 
 \n              {++total_lines;}
@@ -76,8 +75,9 @@ nil             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   NIL",
 {STRING}        {add_alpha_token_t(++total_tokens, total_lines, "STRING", string_reformatting(strdup(yytext)));}
 {IDENTIFIER}    {add_alpha_token_t(++total_tokens, total_lines, "IDENTIFIER", strdup(yytext));}
 {LINE_COMM}     {add_alpha_token_t(++total_tokens, total_lines, "LINE COMMENT", strdup(yytext));}
-{BLOCK_COMM}    {add_alpha_token_t(++total_tokens, total_lines, "BLOCK COMMENT", strdup(yytext));}
-{NESTED_COMM}   {add_alpha_token_t(++total_tokens, total_lines, "NESTED COMMENT", strdup(yytext));}
+{BLOCK_COMM}    {nested_comment_checker(strdup(yytext));}
+
+"321313123123"   {add_alpha_token_t(++total_tokens, total_lines, "NESTED COMMENT", strdup(yytext));}
 {WHITESPACE}    {add_alpha_token_t(++total_tokens, total_lines, "WHITESPACE", strdup(yytext));}
 
 
@@ -87,6 +87,38 @@ nil             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   NIL",
 
 
 %%
+void nested_comment_checker(char *full_comment) {
+    int opening_nested = 0;
+    int closing_nested = 0;
+    char *current, *tmp;
+    int i;
+
+    add_alpha_token_t(++total_tokens, total_lines, "BLOCK COMMENT", strdup(yytext));
+    tmp = malloc(sizeof(strlen(full_comment)));
+    strncpy(tmp,(full_comment+2),strlen(full_comment)-4);
+
+    current = tmp;
+    while (*(current+1)) {
+        if (*current == '\n') {
+            total_lines++;
+        }
+        else if (*current == '/' && (*(current+1) == '*')) {
+            opening_nested++;
+        }
+        else if (*current == '*' && (*(current+1) == '/')) {
+            closing_nested++;
+        }
+        *(current++);
+    }
+
+    if (opening_nested > closing_nested) {
+        printf("Warning: Unclosed block comment\n");
+    }
+    else if (opening_nested == closing_nested) {
+        add_alpha_token_t(++total_tokens, total_lines, "NESTED COMMENT", "");
+    }
+}
+
 /*void nested_comment_checker(char *full_comment) {
     struct nested_comments *opening_head = NULL;   //oura me ptr sta emfwleumena
     struct nested_comments *opening_tail = NULL;
