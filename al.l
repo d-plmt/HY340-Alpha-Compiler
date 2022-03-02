@@ -21,7 +21,7 @@ LINE_COMM   "//".*
 /*BLOCK_COMM  "\/\*"[^("\/\*")]*"\*\/"
 NESTED_COMM ("\/\*"[^("\/\*")]*){2,}"\*\/"{2,}
 LINE_COMM   (\/){1}(\/){1}[^\\\n]*[\\\n]{1}*/
-BLOCK_COMM  (\/){1}(\*){1}*.*(\*){1}(\/){1}
+BLOCK_COMM  "\/\*"*[."\n"]*"\*\/"
 WHITESPACE  [ ]|"\t"|"\n"
 
 %%
@@ -92,9 +92,10 @@ void nested_comment_checker(char *full_comment) {
     int closing_nested = 0;
     char *current, *tmp;
     int i;
+    printf("%s",full_comment);
 
     add_alpha_token_t(++total_tokens, total_lines, "BLOCK COMMENT", strdup(yytext));
-    tmp = malloc(sizeof(strlen(full_comment)));
+    tmp = malloc(sizeof(sizeof(full_comment)));
     strncpy(tmp,(full_comment+2),strlen(full_comment)-4);
 
     current = tmp;
