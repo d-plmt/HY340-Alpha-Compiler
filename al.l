@@ -12,14 +12,18 @@
 %option noyywrap
 
 
+
 INT         [0-9]+  
 REAL        {INT}\.{1}{INT}
 STRING      (\")([.\\]|[^"]|(\\\"))*(\")
 IDENTIFIER  [A-Za-z]{1}[0-9A-Za-z_]*
-LINE_COMM   (\/){1}(\/){1}[^\\\n]*[\\\n]{1}
-BLOCK_COMM  (\/){1}(\*){1}*.*(\*){1}(\/){1}
+LINE_COMM   "//".*
+BLOCK_COMM  "/*"[^"/*"]*"*/"
+NESTED_COMM ("/*"[^"/*"]*){2,}"*/"{2,}
 WHITESPACE  [ ]|"\t"|"\n"
+
 %%
+
 
 
 \n              {++total_lines;}
@@ -69,16 +73,18 @@ nil             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   NIL",
 {REAL}          {add_alpha_token_t(++total_tokens, total_lines, "DOUBLECONST", strdup(yytext));}
 {STRING}        {add_alpha_token_t(++total_tokens, total_lines, "STRING", string_reformatting(strdup(yytext)));}
 {IDENTIFIER}    {add_alpha_token_t(++total_tokens, total_lines, "IDENTIFIER", strdup(yytext));}
-{LINE_COMM}     {printf("LINE COMMENT ");}
-{BLOCK_COMM}    {}
-{WHITESPACE}    {}
+{LINE_COMM}     {add_alpha_token_t(++total_tokens, total_lines, "LINE COMMENT", strdup(yytext));}
+{BLOCK_COMM}    {add_alpha_token_t(++total_tokens, total_lines, "BLOCK COMMENT", strdup(yytext));}
+{NESTED_COMM}   {add_alpha_token_t(++total_tokens, total_lines, "NESTED COMMENT", strdup(yytext));}
+{WHITESPACE}    {add_alpha_token_t(++total_tokens, total_lines, "WHITESPACE", strdup(yytext));}
+
 
 
 .               {++total_tokens; printf("Undefined input %s line %d\n",strdup(yytext),total_lines);}
 
 
-%%
 
+%%
 /*void nested_comment_checker(char *full_comment) {
     struct nested_comments *opening_head = NULL;   //oura me ptr sta emfwleumena
     struct nested_comments *opening_tail = NULL;
@@ -118,6 +124,7 @@ nil             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   NIL",
     }
     printf("%c",opening_head);
 }*/
+
 
 char *string_reformatting(char *initial_string) {
     char *formatted_string;
