@@ -6,9 +6,10 @@
 
     int total_lines = 1;
     int total_tokens = 0;
-
-    int nested_begin = 0;
-    int nested_end = 0;    
+  
+    int flag=0;
+    int opening = 0;
+    int line123 = 0;
 %}
 
 %option yylineno
@@ -74,43 +75,40 @@ nil             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   NIL",
 
 {INT}           {add_alpha_token_t(++total_tokens, total_lines, "INTCONST", strdup(yytext));}
 {REAL}          {add_alpha_token_t(++total_tokens, total_lines, "DOUBLECONST", strdup(yytext));}
-{STRING}        {add_alpha_token_t(++total_tokens, total_lines, "STRING", string_reformatting(strdup(yytext)));}
+{STRING}        {string_reformatting(strdup(yytext));}
 {IDENTIFIER}    {add_alpha_token_t(++total_tokens, total_lines, "IDENTIFIER", strdup(yytext));}
 {LINE_COMM}     {add_alpha_token_t(++total_tokens, total_lines, "LINE COMMENT", strdup(yytext));}
 {WHITESPACE}    {;}
 .               {++total_tokens; printf("Undefined input %s line %d\n",strdup(yytext),total_lines);}
 
-{BLOCK_START}   {
-    add_alpha_token_t(++total_tokens, total_lines, "BLOCK COMMENT", strdup(yytext));
+(\")([.\\]|[^"]|(\\\"))* {printf("Warning.\n");}
+
+{BLOCK_START} {
+    opening = 1;
+    line123 = 0;
 
     BEGIN(FIND_NESTED_COMMENT);
 }
+<FIND_NESTED_COMMENT>"\n" {
+    ++total_lines;
+    ++line123;
+}
 
 <FIND_NESTED_COMMENT>"/*" {
-    add_alpha_token_t(++total_tokens, total_lines, "NESTED COMMENT", strdup(yytext));
-    nested_begin++;
-    printf("%d",nested_begin);
+    opening++;
 }
 
-<FIND_NESTED_COMMENT>"*/" {   
-    printf("FIND NESTED COMMENT: %d\n",nested_begin);
-    nested_end++;
-    printf("%d",nested_end);
-}
+<FIND_NESTED_COMMENT>"*/" {
+    opening--;
 
-<FIND_NESTED_END>"*/" {
-    printf("%d \t %d\n",nested_begin,nested_end);
-    if (--nested_end == 0) {
-        BEGIN(FIND_BLOCK_END);
+    if (opening > 0) {
+        add_alpha_token_t(++total_tokens, total_lines-line123, "NESTED COMMENT", "");
+    }
+    else {
+        add_alpha_token_t(++total_tokens, total_lines-line123, "BLOCK COMMENT", "");
+        BEGIN(INITIAL);
     }
 }
-
-<FIND_BLOCK_END>"*/" {
-    printf("FIND BLOCK END\n");
-    BEGIN(INITIAL);
-}
-
-<FIND_NESTED_COMMENT>"\n"   {total_lines++;}
 
 
 %%
@@ -153,17 +151,18 @@ void nested_comment_checker(char *full_comment) {
     
 }
 
-char *string_reformatting(char *initial_string) {
+void string_reformatting(char *initial_string) {
     char *formatted_string;
     char *current;
-    int i,j;
+    int i,j, starting_line;
     
     j=0;
-    formatted_string = malloc(sizeof(char)); //tha to xrhsimopoihsoume sto telos gia to \0
+    starting_line = total_lines;
+    formatted_string = malloc(sizeof(char*)); //tha to xrhsimopoihsoume sto telos gia to \0
     current = initial_string;
     for (i=0; i<strlen(initial_string);i++) {
         
-        formatted_string = realloc(formatted_string, sizeof(char));
+        formatted_string = realloc(formatted_string, (strlen(formatted_string)+1)*sizeof(char*));
         if (*current == '\\') {
             if (*(current+1) == 'n') {
                 formatted_string[j] = '\n';
@@ -175,12 +174,15 @@ char *string_reformatting(char *initial_string) {
                 formatted_string[j] = '\\';
             }
             else {
-                formatted_string = realloc(formatted_string, sizeof(char));
+                formatted_string = realloc(formatted_string, (strlen(formatted_string)+1)*sizeof(char*));
                 formatted_string[j] = *current;
                 formatted_string[++j] = *(current+1);
                 printf("Warning: Invalid escape character %c\n",formatted_string[j]);
             }
             *(current++);
+        }
+        else if (*current == '\n'){
+            ++total_lines;
         }
         else {
             formatted_string[j] = *current;
@@ -190,7 +192,7 @@ char *string_reformatting(char *initial_string) {
     }
     formatted_string[j] = '\0';
 
-    return formatted_string;
+    add_alpha_token_t(++total_tokens, starting_line, "STRING", formatted_string);
 }
 
 /*add new token to struct alpha_token_t*/
@@ -229,7 +231,6 @@ int main(int argc, char** argv) {
     }
     alpha_yylex(head);
 
-
     
     struct alpha_token_t *temp = head;
     if (argc > 2) {
@@ -241,6 +242,9 @@ int main(int argc, char** argv) {
             fprintf(fp, "  %d\t#%d\t  %s\t\t%s\n",temp->token_line,temp->token_number,temp->token_tiexeimesa, temp->token_type);
             temp = temp->next_token;
         }
+        if (opening > 0) {
+            fprintf(fp, "Warning: Unclosed block comment.\n");
+        }
         fclose(fp);
         printf("Output saved to file \"%s\"\n",argv[2]);
     }
@@ -249,6 +253,9 @@ int main(int argc, char** argv) {
         while (temp != NULL) {
             printf("  %d\t#%d\t  %s\t\t%s\n",temp->token_line,temp->token_number,temp->token_tiexeimesa, temp->token_type);
             temp = temp->next_token;
+        }
+        if (opening > 0) {
+            printf("Warning: Unclosed block comment.\n");
         }
     }
 
