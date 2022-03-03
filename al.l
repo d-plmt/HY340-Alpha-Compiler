@@ -6,7 +6,9 @@
 
     int total_lines = 1;
     int total_tokens = 0;
-    
+
+    int nested_begin = 0;
+    int nested_end = 0;    
 %}
 
 %option yylineno
@@ -19,8 +21,10 @@ REAL        {INT}\.{1}{INT}
 STRING      (\")([.\\]|[^"]|(\\\"))*(\")
 IDENTIFIER  [A-Za-z]{1}[0-9A-Za-z_]*
 LINE_COMM   (\/\/)+.+
-BLOCK_COMM  (\/\*)+(.|(\n)|(\r)|(\r\n))*(\*\/)+
+BLOCK_START (\/\*)
 WHITESPACE  [ ]|"\t"|"\n"
+
+%x FIND_NESTED_COMMENT FIND_NESTED_END FIND_BLOCK_END
 
 %%
 
@@ -73,17 +77,45 @@ nil             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   NIL",
 {STRING}        {add_alpha_token_t(++total_tokens, total_lines, "STRING", string_reformatting(strdup(yytext)));}
 {IDENTIFIER}    {add_alpha_token_t(++total_tokens, total_lines, "IDENTIFIER", strdup(yytext));}
 {LINE_COMM}     {add_alpha_token_t(++total_tokens, total_lines, "LINE COMMENT", strdup(yytext));}
-{BLOCK_COMM}    {nested_comment_checker(strdup(yytext));}
 {WHITESPACE}    {;}
-
-
-
 .               {++total_tokens; printf("Undefined input %s line %d\n",strdup(yytext),total_lines);}
 
+{BLOCK_START}   {
+    add_alpha_token_t(++total_tokens, total_lines, "BLOCK COMMENT", strdup(yytext));
+
+    BEGIN(FIND_NESTED_COMMENT);
+}
+
+<FIND_NESTED_COMMENT>"/*" {
+    add_alpha_token_t(++total_tokens, total_lines, "NESTED COMMENT", strdup(yytext));
+    nested_begin++;
+    printf("%d",nested_begin);
+}
+
+<FIND_NESTED_COMMENT>"*/" {   
+    printf("FIND NESTED COMMENT: %d\n",nested_begin);
+    nested_end++;
+    printf("%d",nested_end);
+}
+
+<FIND_NESTED_END>"*/" {
+    printf("%d \t %d\n",nested_begin,nested_end);
+    if (--nested_end == 0) {
+        BEGIN(FIND_BLOCK_END);
+    }
+}
+
+<FIND_BLOCK_END>"*/" {
+    printf("FIND BLOCK END\n");
+    BEGIN(INITIAL);
+}
+
+<FIND_NESTED_COMMENT>"\n"   {total_lines++;}
 
 
 %%
 char *tmp;
+
 
 void nested_comment_checker(char *full_comment) {
     int opening_nested = 0;
