@@ -1,2 +1,1 @@
-if {} else "asd\n" //dsadasd
-/* if while /* else */*/
+/////asdf

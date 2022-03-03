@@ -18,7 +18,7 @@ INT         [0-9]+
 REAL        {INT}\.{1}{INT}
 STRING      (\")([.\\]|[^"]|(\\\"))*(\")
 IDENTIFIER  [A-Za-z]{1}[0-9A-Za-z_]*
-LINE_COMM   "//".*
+LINE_COMM   (\/\/)+.+
 BLOCK_COMM  (\/\*)+(.|(\n)|(\r)|(\r\n))*(\*\/)+
 WHITESPACE  [ ]|"\t"|"\n"
 
@@ -83,15 +83,17 @@ nil             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   NIL",
 
 
 %%
+char *tmp;
+
 void nested_comment_checker(char *full_comment) {
     int opening_nested = 0;
     int closing_nested = 0;
-    char *current, *tmp;
+    char *current;
     int i, nested_flag;
 
     nested_flag = 0;
     add_alpha_token_t(++total_tokens, total_lines, "BLOCK COMMENT", strdup(yytext));
-    tmp = (char *)malloc(sizeof(strlen(full_comment)));
+    tmp = (char *)realloc(tmp,sizeof(strlen(full_comment)));
     strncpy(tmp,(full_comment+2),strlen(full_comment)-4);
 
     current = tmp;
@@ -108,6 +110,7 @@ void nested_comment_checker(char *full_comment) {
         }
         *(current++);
     }
+    free(tmp);
 
     if (opening_nested > closing_nested) {
         printf("Warning: Unclosed block comment\n");
@@ -115,6 +118,7 @@ void nested_comment_checker(char *full_comment) {
     else if (opening_nested == closing_nested && (opening_nested>0)) {
         add_alpha_token_t(++total_tokens, nested_flag, "NESTED COMMENT", "");
     }
+    
 }
 
 char *string_reformatting(char *initial_string) {
@@ -183,6 +187,7 @@ void add_alpha_token_t(int token_number, int line, char *type, char *tiexei){
 
 
 int main(int argc, char** argv) {
+    tmp = (char *)malloc(sizeof(char));
     if (argc > 1) {
         yyin = fopen(argv[1], "r");
         printf("Reading from input file \"%s\"\n",argv[1]);

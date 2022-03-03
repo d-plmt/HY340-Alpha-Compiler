@@ -13,5 +13,5 @@ a:
 	@flex -o al.c al.l
 	@gcc al.c -o al
 	@echo "Executing program:"
-	@./al input.txt output.txt
+	@./al input.txt
 	

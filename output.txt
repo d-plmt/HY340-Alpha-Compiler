@@ -1,11 +1,4 @@
 
   Line	Token#	  Content	Category
-  1	#1	  if		KEYWORD   IF
-  1	#2	  {		PANCTUATION LEFT BRACE
-  1	#3	  }		PANCTUATION RIGHT BRACE
-  1	#4	  else		KEYWORD   ELSE
-  1	#5	  "asd
-"		STRING
-  1	#6	  //dsadasd		LINE COMMENT
-  2	#7	  /* if while /* else */*/		BLOCK COMMENT
-  2	#8	  		NESTED COMMENT
+  1	#1	  /* sxolia apla */		BLOCK COMMENT
+  4	#2	  // sxolia grammhs		LINE COMMENT
