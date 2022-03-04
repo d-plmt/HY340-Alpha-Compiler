@@ -1,2 +1,4 @@
-// /*asdfdsf
-if asd*/
+if {} else //fdsf
+sd /* /*123
+32*/
+"dasdsad

@@ -6,16 +6,11 @@
 
     int total_lines = 1;
     int total_tokens = 0;
-  
-    int flag=0;
-    int opening = 0;
-    int line123 = 0;
+    int opened_block = 0;
+    int block_starting_line = 0;
 %}
 
-%option yylineno
 %option noyywrap
-
-
 
 INT         [0-9]+  
 REAL        {INT}\.{1}{INT}
@@ -24,8 +19,9 @@ IDENTIFIER  [A-Za-z]{1}[0-9A-Za-z_]*
 LINE_COMM   (\/\/)+.+
 BLOCK_START (\/\*)
 WHITESPACE  [ ]|"\t"|"\n"
+UNCLOSED_STRING (\")([.\\]|[^"]|(\\\"))*
 
-%x FIND_NESTED_COMMENT FIND_NESTED_END FIND_BLOCK_END
+%x FIND_NESTED_COMMENT
 
 %%
 
@@ -60,18 +56,18 @@ nil             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   NIL",
 "<"             {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   LESSER", strdup(yytext));}
 ">="            {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   GREATER EQUALS", strdup(yytext));}
 "<="            {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   LESSER EQUALS", strdup(yytext));}
-"{"             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION LEFT BRACE", strdup(yytext));}
-"}"             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION RIGHT BRACE", strdup(yytext));}
-"["             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION LEFT BRACKET", strdup(yytext));}
-"]"             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION RIGHT BRACKET", strdup(yytext));}
-"("             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION LEFT PARENTHESIS", strdup(yytext));}
-")"             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION RIGHT PARENTHESIS", strdup(yytext));}
-";"             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION SEMICOLON", strdup(yytext));}
-","             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION COMMA", strdup(yytext));}
-":"             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION COLON", strdup(yytext));}
-"::"            {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION COLON COLON", strdup(yytext));}
-"."             {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION DOT", strdup(yytext));}
-".."            {add_alpha_token_t(++total_tokens, total_lines, "PANCTUATION DOT DOT", strdup(yytext));}
+"{"             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION LEFT BRACE", strdup(yytext));}
+"}"             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION RIGHT BRACE", strdup(yytext));}
+"["             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION LEFT BRACKET", strdup(yytext));}
+"]"             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION RIGHT BRACKET", strdup(yytext));}
+"("             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION LEFT PARENTHESIS", strdup(yytext));}
+")"             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION RIGHT PARENTHESIS", strdup(yytext));}
+";"             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION SEMICOLON", strdup(yytext));}
+","             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION COMMA", strdup(yytext));}
+":"             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION COLON", strdup(yytext));}
+"::"            {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION COLON COLON", strdup(yytext));}
+"."             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION DOT", strdup(yytext));}
+".."            {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION DOT DOT", strdup(yytext));}
 
 {INT}           {add_alpha_token_t(++total_tokens, total_lines, "INTCONST", strdup(yytext));}
 {REAL}          {add_alpha_token_t(++total_tokens, total_lines, "DOUBLECONST", strdup(yytext));}
@@ -79,77 +75,40 @@ nil             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   NIL",
 {IDENTIFIER}    {add_alpha_token_t(++total_tokens, total_lines, "IDENTIFIER", strdup(yytext));}
 {LINE_COMM}     {add_alpha_token_t(++total_tokens, total_lines, "LINE COMMENT", strdup(yytext));}
 {WHITESPACE}    {;}
-.               {++total_tokens; printf("Undefined input %s line %d\n",strdup(yytext),total_lines);}
+{UNCLOSED_STRING} {fprintf(stderr,"Warning: Unclosed string literal at line %d\n",total_lines);}
+.               {++total_tokens; fprintf(stderr,"Undefined input %s line %d\n",strdup(yytext),total_lines);}
 
-(\")([.\\]|[^"]|(\\\"))* {printf("Warning.\n");}
 
 {BLOCK_START} {
-    opening = 1;
-    line123 = 0;
+    opened_block = 1;
+    block_starting_line = 0;
 
     BEGIN(FIND_NESTED_COMMENT);
 }
+
 <FIND_NESTED_COMMENT>"\n" {
     ++total_lines;
-    ++line123;
+    ++block_starting_line;
 }
 
 <FIND_NESTED_COMMENT>"/*" {
-    opening++;
+    opened_block++;
 }
 
 <FIND_NESTED_COMMENT>"*/" {
-    opening--;
+    opened_block--;
 
-    if (opening > 0) {
-        add_alpha_token_t(++total_tokens, total_lines-line123, "NESTED COMMENT", "");
+    if (opened_block > 0) {
+        add_alpha_token_t(++total_tokens, total_lines-block_starting_line, "NESTED COMMENT", "");
     }
     else {
-        add_alpha_token_t(++total_tokens, total_lines-line123, "BLOCK COMMENT", "");
+        add_alpha_token_t(++total_tokens, total_lines-block_starting_line, "BLOCK COMMENT", "");
         BEGIN(INITIAL);
     }
 }
 
 
 %%
-char *tmp;
-
-
-void nested_comment_checker(char *full_comment) {
-    int opening_nested = 0;
-    int closing_nested = 0;
-    char *current;
-    int i, nested_flag;
-
-    nested_flag = 0;
-    add_alpha_token_t(++total_tokens, total_lines, "BLOCK COMMENT", strdup(yytext));
-    tmp = (char *)realloc(tmp,sizeof(strlen(full_comment)));
-    strncpy(tmp,(full_comment+2),strlen(full_comment)-4);
-
-    current = tmp;
-    while (*(current+1)) {
-        if (*current == '\n') {
-            total_lines++;
-        }
-        else if (*current == '/' && (*(current+1) == '*')) {
-            opening_nested++;
-            nested_flag = total_lines;
-        }
-        else if (*current == '*' && (*(current+1) == '/')) {
-            closing_nested++;
-        }
-        *(current++);
-    }
-    free(tmp);
-
-    if (opening_nested > closing_nested) {
-        printf("Warning: Unclosed block comment\n");
-    }
-    else if (opening_nested == closing_nested && (opening_nested>0)) {
-        add_alpha_token_t(++total_tokens, nested_flag, "NESTED COMMENT", "");
-    }
-    
-}
 
 void string_reformatting(char *initial_string) {
     char *formatted_string;
@@ -177,7 +136,7 @@ void string_reformatting(char *initial_string) {
                 formatted_string = realloc(formatted_string, (strlen(formatted_string)+1)*sizeof(char*));
                 formatted_string[j] = *current;
                 formatted_string[++j] = *(current+1);
-                printf("Warning: Invalid escape character %c\n",formatted_string[j]);
+                fprintf(stderr,"Warning: Invalid escape character %c\n",formatted_string[j]);
             }
             *(current++);
         }
@@ -212,7 +171,8 @@ void add_alpha_token_t(int token_number, int line, char *type, char *tiexei){
     if(head == NULL){
         head = newtoken;
         tail = newtoken;
-    }else{
+    }
+    else {
         tail->next_token = newtoken;
         tail = newtoken;
     }
@@ -221,13 +181,12 @@ void add_alpha_token_t(int token_number, int line, char *type, char *tiexei){
 
 
 int main(int argc, char** argv) {
-    tmp = (char *)malloc(sizeof(char));
     if (argc > 1) {
         yyin = fopen(argv[1], "r");
         printf("Reading from input file \"%s\"\n",argv[1]);
     }
     else {
-        printf("ERROR. No input file specified\n");
+        fprintf(stderr,"ERROR. No input file specified\n");
     }
     alpha_yylex(head);
 
@@ -242,7 +201,7 @@ int main(int argc, char** argv) {
             fprintf(fp, "  %d\t#%d\t  %s\t\t%s\n",temp->token_line,temp->token_number,temp->token_tiexeimesa, temp->token_type);
             temp = temp->next_token;
         }
-        if (opening > 0) {
+        if (opened_block > 0) {
             fprintf(fp, "Warning: Unclosed block comment.\n");
         }
         fclose(fp);
@@ -254,8 +213,8 @@ int main(int argc, char** argv) {
             printf("  %d\t#%d\t  %s\t\t%s\n",temp->token_line,temp->token_number,temp->token_tiexeimesa, temp->token_type);
             temp = temp->next_token;
         }
-        if (opening > 0) {
-            printf("Warning: Unclosed block comment.\n");
+        if (opened_block > 0) {
+            fprintf(stderr,"Warning: Unclosed block comment.\n");
         }
     }
 
