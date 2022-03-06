@@ -2130,12 +2130,13 @@ void string_reformatting(char *initial_string) {
     char *formatted_string;
     char *current;
     int i,j, starting_line;
-    
+
+    *(initial_string++);    
     j=0;
     starting_line = total_lines;
     formatted_string = malloc(sizeof(char*)); //tha to xrhsimopoihsoume sto telos gia to \0
     current = initial_string;
-    for (i=0; i<strlen(initial_string);i++) {
+    for (i=0; i<strlen(initial_string)-1;i++) {
         
         formatted_string = realloc(formatted_string, (strlen(formatted_string)+1)*sizeof(char*));
         if (*current == '\\') {
@@ -2214,7 +2215,7 @@ int main(int argc, char** argv) {
         fp = fopen(argv[2], "w+");
         fprintf(fp, "\n  Line\tToken#\t  Content\tCategory\n");
         while (temp != NULL) {
-            fprintf(fp, "  %d\t#%d\t  %s\t\t%s\n",temp->token_line,temp->token_number,temp->token_tiexeimesa, temp->token_type);
+            fprintf(fp, "  %d\t#%d\t  \"%s\"\t\t%s\n",temp->token_line,temp->token_number,temp->token_tiexeimesa, temp->token_type);
             temp = temp->next_token;
         }
         if (opened_block > 0) {
@@ -2226,7 +2227,7 @@ int main(int argc, char** argv) {
     else {
         printf("\n  Line\tToken#\t  Content\tCategory\n");
         while (temp != NULL) {
-            printf("  %d\t#%d\t  %s\t\t%s\n",temp->token_line,temp->token_number,temp->token_tiexeimesa, temp->token_type);
+            printf("  %d\t#%d\t  \"%s\"\t\t%s\n",temp->token_line,temp->token_number,temp->token_tiexeimesa, temp->token_type);
             temp = temp->next_token;
         }
         if (opened_block > 0) {
