@@ -3,8 +3,8 @@ GCC =gcc
 FLEX =flex
 all:
 	
-	@bison parser.c parser.y
-	@flex -o al.c al.l
+	@bison --yacc --defines --output=parser.c parser.y
+	@flex --outfile=al.c al.l
 	@gcc al.c parser.c -o al
 
 clean:
@@ -13,9 +13,9 @@ clean:
 
 a:
 	@rm -f al al.c parser.c
-	@bison parser.c parser.y
-	@flex -o al.c al.l
-	@gcc al.c -o al
+	@bison --yacc --defines --output=parser.c parser.y
+	@flex --outfile=al.c al.l
+	@gcc al.c parser.c -o al
 	@echo "Executing program:"
 	@./al input.txt
 	

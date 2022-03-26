@@ -1,4 +1,5 @@
 %{
+	#include "parser.h"
     #include "decl.h"
     #include <stdio.h>
 
@@ -181,7 +182,7 @@ void add_alpha_token_t(int token_number, int line, char *type, char *tiexei){
 }
 
 
-int main(int argc, char** argv) {
+/* int main(int argc, char** argv) {
     if (argc > 1) {
         yyin = fopen(argv[1], "r");
         printf("Reading from input file \"%s\"\n",argv[1]);
@@ -220,4 +221,4 @@ int main(int argc, char** argv) {
     }
 
     return 0;
-}
+} */
