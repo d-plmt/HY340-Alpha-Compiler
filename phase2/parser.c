@@ -571,11 +571,11 @@ union yyalloc
 static const yytype_int8 yytranslate[] =
 {
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-      57,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
       55,    56,    52,    50,    49,    51,     2,    53,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,    57,
        2,    48,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -607,8 +607,8 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    29,    29,    30,    33,    34,    35,    36,    37,    38,
-      39,    40,    42,    44,    45,    48,    51,    52
+       0,    33,    33,    34,    37,    38,    39,    40,    41,    42,
+      43,    44,    46,    48,    49,    52,    55,    56
 };
 #endif
 
@@ -626,7 +626,7 @@ static const char *const yytname[] =
   "OP_LESSER_EQ", "LEFT_BRACE", "RIGHT_BRACE", "LEFT_BRACKET",
   "RIGHT_BRACKET", "LEFT_PAR", "RIGHT_PAR", "SEMICOLON", "COMMA", "COLON",
   "COL_COL", "DOT", "DOT_DOT", "'='", "','", "'+'", "'-'", "'*'", "'/'",
-  "UMINUS", "'('", "')'", "'\\n'", "$accept", "program", "expression",
+  "UMINUS", "'('", "')'", "';'", "$accept", "program", "expression",
   "expr", "expressions", "assignment", "assignments", YY_NULLPTR
 };
 #endif
@@ -641,7 +641,7 @@ static const yytype_int16 yytoknum[] =
      275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
      285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
      295,   296,   297,   298,   299,   300,   301,   302,    61,    44,
-      43,    45,    42,    47,   303,    40,    41,    10
+      43,    45,    42,    47,   303,    40,    41,    59
 };
 # endif
 
@@ -1424,8 +1424,80 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
+  case 4:
+#line 37 "parser.y"
+                                                { (yyval.intVal) = (yyvsp[0].intVal); }
+#line 1431 "parser.c"
+    break;
 
-#line 1429 "parser.c"
+  case 5:
+#line 38 "parser.y"
+                                                { free((yyvsp[0].strVal));}
+#line 1437 "parser.c"
+    break;
+
+  case 6:
+#line 39 "parser.y"
+                                                { (yyval.intVal) = (yyvsp[-2].intVal) + (yyvsp[0].intVal);}
+#line 1443 "parser.c"
+    break;
+
+  case 7:
+#line 40 "parser.y"
+                                                { (yyval.intVal) = (yyvsp[-2].intVal) - (yyvsp[0].intVal);}
+#line 1449 "parser.c"
+    break;
+
+  case 8:
+#line 41 "parser.y"
+                                                { (yyval.intVal) = (yyvsp[-2].intVal) * (yyvsp[0].intVal);}
+#line 1455 "parser.c"
+    break;
+
+  case 9:
+#line 42 "parser.y"
+                                                { (yyval.intVal) = (yyvsp[-2].intVal) / (yyvsp[0].intVal);}
+#line 1461 "parser.c"
+    break;
+
+  case 10:
+#line 43 "parser.y"
+                                                { (yyval.intVal) = (yyvsp[-1].intVal);}
+#line 1467 "parser.c"
+    break;
+
+  case 11:
+#line 44 "parser.y"
+                                                { (yyval.intVal) = -(yyvsp[0].intVal);}
+#line 1473 "parser.c"
+    break;
+
+  case 12:
+#line 46 "parser.y"
+                                                {fprintf(stdout, "Result is: %d\n", (yyvsp[-1].intVal));}
+#line 1479 "parser.c"
+    break;
+
+  case 13:
+#line 48 "parser.y"
+                                                {;}
+#line 1485 "parser.c"
+    break;
+
+  case 14:
+#line 49 "parser.y"
+                                                {;}
+#line 1491 "parser.c"
+    break;
+
+  case 15:
+#line 52 "parser.y"
+                                              { ;}
+#line 1497 "parser.c"
+    break;
+
+
+#line 1501 "parser.c"
 
       default: break;
     }
@@ -1657,7 +1729,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 55 "parser.y"
+#line 59 "parser.y"
 
 
 int yyerror (char* yaccProvidedMessage) {
@@ -1666,7 +1738,6 @@ int yyerror (char* yaccProvidedMessage) {
 }
 
 int main(int argc, char** argv) {
-    printf("ektelw pragmata");
     if (argc > 1) {
         yyin = fopen(argv[1], "r");
         printf("Reading from input file \"%s\"\n",argv[1]);
