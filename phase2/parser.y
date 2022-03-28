@@ -1,7 +1,7 @@
 %{
     #include <stdio.h>
     int yyerror (char* yaccProvidedMessage);
-    int yylex(void);
+    extern int yylex(void);
 
     extern int total_lines;
     extern char* yytext;
@@ -54,6 +54,7 @@ int yyerror (char* yaccProvidedMessage) {
 }
 
 int main(int argc, char** argv) {
+    printf("ektelw pragmata");
     if (argc > 1) {
         yyin = fopen(argv[1], "r");
         printf("Reading from input file \"%s\"\n",argv[1]);
