@@ -9,7 +9,13 @@
 %}
 
 %start program
-%token ID INTEGER
+%union {int intVal; double realVal; char *strVal;}
+
+%token <intVal>     INTEGER
+%token <realVal>   REAL
+%token <strVal>     STRING
+%token <strVal>     IDENTIFIER
+%token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT
 
 %right '='
 %left ','
@@ -25,7 +31,7 @@ program:        assignments expressions
                 ;
 
 expression:     INTEGER
-                | ID
+                | IDENTIFIER
                 | expression '+' expression
                 | expression '-' expression
                 | expression '*' expression
@@ -39,7 +45,7 @@ expressions:    expressions expr
                 | expr
                 ;
 
-assignment:     ID '=' expression '\n'
+assignment:     IDENTIFIER '=' expression '\n'
                 ;
 
 assignments:    assignments assignment

@@ -49,19 +49,113 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    ID = 258,
-    INTEGER = 259,
-    UMINUS = 260
+    INTEGER = 258,
+    REAL = 259,
+    STRING = 260,
+    IDENTIFIER = 261,
+    IF = 262,
+    ELSE = 263,
+    WHILE = 264,
+    FOR = 265,
+    FUNCTION = 266,
+    RETURN = 267,
+    BREAK = 268,
+    CONTINUE = 269,
+    AND = 270,
+    NOT = 271,
+    OR = 272,
+    LOCAL = 273,
+    TRUE = 274,
+    FALSE = 275,
+    NIL = 276,
+    OP_EQUALS = 277,
+    OP_PLUS = 278,
+    OP_MINUS = 279,
+    OP_ASTERISK = 280,
+    OP_SLASH = 281,
+    OP_PERCENTAGE = 282,
+    OP_EQ_EQ = 283,
+    OP_NOT_EQ = 284,
+    OP_PLUS_PLUS = 285,
+    OP_MINUS_MINUS = 286,
+    OP_GREATER = 287,
+    OP_LESSER = 288,
+    OP_GREATER_EQ = 289,
+    OP_LESSER_EQ = 290,
+    LEFT_BRACE = 291,
+    RIGHT_BRACE = 292,
+    LEFT_BRACKET = 293,
+    RIGHT_BRACKET = 294,
+    LEFT_PAR = 295,
+    RIGHT_PAR = 296,
+    SEMICOLON = 297,
+    COMMA = 298,
+    COLON = 299,
+    COL_COL = 300,
+    DOT = 301,
+    DOT_DOT = 302,
+    UMINUS = 303
   };
 #endif
 /* Tokens.  */
-#define ID 258
-#define INTEGER 259
-#define UMINUS 260
+#define INTEGER 258
+#define REAL 259
+#define STRING 260
+#define IDENTIFIER 261
+#define IF 262
+#define ELSE 263
+#define WHILE 264
+#define FOR 265
+#define FUNCTION 266
+#define RETURN 267
+#define BREAK 268
+#define CONTINUE 269
+#define AND 270
+#define NOT 271
+#define OR 272
+#define LOCAL 273
+#define TRUE 274
+#define FALSE 275
+#define NIL 276
+#define OP_EQUALS 277
+#define OP_PLUS 278
+#define OP_MINUS 279
+#define OP_ASTERISK 280
+#define OP_SLASH 281
+#define OP_PERCENTAGE 282
+#define OP_EQ_EQ 283
+#define OP_NOT_EQ 284
+#define OP_PLUS_PLUS 285
+#define OP_MINUS_MINUS 286
+#define OP_GREATER 287
+#define OP_LESSER 288
+#define OP_GREATER_EQ 289
+#define OP_LESSER_EQ 290
+#define LEFT_BRACE 291
+#define RIGHT_BRACE 292
+#define LEFT_BRACKET 293
+#define RIGHT_BRACKET 294
+#define LEFT_PAR 295
+#define RIGHT_PAR 296
+#define SEMICOLON 297
+#define COMMA 298
+#define COLON 299
+#define COL_COL 300
+#define DOT 301
+#define DOT_DOT 302
+#define UMINUS 303
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+union YYSTYPE
+{
+#line 12 "parser.y"
+int intVal; double realVal; char *strVal;
+
+#line 156 "parser.h"
+
+};
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif

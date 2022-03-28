@@ -26,53 +26,53 @@ UNCLOSED_STRING (\")([.\\]|[^"]|(\\\"))*
 
 
 \n              {++total_lines;}
-if              {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   IF", strdup(yytext));}
-else            {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   ELSE", strdup(yytext));}
-while           {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   WHILE", strdup(yytext));}
-for             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   FOR", strdup(yytext));}
-function        {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   FUNCTION", strdup(yytext));}
-return          {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   RETURN", strdup(yytext));}
-break           {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   BREAK", strdup(yytext));}
-continue        {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   CONTINUE", strdup(yytext));}
-and             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   AND", strdup(yytext));}
-not             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   NOT", strdup(yytext));}
-or              {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   OR", strdup(yytext));}
-local           {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   LOCAL", strdup(yytext));}
-true            {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   TRUE", strdup(yytext));}
-false           {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   FALSE", strdup(yytext));}
-nil             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   NIL", strdup(yytext));}
-"="             {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   EQUALS", strdup(yytext));}
-"+"             {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   PLUS", strdup(yytext));}
-"-"             {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   MINUS", strdup(yytext));}
-"*"             {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   ASTERISK", strdup(yytext));}
-"/"             {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   SLASH", strdup(yytext));}
-"%"             {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   PERCENTAGE", strdup(yytext));}
-"=="            {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   EQUALS EQUALS", strdup(yytext));}
-"!="            {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   EXCLAMATION EQUALS", strdup(yytext));}
-"++"            {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   PLUS PLUS", strdup(yytext));}
-"--"            {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   MINUS MINUS", strdup(yytext));}
-">"             {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   GREATER", strdup(yytext));}
-"<"             {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   LESSER", strdup(yytext));}
-">="            {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   GREATER EQUALS", strdup(yytext));}
-"<="            {add_alpha_token_t(++total_tokens, total_lines, "OPERATOR   LESSER EQUALS", strdup(yytext));}
-"{"             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION LEFT BRACE", strdup(yytext));}
-"}"             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION RIGHT BRACE", strdup(yytext));}
-"["             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION LEFT BRACKET", strdup(yytext));}
-"]"             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION RIGHT BRACKET", strdup(yytext));}
-"("             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION LEFT PARENTHESIS", strdup(yytext));}
-")"             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION RIGHT PARENTHESIS", strdup(yytext));}
-";"             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION SEMICOLON", strdup(yytext));}
-","             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION COMMA", strdup(yytext));}
-":"             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION COLON", strdup(yytext));}
-"::"            {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION COLON COLON", strdup(yytext));}
-"."             {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION DOT", strdup(yytext));}
-".."            {add_alpha_token_t(++total_tokens, total_lines, "PUNCTUATION DOT DOT", strdup(yytext));}
+if              {return IF;}
+else            {return ELSE;}
+while           {return WHILE;}
+for             {return FOR;}
+function        {return FUNCTION;}
+return          {return RETURN;}
+break           {return BREAK;}
+continue        {return CONTINUE;}
+and             {return AND;}
+not             {return NOT;}
+or              {return OR;}
+local           {return LOCAL;}
+true            {return TRUE;}
+false           {return FALSE;}
+nil             {return NIL;}
+"="             {return OP_EQUALS;}
+"+"             {return OP_PLUS;}
+"-"             {return OP_MINUS;}
+"*"             {return OP_ASTERISK;}
+"/"             {return OP_SLASH;}
+"%"             {return OP_PERCENTAGE;}
+"=="            {return OP_EQ_EQ;}
+"!="            {return OP_NOT_EQ;}
+"++"            {return OP_PLUS_PLUS;}
+"--"            {return OP_MINUS_MINUS;}
+">"             {return OP_GREATER;}
+"<"             {return OP_LESSER;}
+">="            {return OP_GREATER_EQ;}
+"<="            {return OP_LESSER_EQ;}
+"{"             {return LEFT_BRACE;}
+"}"             {return RIGHT_BRACE;}
+"["             {return LEFT_BRACKET;}
+"]"             {return RIGHT_BRACKET;}
+"("             {return LEFT_PAR;}
+")"             {return RIGHT_PAR;}
+";"             {return SEMICOLON;}
+","             {return COMMA;}
+":"             {return COLON;}
+"::"            {return COL_COL;}
+"."             {return DOT;}
+".."            {return DOT_DOT;}
 
-{INT}           {add_alpha_token_t(++total_tokens, total_lines, "INTCONST", strdup(yytext));}
-{REAL}          {add_alpha_token_t(++total_tokens, total_lines, "DOUBLECONST", strdup(yytext));}
-{STRING}        {string_reformatting(strdup(yytext));}
-{IDENTIFIER}    {add_alpha_token_t(++total_tokens, total_lines, "IDENTIFIER", strdup(yytext));}
-{LINE_COMM}     {add_alpha_token_t(++total_tokens, total_lines, "LINE COMMENT", strdup(yytext));}
+{INT}           {yylval.intVal = atoi(yytext); return INTEGER;}
+{REAL}          {yylval.realVal = atof(yytext); return REAL;}
+{STRING}        {yylval.strVal = strdup(string_reformatting(strdup(yytext))); return STRING;}
+{IDENTIFIER}    {yylval.strVal = yylval.strVal = strdup(yytext); return IDENTIFIER;}
+{LINE_COMM}     {;}
 {WHITESPACE}    {;}
 {UNCLOSED_STRING} {fprintf(stderr,"Warning: Unclosed string literal at line %d\n",total_lines);}
 .               {++total_tokens; fprintf(stderr,"Undefined input %s line %d\n",strdup(yytext),total_lines);}
@@ -98,10 +98,9 @@ nil             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   NIL",
     opened_block--;
 
     if (opened_block > 0) {
-        add_alpha_token_t(++total_tokens, total_lines-block_starting_line, "NESTED COMMENT", "");
+        //xreiazetai na grapsoume kati edw?
     }
     else {
-        add_alpha_token_t(++total_tokens, total_lines-block_starting_line, "BLOCK COMMENT", "");
         BEGIN(INITIAL);
     }
 }
@@ -109,7 +108,7 @@ nil             {add_alpha_token_t(++total_tokens, total_lines, "KEYWORD   NIL",
 
 %%
 
-void string_reformatting(char *initial_string) {
+char* string_reformatting(char *initial_string) {
     char *formatted_string;
     char *current;
     int i,j, starting_line;
@@ -132,6 +131,9 @@ void string_reformatting(char *initial_string) {
             else if (*(current+1) == '\\') {
                 formatted_string[j] = '\\';
             }
+            else if (*(current+1) == '"') {
+                formatted_string[j] = '\"';
+            }
             else {
                 formatted_string = realloc(formatted_string, (strlen(formatted_string)+1)*sizeof(char*));
                 formatted_string[j] = *current;
@@ -151,7 +153,7 @@ void string_reformatting(char *initial_string) {
     }
     formatted_string[j] = '\0';
 
-    add_alpha_token_t(++total_tokens, starting_line, "STRING", formatted_string);
+    return formatted_string;
 }
 
 /*add new token to struct alpha_token_t*/
