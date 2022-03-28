@@ -1,7 +1,7 @@
 %{
     #include <stdio.h>
     int yyerror (char* yaccProvidedMessage);
-    extern int yylex(void);
+    int yylex(void){}
 
     extern int total_lines;
     extern char* yytext;
