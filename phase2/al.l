@@ -3,13 +3,10 @@
     #include "decl.h"
     #include <stdio.h>
 
-    #define YY_DECL int alpha_yylex(void *yyval)
-
     int total_lines = 1;
     int total_tokens = 0;
     int opened_block = 0;
     int block_starting_line = 0;
-    int yylex(void){}
 %}
 
 %option noyywrap
