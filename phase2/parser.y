@@ -18,7 +18,7 @@
 %token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT
 
 
-
+%type stmt expr op term assignexpr primary lvalue member call callsuffix normcall methodcall elist objectdef indexed indexedelem block funcdef const idlist ifstmt whilestmt forstmt returnstmt
 
 %right OP_EQUALS
 %left OR
@@ -34,34 +34,121 @@
 
 %%
 
-program:    stmt;
+program:    stmt program
+            |
+            ;
 
-expr:       assignexpr
+stmt:       expr SEMICOLON
+            |ifstmt
+            |whilestmt
+            |forstmt
+            |returnstmt
+            |BREAK SEMICOLON
+            |CONTINUE SEMICOLON
+            |block
+            |funcdef
+            |SEMICOLON
+            ;
+
+expr:       assignexpr      
             |expr op expr
             |term
             ;
 
-stmt:       expr;
+op:         OP_PLUS | OP_MINUS | OP_ASTERISK | OP_SLASH | OP_PERCENTAGE | OP_GREATER | OP_GREATER_EQ | OP_LESSER | OP_LESSER_EQ | OP_EQ_EQ | OP_NOT_EQ | AND | OR
+            ;
 
-expr:       INTEGER;
-     
+term:       LEFT_PAR expr RIGHT_PAR
+            |UMINUS expr
+            |NOT expr
+            |OP_PLUS_PLUS lvalue
+            |lvalue OP_PLUS_PLUS
+            |OP_MINUS_MINUS lvalue
+            |lvalue OP_MINUS_MINUS
+            |primary
+            ;
 
-op:         expr OP_PLUS expr           {printf("grapse atin\n");}
-           |expr OP_MINUS expr      {printf("grapsekatiallo\n");}
-           |expr OP_ASTERISK expr
-           |expr OP_SLASH expr
-           |expr OP_PERCENTAGE expr
-           |expr OP_GREATER expr
-           |expr OP_GREATER_EQ expr
-           |expr OP_LESSER expr
-           |expr OP_LESSER_EQ expr
-           |expr OP_EQ_EQ expr
-           |expr OP_NOT_EQ expr
-           ;
+assignexpr: lvalue OP_EQUALS expr
+            ;
 
-term:       'x';
+primary:    lvalue
+            |call
+            |objectdef
+            |LEFT_PAR funcdef RIGHT_PAR
+            |const
+            ;
 
-assignexpr: 'c';
+lvalue:     IDENTIFIER
+            |LOCAL IDENTIFIER
+            |COL_COL IDENTIFIER
+            |member
+            ;
+
+member:     lvalue DOT IDENTIFIER
+            |lvalue LEFT_BRACKET expr RIGHT_BRACKET
+            |call DOT IDENTIFIER
+            |call LEFT_BRACKET expr RIGHT_BRACKET
+            ;
+
+call:       call LEFT_PAR elist RIGHT_PAR
+            |lvalue callsuffix
+            |LEFT_PAR funcdef RIGHT_PAR LEFT_PAR elist RIGHT_PAR
+            ;
+        
+callsuffix: normcall
+            |methodcall
+            ;
+
+normcall:   LEFT_PAR elist RIGHT_PAR
+            ;
+
+methodcall: DOT_DOT IDENTIFIER LEFT_PAR elist RIGHT_PAR
+            ;
+
+elist:      expr
+            |expr elist
+            | expr COMMA expr elist
+            ;
+
+objectdef:  LEFT_BRACKET elist RIGHT_BRACKET
+            |LEFT_BRACKET indexed RIGHT_BRACKET
+            ;
+
+indexed:    indexedelem indexed
+            | indexedelem COMMA indexedelem indexed
+
+indexedelem: LEFT_BRACE expr COLON expr RIGHT_BRACE
+            ;
+
+block:      LEFT_BRACE RIGHT_BRACE
+            |LEFT_BRACE stmt RIGHT_BRACE
+            ;
+
+funcdef:    FUNCTION LEFT_PAR idlist RIGHT_PAR block
+            |FUNCTION IDENTIFIER LEFT_PAR idlist RIGHT_PAR block
+            ;
+
+const:      INTEGER | REAL | STRING | NIL | TRUE | FALSE
+            ;
+
+idlist:     IDENTIFIER
+            | idlist COMMA IDENTIFIER
+
+ifstmt:     IF LEFT_PAR expr RIGHT_PAR stmt 
+            |IF LEFT_PAR expr RIGHT_PAR stmt ELSE stmt
+            ;
+
+whilestmt:  WHILE LEFT_PAR expr RIGHT_PAR stmt
+            ;
+
+forstmt:    FOR LEFT_PAR elist SEMICOLON expr SEMICOLON elist LEFT_PAR stmt
+            ;
+
+returnstmt: RETURN SEMICOLON
+            |RETURN expr SEMICOLON
+            ;
+
+
 %%
 
 int yyerror (char* yaccProvidedMessage) {
