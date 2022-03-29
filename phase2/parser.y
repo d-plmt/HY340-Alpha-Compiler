@@ -20,15 +20,17 @@
 
 %type <intVal>      expression
 
-%right '='
-%left ','
-%left '+' '-'
-%left '*' '/'
-%nonassoc UMINUS
-%left '(' ')'
-
-%nonassoc OP_GREATER OP_GREATER_EQ OP_LESSER OP_LESSER_EQ OP_EQ_EQ OP_NOT_EQ
-
+%right OP_EQUALS
+%left OR
+%left AND
+%nonassoc OP_EQ_EQ OP_NOT_EQ
+%nonassoc OP_GREATER OP_GREATER_EQ OP_LESSER OP_LESSER_EQ
+%left OP_PLUS OP_MINUS
+%left OP_ASTERISK OP_SLASH OP_PERCENTAGE
+%right NOT OP_PLUS_PLUS OP_MINUS_MINUS UMINUS
+%left DOT DOT_DOT
+%left LEFT_BRACE RIGHT_BRACE
+%left LEFT_PAR RIGHT_PAR
 
 %%
 
