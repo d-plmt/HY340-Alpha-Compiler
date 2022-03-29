@@ -34,32 +34,21 @@
 
 %%
 
-program:        assignments expressions
-                |
-                ;
+program:    stmt;
 
-expression:     INTEGER                         { $$ = $1; }
-                | IDENTIFIER                    { free($1);}
-                | expression '+' expression     { $$ = $1 + $3;}
-                | expression '-' expression     { $$ = $1 - $3;}
-                | expression '*' expression     { $$ = $1 * $3;}
-                | expression '/' expression     { $$ = $1 / $3;}
-                | '(' expression ')'            { $$ = $2;}
-                | '-' expression %prec UMINUS   { $$ = -$2;}
-
-expr:           expression ';'                  {fprintf(stdout, "Result is: %d\n", $1);}
-
-expressions:    expressions expr                {;}
-                | expr                          {;}
-                ;
-
-assignment:     IDENTIFIER '=' expression ';' { ;}
-                ;
-
-assignments:    assignments assignment
-                |
-                ;
-
+op:         expr OP_PLUS expr
+           |expr    OP_MINUS expr
+           |expr     OP_ASTERISK expr
+           |expr     OP_SLASH expr
+           |expr     OP_PERCENTAGE expr
+           |expr     OP_GREATER expr
+           |expr    OP_GREATER_EQ expr
+           |expr     OP_LESSER expr
+           |expr    OP_LESSER_EQ expr
+           |expr    OP_EQ_EQ expr
+           |expr    OP_NOT_EQ expr
+           |expr   OP_AND expr
+           |expr    OP_OR expr
 %%
 
 int yyerror (char* yaccProvidedMessage) {
