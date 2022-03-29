@@ -27,6 +27,8 @@
 %nonassoc UMINUS
 %left '(' ')'
 
+%nonassoc OP_GREATER OP_GREATER_EQ OP_LESSER OP_LESSER_EQ OP_EQ_EQ OP_NOT_EQ
+
 
 %%
 

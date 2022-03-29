@@ -607,8 +607,8 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int8 yyrline[] =
 {
-       0,    33,    33,    34,    37,    38,    39,    40,    41,    42,
-      43,    44,    46,    48,    49,    52,    55,    56
+       0,    35,    35,    36,    39,    40,    41,    42,    43,    44,
+      45,    46,    48,    50,    51,    54,    57,    58
 };
 #endif
 
@@ -1425,73 +1425,73 @@ yyreduce:
   switch (yyn)
     {
   case 4:
-#line 37 "parser.y"
-                                                { (yyval.intVal) = (yyvsp[0].intVal); }
+#line 39 "parser.y"
+                                                { fprintf(stdout, "Result is: %d\n", (yyvsp[0].intVal)); }
 #line 1431 "parser.c"
     break;
 
   case 5:
-#line 38 "parser.y"
+#line 40 "parser.y"
                                                 { free((yyvsp[0].strVal));}
 #line 1437 "parser.c"
     break;
 
   case 6:
-#line 39 "parser.y"
+#line 41 "parser.y"
                                                 { (yyval.intVal) = (yyvsp[-2].intVal) + (yyvsp[0].intVal);}
 #line 1443 "parser.c"
     break;
 
   case 7:
-#line 40 "parser.y"
+#line 42 "parser.y"
                                                 { (yyval.intVal) = (yyvsp[-2].intVal) - (yyvsp[0].intVal);}
 #line 1449 "parser.c"
     break;
 
   case 8:
-#line 41 "parser.y"
+#line 43 "parser.y"
                                                 { (yyval.intVal) = (yyvsp[-2].intVal) * (yyvsp[0].intVal);}
 #line 1455 "parser.c"
     break;
 
   case 9:
-#line 42 "parser.y"
+#line 44 "parser.y"
                                                 { (yyval.intVal) = (yyvsp[-2].intVal) / (yyvsp[0].intVal);}
 #line 1461 "parser.c"
     break;
 
   case 10:
-#line 43 "parser.y"
+#line 45 "parser.y"
                                                 { (yyval.intVal) = (yyvsp[-1].intVal);}
 #line 1467 "parser.c"
     break;
 
   case 11:
-#line 44 "parser.y"
+#line 46 "parser.y"
                                                 { (yyval.intVal) = -(yyvsp[0].intVal);}
 #line 1473 "parser.c"
     break;
 
   case 12:
-#line 46 "parser.y"
+#line 48 "parser.y"
                                                 {fprintf(stdout, "Result is: %d\n", (yyvsp[-1].intVal));}
 #line 1479 "parser.c"
     break;
 
   case 13:
-#line 48 "parser.y"
+#line 50 "parser.y"
                                                 {;}
 #line 1485 "parser.c"
     break;
 
   case 14:
-#line 49 "parser.y"
+#line 51 "parser.y"
                                                 {;}
 #line 1491 "parser.c"
     break;
 
   case 15:
-#line 52 "parser.y"
+#line 54 "parser.y"
                                               { ;}
 #line 1497 "parser.c"
     break;
@@ -1729,7 +1729,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 59 "parser.y"
+#line 61 "parser.y"
 
 
 int yyerror (char* yaccProvidedMessage) {
