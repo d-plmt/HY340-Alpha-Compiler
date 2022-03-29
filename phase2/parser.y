@@ -18,7 +18,7 @@
 %token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT
 
 
-%type <intVal>      expression
+
 
 %right OP_EQUALS
 %left OR
@@ -36,19 +36,32 @@
 
 program:    stmt;
 
-op:         expr OP_PLUS expr
-           |expr    OP_MINUS expr
-           |expr     OP_ASTERISK expr
-           |expr     OP_SLASH expr
-           |expr     OP_PERCENTAGE expr
-           |expr     OP_GREATER expr
-           |expr    OP_GREATER_EQ expr
-           |expr     OP_LESSER expr
-           |expr    OP_LESSER_EQ expr
-           |expr    OP_EQ_EQ expr
-           |expr    OP_NOT_EQ expr
-           |expr   OP_AND expr
-           |expr    OP_OR expr
+expr:       assignexpr
+            |expr op expr
+            |term
+            ;
+
+stmt:       expr;
+
+expr:       INTEGER;
+     
+
+op:         expr OP_PLUS expr           {printf("grapse atin\n");}
+           |expr OP_MINUS expr      {printf("grapsekatiallo\n");}
+           |expr OP_ASTERISK expr
+           |expr OP_SLASH expr
+           |expr OP_PERCENTAGE expr
+           |expr OP_GREATER expr
+           |expr OP_GREATER_EQ expr
+           |expr OP_LESSER expr
+           |expr OP_LESSER_EQ expr
+           |expr OP_EQ_EQ expr
+           |expr OP_NOT_EQ expr
+           ;
+
+term:       'x';
+
+assignexpr: 'c';
 %%
 
 int yyerror (char* yaccProvidedMessage) {

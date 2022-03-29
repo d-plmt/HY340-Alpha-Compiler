@@ -18,3 +18,4 @@ a:
 	@echo "Executing program:"
 	@./al input.txt
 	
+	
