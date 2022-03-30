@@ -59,7 +59,7 @@ op:         OP_PLUS | OP_MINUS | OP_ASTERISK | OP_SLASH | OP_PERCENTAGE | OP_GRE
             ;
 
 term:       LEFT_PAR expr RIGHT_PAR
-            |UMINUS expr
+            |OP_MINUS expr
             |NOT expr
             |OP_PLUS_PLUS lvalue
             |lvalue OP_PLUS_PLUS
@@ -90,9 +90,9 @@ member:     lvalue DOT IDENTIFIER
             |call LEFT_BRACKET expr RIGHT_BRACKET
             ;
 
-call:       call LEFT_PAR elist RIGHT_PAR
-            |lvalue callsuffix
-            |LEFT_PAR funcdef RIGHT_PAR LEFT_PAR elist RIGHT_PAR
+call:       call LEFT_PAR elist RIGHT_PAR   {printf("call\n");}
+            |lvalue callsuffix{printf("call\n");}
+            |LEFT_PAR funcdef RIGHT_PAR LEFT_PAR elist RIGHT_PAR{printf("call\n");} //edw paizei conflict
             ;
         
 callsuffix: normcall
@@ -106,16 +106,17 @@ methodcall: DOT_DOT IDENTIFIER LEFT_PAR elist RIGHT_PAR
             ;
 
 elist:      expr
-            |expr elist
-            | expr COMMA expr elist
+            | expr COMMA elist
             ;
 
 objectdef:  LEFT_BRACKET elist RIGHT_BRACKET
             |LEFT_BRACKET indexed RIGHT_BRACKET
+            |LEFT_BRACKET RIGHT_BRACKET
             ;
 
-indexed:    indexedelem indexed
-            | indexedelem COMMA indexedelem indexed
+indexed:    indexedelem
+            | indexedelem COMMA indexed
+            ;
 
 indexedelem: LEFT_BRACE expr COLON expr RIGHT_BRACE
             ;
@@ -124,15 +125,16 @@ block:      LEFT_BRACE RIGHT_BRACE
             |LEFT_BRACE stmt RIGHT_BRACE
             ;
 
-funcdef:    FUNCTION LEFT_PAR idlist RIGHT_PAR block
-            |FUNCTION IDENTIFIER LEFT_PAR idlist RIGHT_PAR block
+funcdef:    FUNCTION LEFT_PAR idlist RIGHT_PAR block{printf("func\n");}
+            |FUNCTION IDENTIFIER LEFT_PAR idlist RIGHT_PAR block{printf("func\n");}
             ;
 
-const:      INTEGER | REAL | STRING | NIL | TRUE | FALSE
+const:      INTEGER | REAL | STRING | NIL | TRUE | FALSE    {printf("const\n");}
             ;
 
-idlist:     IDENTIFIER
-            | idlist COMMA IDENTIFIER
+idlist:     IDENTIFIER      {printf("idlist\n");}
+            | IDENTIFIER COMMA idlist   {printf("idlist\n");}
+            ;
 
 ifstmt:     IF LEFT_PAR expr RIGHT_PAR stmt 
             |IF LEFT_PAR expr RIGHT_PAR stmt ELSE stmt
@@ -141,7 +143,7 @@ ifstmt:     IF LEFT_PAR expr RIGHT_PAR stmt
 whilestmt:  WHILE LEFT_PAR expr RIGHT_PAR stmt
             ;
 
-forstmt:    FOR LEFT_PAR elist SEMICOLON expr SEMICOLON elist LEFT_PAR stmt
+forstmt:    FOR LEFT_PAR elist SEMICOLON expr SEMICOLON elist RIGHT_PAR stmt
             ;
 
 returnstmt: RETURN SEMICOLON
