@@ -7,15 +7,15 @@ all:
 	@gcc al.c parser.c -o al
 
 clean:
-	@rm -f al al.c parser.c
+	@rm -f al al.c parser.c parser.h 
 	@echo "Cleanup complete"
 
 a:
-	@rm -f al al.c parser.c
+	@rm -f al al.c parser.c parser.h
 	@bison --yacc --defines --output=parser.c parser.y
 	@flex --outfile=al.c al.l
 	@gcc al.c parser.c -o al
 	@echo "Executing program:"
-	@./al input.txt
+	@./al
 	
 	
