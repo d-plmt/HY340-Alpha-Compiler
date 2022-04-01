@@ -104,9 +104,9 @@ member:     lvalue DOT IDENTIFIER
             |call LEFT_BRACKET expr RIGHT_BRACKET
             ;
 
-call:       call LEFT_PAR elist RIGHT_PAR   {printf("call\n");}
-            |lvalue callsuffix{printf("call\n");}
-            |LEFT_PAR funcdef RIGHT_PAR LEFT_PAR elist RIGHT_PAR{printf("call\n");} //edw paizei conflict
+call:       call LEFT_PAR elist RIGHT_PAR
+            |lvalue callsuffix
+            |LEFT_PAR funcdef RIGHT_PAR LEFT_PAR elist RIGHT_PAR
             ;
         
 callsuffix: normcall
@@ -141,12 +141,40 @@ func_stmt: stmt func_stmt
             | stmt
             ;
 
-block:      LEFT_BRACE {scope=scope+scope_flag;} RIGHT_BRACE {scope=scope-scope_flag;}
-            |LEFT_BRACE {scope=scope+scope_flag;} func_stmt RIGHT_BRACE {scope=scope-scope_flag;} 
+block:      LEFT_BRACE {
+                    scope = scope + scope_flag;
+                } RIGHT_BRACE {
+                    scope = scope - scope_flag;
+                }
+            |LEFT_BRACE {
+                    scope = scope + scope_flag;
+                } func_stmt RIGHT_BRACE {
+                    scope = scope - scope_flag;
+                } 
             ;
 
-funcdef:    FUNCTION  LEFT_PAR {scope++; scope_flag=0; functions++;} idlist RIGHT_PAR block {if(!(--functions)){scope_flag=1;} scope--;}
-            |FUNCTION IDENTIFIER LEFT_PAR {scope++; scope_flag=0; functions++;} idlist RIGHT_PAR block {if(!(--functions)){scope_flag=1;} scope--;}
+funcdef:    FUNCTION  LEFT_PAR {
+                    scope++; 
+                    scope_flag = 0; 
+                    functions++;
+                } 
+                idlist RIGHT_PAR block {
+                    if (!(--functions)){
+                        scope_flag = 1;
+                    } 
+                    scope--;
+                }
+            |FUNCTION IDENTIFIER LEFT_PAR {
+                    scope++; 
+                    scope_flag = 0; 
+                    functions++;
+                } 
+                idlist RIGHT_PAR block {
+                    if (!(--functions)){
+                        scope_flag = 1;
+                    } 
+                    scope--;
+                }
             ;
 
 const:      INTEGER | REAL | STRING | NIL | TRUE | FALSE
