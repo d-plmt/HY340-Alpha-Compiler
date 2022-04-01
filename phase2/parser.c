@@ -619,9 +619,9 @@ static const yytype_uint8 yyrline[] =
       89,    90,    91,    92,    95,    96,    97,    98,   101,   102,
      103,   104,   107,   108,   109,   112,   113,   116,   119,   122,
      123,   124,   127,   128,   129,   132,   133,   134,   137,   140,
-     141,   144,   144,   145,   145,   148,   148,   149,   149,   152,
-     152,   152,   152,   152,   152,   155,   156,   157,   160,   161,
-     164,   167,   170,   171
+     141,   144,   144,   149,   149,   156,   156,   167,   167,   180,
+     180,   180,   180,   180,   180,   183,   184,   185,   188,   189,
+     192,   195,   198,   199
 };
 #endif
 
@@ -641,7 +641,7 @@ static const char *const yytname[] =
   "COL_COL", "DOT", "DOT_DOT", "UMINUS", "$accept", "program", "stmt",
   "expr", "op", "term", "assignexpr", "primary", "lvalue", "member",
   "call", "callsuffix", "normcall", "methodcall", "elist", "objectdef",
-  "indexed", "indexedelem", "statements", "block", "$@1", "$@2", "funcdef",
+  "indexed", "indexedelem", "func_stmt", "block", "$@1", "$@2", "funcdef",
   "$@3", "$@4", "const", "idlist", "ifstmt", "whilestmt", "forstmt",
   "returnstmt", YY_NULLPTR
 };
@@ -1591,74 +1591,82 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 52:
-#line 107 "parser.y"
-                                            {printf("call\n");}
-#line 1598 "parser.c"
-    break;
-
-  case 53:
-#line 108 "parser.y"
-                              {printf("call\n");}
-#line 1604 "parser.c"
-    break;
-
-  case 54:
-#line 109 "parser.y"
-                                                                {printf("call\n");}
-#line 1610 "parser.c"
-    break;
-
   case 71:
 #line 144 "parser.y"
-                       {scope=scope+scope_flag;}
-#line 1616 "parser.c"
+                       {
+                    scope = scope + scope_flag;
+                }
+#line 1600 "parser.c"
     break;
 
   case 72:
-#line 144 "parser.y"
-                                                             {scope=scope-scope_flag;}
-#line 1622 "parser.c"
+#line 146 "parser.y"
+                              {
+                    scope = scope - scope_flag;
+                }
+#line 1608 "parser.c"
     break;
 
   case 73:
-#line 145 "parser.y"
-                        {scope=scope+scope_flag; printf("%d\n",scope);}
-#line 1628 "parser.c"
+#line 149 "parser.y"
+                        {
+                    scope = scope + scope_flag;
+                }
+#line 1616 "parser.c"
     break;
 
   case 74:
-#line 145 "parser.y"
-                                                                                               {scope=scope-scope_flag; printf("%d\n",scope);}
-#line 1634 "parser.c"
+#line 151 "parser.y"
+                                        {
+                    scope = scope - scope_flag;
+                }
+#line 1624 "parser.c"
     break;
 
   case 75:
-#line 148 "parser.y"
-                               {}
-#line 1640 "parser.c"
+#line 156 "parser.y"
+                               {
+                    scope++; 
+                    scope_flag = 0; 
+                    functions++;
+                }
+#line 1634 "parser.c"
     break;
 
   case 76:
-#line 148 "parser.y"
-                                                        {printf("func\n");}
-#line 1646 "parser.c"
+#line 161 "parser.y"
+                                       {
+                    if (!(--functions)){
+                        scope_flag = 1;
+                    } 
+                    scope--;
+                }
+#line 1645 "parser.c"
     break;
 
   case 77:
-#line 149 "parser.y"
-                                          {scope++; scope_flag=0; functions++; printf("%d\n",scope);}
-#line 1652 "parser.c"
+#line 167 "parser.y"
+                                          {
+                    scope++; 
+                    scope_flag = 0; 
+                    functions++;
+                }
+#line 1655 "parser.c"
     break;
 
   case 78:
-#line 149 "parser.y"
-                                                                                                                            {if(!(--functions)){scope_flag=1;} scope--; printf("%d\n",scope);}
-#line 1658 "parser.c"
+#line 172 "parser.y"
+                                       {
+                    if (!(--functions)){
+                        scope_flag = 1;
+                    } 
+                    scope--;
+                }
+#line 1666 "parser.c"
     break;
 
 
-#line 1662 "parser.c"
+#line 1670 "parser.c"
 
       default: break;
     }
@@ -1890,13 +1898,14 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 175 "parser.y"
+#line 203 "parser.y"
 
 
 
 int yyerror (char* yaccProvidedMessage) {
     fprintf(stderr, "%s: at line %d, before token: %s\n", yaccProvidedMessage, total_lines, yytext);
     fprintf(stderr, "INPUT NOT VALID\n");
+    yyparse();
 }
 
 int main(int argc, char** argv) {

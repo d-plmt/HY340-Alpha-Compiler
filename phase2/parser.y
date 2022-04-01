@@ -206,6 +206,7 @@ returnstmt: RETURN SEMICOLON
 int yyerror (char* yaccProvidedMessage) {
     fprintf(stderr, "%s: at line %d, before token: %s\n", yaccProvidedMessage, total_lines, yytext);
     fprintf(stderr, "INPUT NOT VALID\n");
+    yyparse(); //mporei k na einai lathos auto
 }
 
 int main(int argc, char** argv) {
