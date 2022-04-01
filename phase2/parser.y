@@ -6,6 +6,11 @@
     extern int total_lines;
     extern char* yytext;
     extern FILE* yyin;
+
+    int scope = 0;
+    int scope_flag = 1;
+    int nested_func_flag = 0;
+    int functions = 0;
 %}
 
 %start program
@@ -18,7 +23,16 @@
 %token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT
 
 
-%type stmt expr op term assignexpr primary lvalue member call callsuffix normcall methodcall elist objectdef indexed indexedelem block funcdef const idlist ifstmt whilestmt forstmt returnstmt
+//%type stmt expr op term assignexpr primary lvalue member call callsuffix normcall methodcall elist objectdef indexed indexedelem block funcdef const idlist ifstmt whilestmt forstmt returnstmt
+
+%type <strVal>	stmt
+%type		expr
+%type <strVal>	op term assignexpr
+%type <strVal>	primary lvalue member
+%type <strVal>	call callsuffix normcall methodcall
+%type <strVal>	elist objectdef indexed indexedelem
+%type <strVal>	block funcdef const idlist
+%type <strVal>	ifstmt whilestmt forstmt returnstmt
 
 %right OP_EQUALS
 %left OR
@@ -107,6 +121,7 @@ methodcall: DOT_DOT IDENTIFIER LEFT_PAR elist RIGHT_PAR
 
 elist:      expr
             | expr COMMA elist
+            |
             ;
 
 objectdef:  LEFT_BRACKET elist RIGHT_BRACKET
@@ -116,24 +131,30 @@ objectdef:  LEFT_BRACKET elist RIGHT_BRACKET
 
 indexed:    indexedelem
             | indexedelem COMMA indexed
+            |
             ;
 
 indexedelem: LEFT_BRACE expr COLON expr RIGHT_BRACE
             ;
 
-block:      LEFT_BRACE RIGHT_BRACE
-            |LEFT_BRACE stmt RIGHT_BRACE
+func_stmt: stmt func_stmt
+            | stmt
             ;
 
-funcdef:    FUNCTION LEFT_PAR idlist RIGHT_PAR block{printf("func\n");}
-            |FUNCTION IDENTIFIER LEFT_PAR idlist RIGHT_PAR block{printf("func\n");}
+block:      LEFT_BRACE {scope=scope+scope_flag;} RIGHT_BRACE {scope=scope-scope_flag;}
+            |LEFT_BRACE {scope=scope+scope_flag;} func_stmt RIGHT_BRACE {scope=scope-scope_flag;} 
             ;
 
-const:      INTEGER | REAL | STRING | NIL | TRUE | FALSE    {printf("const\n");}
+funcdef:    FUNCTION  LEFT_PAR {scope++; scope_flag=0; functions++;} idlist RIGHT_PAR block {if(!(--functions)){scope_flag=1;} scope--;}
+            |FUNCTION IDENTIFIER LEFT_PAR {scope++; scope_flag=0; functions++;} idlist RIGHT_PAR block {if(!(--functions)){scope_flag=1;} scope--;}
             ;
 
-idlist:     IDENTIFIER      {printf("idlist\n");}
-            | IDENTIFIER COMMA idlist   {printf("idlist\n");}
+const:      INTEGER | REAL | STRING | NIL | TRUE | FALSE
+            ;
+
+idlist:     IDENTIFIER
+            | IDENTIFIER COMMA idlist
+            |
             ;
 
 ifstmt:     IF LEFT_PAR expr RIGHT_PAR stmt 
@@ -152,6 +173,7 @@ returnstmt: RETURN SEMICOLON
 
 
 %%
+
 
 int yyerror (char* yaccProvidedMessage) {
     fprintf(stderr, "%s: at line %d, before token: %s\n", yaccProvidedMessage, total_lines, yytext);
