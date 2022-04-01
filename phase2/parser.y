@@ -1,11 +1,17 @@
 %{
+    #include <stdbool.h>
     #include <stdio.h>
+    #include "symT.h" 
+
     int yyerror (char* yaccProvidedMessage);
     int yylex(void);
 
     extern int total_lines;
     extern char* yytext;
     extern FILE* yyin;
+
+    Trapezi_Symvolwn *trapezaki;
+    types type1;
 
     int scope = 0;
     int scope_flag = 1;
@@ -92,7 +98,7 @@ primary:    lvalue
             |const
             ;
 
-lvalue:     IDENTIFIER
+lvalue:     IDENTIFIER  {SymTable_insert($$, scope, total_lines, 2);}
             |LOCAL IDENTIFIER
             |COL_COL IDENTIFIER
             |member
@@ -202,6 +208,82 @@ returnstmt: RETURN SEMICOLON
 
 %%
 
+int SymTable_insert(const char *name, unsigned int scope, unsigned int line, types type) {
+    kremastra *new_node, *temp;
+    unsigned int index = SymTable_hash(name) % 499;
+    int i;
+
+    if (SymTable_lookup(strdup(name), scope, type)) {
+        new_node = malloc(sizeof(kremastra));
+        if (trapezaki->head[index] != NULL) {
+            temp = trapezaki->head[index];
+            while (temp->next != NULL) {
+                temp = temp->next;
+            }
+            temp->next = new_node;
+        }
+        else {
+            trapezaki->head[index] = new_node;
+        }
+        new_node->next = NULL;
+        new_node->isActive = 1;
+        new_node->type = type;
+        if (new_node->type <= 2) {
+            new_node->value.varVal = malloc(sizeof(var));
+            new_node->value.varVal->vname = name;
+            new_node->value.varVal->vscope = scope;
+            new_node->value.varVal->vline = line;
+        }
+        else {
+            new_node->value.funcVal = malloc(sizeof(func));
+            new_node->value.funcVal->fname = name;
+            new_node->value.funcVal->fscope = scope;
+            new_node->value.funcVal->fline = line;
+        }
+        //edw prepei na enwsoume k ta scope lists
+    }
+    else {
+        yyerror("Illegal variable or function.\n");
+    }
+}
+
+int SymTable_lookup(char *name, unsigned int scope, types type) {
+    unsigned int hash = SymTable_hash(name);
+    hash = hash % 499;
+
+    //check an einai null
+    kremastra *temp = trapezaki->head[hash];
+
+    while (temp != NULL) {
+        if ((type == 1) && (temp->type == 1)){
+            if (temp->value.varVal->vscope == scope) {
+                if (strcmp(name,temp->value.varVal->vname)) {
+                    return 1;
+                }
+            }
+        }
+        temp = temp->next;
+    }
+    return 1;
+    
+}
+
+unsigned int SymTable_hash(const char *key) {
+    size_t i;
+    unsigned int hash = 0U;
+    for (i = 0U; key[i] != '\0'; key++) {
+        hash = hash * HASH_MULTIPLIER + key[i];
+    }
+    return hash;
+}
+
+void SymTable_new() {
+    trapezaki = malloc(sizeof(Trapezi_Symvolwn));
+    int i;
+    for (i=0; i<SIZE; i++) {
+        trapezaki->head[i] = NULL;
+    }
+}
 
 int yyerror (char* yaccProvidedMessage) {
     fprintf(stderr, "%s: at line %d, before token: %s\n", yaccProvidedMessage, total_lines, yytext);
@@ -217,6 +299,7 @@ int main(int argc, char** argv) {
     else {
         yyin = stdin;
     }
+    SymTable_new();
     yyparse();
     return 0;
 }

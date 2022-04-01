@@ -68,7 +68,10 @@
 /* First part of user prologue.  */
 #line 1 "parser.y"
 
+    #include <stdbool.h>
     #include <stdio.h>
+    #include "symT.h" 
+
     int yyerror (char* yaccProvidedMessage);
     int yylex(void);
 
@@ -76,12 +79,15 @@
     extern char* yytext;
     extern FILE* yyin;
 
+    Trapezi_Symvolwn *trapezaki;
+    types type1;
+
     int scope = 0;
     int scope_flag = 1;
     int nested_func_flag = 0;
     int functions = 0;
 
-#line 85 "parser.c"
+#line 91 "parser.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -229,10 +235,10 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 17 "parser.y"
+#line 23 "parser.y"
 int intVal; double realVal; char *strVal;
 
-#line 236 "parser.c"
+#line 242 "parser.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -612,16 +618,16 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    51,    51,    52,    55,    56,    57,    58,    59,    60,
-      61,    62,    63,    64,    67,    68,    69,    72,    72,    72,
-      72,    72,    72,    72,    72,    72,    72,    72,    72,    72,
-      75,    76,    77,    78,    79,    80,    81,    82,    85,    88,
-      89,    90,    91,    92,    95,    96,    97,    98,   101,   102,
-     103,   104,   107,   108,   109,   112,   113,   116,   119,   122,
-     123,   124,   127,   128,   129,   132,   133,   134,   137,   140,
-     141,   144,   144,   149,   149,   156,   156,   167,   167,   180,
-     180,   180,   180,   180,   180,   183,   184,   185,   188,   189,
-     192,   195,   198,   199
+       0,    57,    57,    58,    61,    62,    63,    64,    65,    66,
+      67,    68,    69,    70,    73,    74,    75,    78,    78,    78,
+      78,    78,    78,    78,    78,    78,    78,    78,    78,    78,
+      81,    82,    83,    84,    85,    86,    87,    88,    91,    94,
+      95,    96,    97,    98,   101,   102,   103,   104,   107,   108,
+     109,   110,   113,   114,   115,   118,   119,   122,   125,   128,
+     129,   130,   133,   134,   135,   138,   139,   140,   143,   146,
+     147,   150,   150,   155,   155,   162,   162,   173,   173,   186,
+     186,   186,   186,   186,   186,   189,   190,   191,   194,   195,
+     198,   201,   204,   205
 };
 #endif
 
@@ -1591,82 +1597,88 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
+  case 44:
+#line 101 "parser.y"
+                        {SymTable_insert((yyval.strVal), scope, total_lines, 2);}
+#line 1604 "parser.c"
+    break;
+
   case 71:
-#line 144 "parser.y"
+#line 150 "parser.y"
                        {
                     scope = scope + scope_flag;
                 }
-#line 1600 "parser.c"
+#line 1612 "parser.c"
     break;
 
   case 72:
-#line 146 "parser.y"
+#line 152 "parser.y"
                               {
                     scope = scope - scope_flag;
                 }
-#line 1608 "parser.c"
+#line 1620 "parser.c"
     break;
 
   case 73:
-#line 149 "parser.y"
+#line 155 "parser.y"
                         {
                     scope = scope + scope_flag;
                 }
-#line 1616 "parser.c"
+#line 1628 "parser.c"
     break;
 
   case 74:
-#line 151 "parser.y"
+#line 157 "parser.y"
                                         {
                     scope = scope - scope_flag;
                 }
-#line 1624 "parser.c"
+#line 1636 "parser.c"
     break;
 
   case 75:
-#line 156 "parser.y"
+#line 162 "parser.y"
                                {
                     scope++; 
                     scope_flag = 0; 
                     functions++;
                 }
-#line 1634 "parser.c"
+#line 1646 "parser.c"
     break;
 
   case 76:
-#line 161 "parser.y"
+#line 167 "parser.y"
                                        {
                     if (!(--functions)){
                         scope_flag = 1;
                     } 
                     scope--;
                 }
-#line 1645 "parser.c"
+#line 1657 "parser.c"
     break;
 
   case 77:
-#line 167 "parser.y"
+#line 173 "parser.y"
                                           {
                     scope++; 
                     scope_flag = 0; 
                     functions++;
                 }
-#line 1655 "parser.c"
+#line 1667 "parser.c"
     break;
 
   case 78:
-#line 172 "parser.y"
+#line 178 "parser.y"
                                        {
                     if (!(--functions)){
                         scope_flag = 1;
                     } 
                     scope--;
                 }
-#line 1666 "parser.c"
+#line 1678 "parser.c"
     break;
 
 
-#line 1670 "parser.c"
+#line 1682 "parser.c"
 
       default: break;
     }
@@ -1898,14 +1910,91 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 203 "parser.y"
+#line 209 "parser.y"
 
 
+int SymTable_insert(const char *name, unsigned int scope, unsigned int line, types type) {
+    kremastra *new_node, *temp;
+    unsigned int index = SymTable_hash(name) % 499;
+    int i;
+
+    if (SymTable_lookup(strdup(name), scope, type)) {
+        new_node = malloc(sizeof(kremastra));
+        if (trapezaki->head[index] != NULL) {
+            temp = trapezaki->head[index];
+            while (temp->next != NULL) {
+                temp = temp->next;
+            }
+            temp->next = new_node;
+        }
+        else {
+            trapezaki->head[index] = new_node;
+        }
+        new_node->next = NULL;
+        new_node->isActive = 1;
+        new_node->type = type;
+        if (new_node->type <= 2) {
+            new_node->value.varVal = malloc(sizeof(var));
+            new_node->value.varVal->vname = name;
+            new_node->value.varVal->vscope = scope;
+            new_node->value.varVal->vline = line;
+        }
+        else {
+            new_node->value.funcVal = malloc(sizeof(func));
+            new_node->value.funcVal->fname = name;
+            new_node->value.funcVal->fscope = scope;
+            new_node->value.funcVal->fline = line;
+        }
+        //edw prepei na enwsoume k ta scope lists
+    }
+    else {
+        yyerror("Illegal variable or function.\n");
+    }
+    printf("asdads\t");
+}
+
+int SymTable_lookup(char *name, unsigned int scope, types type) {
+    /*unsigned int hash = SymTable_hash(name);
+    hash = hash % 499;
+
+    //check an einai null
+    kremastra *temp = trapezaki->head[hash];
+
+    while (temp != NULL) {
+        if ((type == 1) && (temp->type == 1)){
+            if (temp->value.varVal->vscope == scope) {
+                if (strcmp(name,temp->value.varVal->vname)) {
+                    return 1;
+                }
+            }
+        }
+        temp = temp->next;
+    }*/
+    return 1;
+    
+}
+
+unsigned int SymTable_hash(const char *key) {
+    size_t i;
+    unsigned int hash = 0U;
+    for (i = 0U; key[i] != '\0'; key++) {
+        hash = hash * HASH_MULTIPLIER + key[i];
+    }
+    return hash;
+}
+
+void SymTable_new() {
+    trapezaki = malloc(sizeof(Trapezi_Symvolwn));
+    int i;
+    for (i=0; i<SIZE; i++) {
+        trapezaki->head[i] = NULL;
+    }
+}
 
 int yyerror (char* yaccProvidedMessage) {
     fprintf(stderr, "%s: at line %d, before token: %s\n", yaccProvidedMessage, total_lines, yytext);
     fprintf(stderr, "INPUT NOT VALID\n");
-    yyparse();
+    yyparse(); //mporei k na einai lathos auto
 }
 
 int main(int argc, char** argv) {
@@ -1916,6 +2005,7 @@ int main(int argc, char** argv) {
     else {
         yyin = stdin;
     }
+    SymTable_new();
     yyparse();
     return 0;
 }
