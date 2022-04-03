@@ -277,15 +277,17 @@ int SymTable_general_lookup(const char * name) {
     tmp = symtable[SymTable_hash(name)];
     
     while(tmp!=NULL){
-        if(name!= NULL && getName(tmp)!=NULL){
-            if(strcmp(name, getName(tmp))== 0){
-                if(tmp->isActive){
-                    return 1;
-                }else       
-                    return 0;
+        if(type==1 && tmp->type==1){
+            if(name!= NULL && getName(tmp)!=NULL){
+                if(strcmp(name, getName(tmp))== 0){
+                    if(tmp->isActive){
+                        return 1;
+                    }else       
+                        return 0;
+                }
             }
+            tmp = tmp->next;
         }
-        tmp = tmp->next;
     }
 }
 
