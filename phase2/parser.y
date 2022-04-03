@@ -10,8 +10,9 @@
     extern char* yytext;
     extern FILE* yyin;
 
-    Trapezi_Symvolwn *trapezaki;
-    types type1;
+    SymTable *lera;
+    scope_link *lista;
+
 
     int scope = 0;
     int scope_flag = 1;
@@ -232,27 +233,49 @@ unsigned int getLine(symt * input){
     }
 }
 
+void resize_pinaka(unsigned int scope) {
+    scope_link *temp;
+    int i;
+    temp = lista;
+
+    while ((temp->scope_counter < scope) && (temp->next != NULL)) {
+        temp = temp->next;
+    }
+    if (temp->next == NULL) {
+        for (i = temp->scope_counter; i < scope; i++) {
+            scope_link *new_node = malloc(sizeof(scope_link));
+            new_node->scope_counter = i+1;
+            new_node->scope_head = NULL;
+            new_node->next = NULL;
+            temp->next = new_node;
+            temp = temp->next;
+        } 
+    }
+}
+
 int SymTable_insert(const char *name, unsigned int scope, unsigned int line, types type) {
-    kremastra *new_node, *temp;
+    symt *new_node, *temp;
+    scope_link *temp2;
     unsigned int index = SymTable_hash(name) % 499;
     int i;
 
-    if (SymTable_lookup(strdup(name), scope, type)) {
-        new_node = malloc(sizeof(kremastra));
-        if (trapezaki->head[index] != NULL) {
-            temp = trapezaki->head[index];
+    if (SymTable_general_lookup(strdup(name), scope, type)) {
+        new_node = malloc(sizeof(symt));
+        if (lera->head[index] != NULL) {
+            temp = lera->head[index];
             while (temp->next != NULL) {
                 temp = temp->next;
             }
             temp->next = new_node;
         }
         else {
-            trapezaki->head[index] = new_node;
+            lera->head[index] = new_node;
         }
         new_node->next = NULL;
+        new_node->next_in_scope = NULL;
         new_node->isActive = 1;
         new_node->type = type;
-        if (new_node->type <= 2) {
+        if (type < 3) {
             new_node->value.varVal = malloc(sizeof(var));
             new_node->value.varVal->vname = name;
             new_node->value.varVal->vscope = scope;
@@ -264,17 +287,35 @@ int SymTable_insert(const char *name, unsigned int scope, unsigned int line, typ
             new_node->value.funcVal->fscope = scope;
             new_node->value.funcVal->fline = line;
         }
-        //edw prepei na enwsoume k ta scope lists
+        resize_pinaka(scope);
+        temp2 = lista;
+        while (temp2->scope_counter != scope) {
+            temp2 = temp2 -> next;
+        }
+        if (temp2->scope_head == NULL) {
+            temp2->scope_head = new_node;
+        }
+        else {
+            temp = temp2->scope_head;
+            while (temp->next_in_scope != NULL) {
+                temp = temp->next_in_scope;
+            }
+            temp->next_in_scope = new_node;
+        }
+        //print
     }
     else {
         yyerror("Illegal variable or function.\n");
     }
+    //print_table();
 }
 
-int SymTable_general_lookup(const char * name) {
+int SymTable_general_lookup(const char * name, int scope, types type) {
     symt * tmp = NULL;
+    unsigned int index = SymTable_hash(name) % 499;
 
-    tmp = symtable[SymTable_hash(name)];
+    tmp = lera->head[index];
+
     
     while(tmp!=NULL){
         if(type==1 && tmp->type==1){
@@ -286,9 +327,10 @@ int SymTable_general_lookup(const char * name) {
                         return 0;
                 }
             }
-            tmp = tmp->next;
         }
+        tmp = tmp->next;
     }
+    return 1;
 }
 
 unsigned int SymTable_hash(const char *key) {
@@ -301,11 +343,68 @@ unsigned int SymTable_hash(const char *key) {
 }
 
 void SymTable_new() {
-    trapezaki = malloc(sizeof(Trapezi_Symvolwn));
+    lera = malloc(sizeof(SymTable));
     int i;
     for (i=0; i<SIZE; i++) {
-        trapezaki->head[i] = NULL;
+        lera->head[i] = NULL;
     }
+}
+
+void initialize() {
+    int i;
+
+    for (i=0; i < 499; i++) {
+        lera->head[i] = NULL;
+    }
+
+    lista = malloc(sizeof(scope_link));
+    lista->scope_counter = 0;
+    lista->scope_head = NULL;
+    lista->next = NULL;
+
+    SymTable_insert("print", 0, 0, 4);
+    SymTable_insert("input", 0, 0, 4);
+    SymTable_insert("objectmemberkeys", 0, 0, 4);
+    SymTable_insert("objecttotalmembers", 0, 0, 4);
+    SymTable_insert("objectcopy", 0, 0, 4);
+    SymTable_insert("totalarguments", 0, 0, 4);
+    SymTable_insert("argument", 0, 0, 4);
+    SymTable_insert("typeof", 0, 0, 4);
+    SymTable_insert("strtonum", 0, 0, 4);
+    SymTable_insert("sqrt", 0, 0, 4);
+    SymTable_insert("cos", 0, 0, 4);
+    SymTable_insert("sin", 0, 0, 4);
+}
+
+void print_scopes() {
+    symt *temp;
+    scope_link *temp2;
+
+    temp2 = lista;
+    while (temp2 != NULL) {
+        temp = temp2->scope_head;
+        printf("scope: %d\n\t",temp2->scope_counter);
+        while (temp != NULL) {
+            printf("%s\t",getName(temp));
+            temp = temp->next_in_scope;
+        }
+        temp2 = temp2 -> next;
+        printf("\n");
+    }
+
+    /* int i;
+    symt *temp;
+
+    for (i=0; i < SIZE; i++) {
+        if (lera->head[i] != NULL) {
+            printf("i = %d\n",i);
+            temp = lera->head[i];
+            do {
+                printf("\tname: %s, scope: %u, line: %u, type: %d\n", getName(temp), getScope(temp), getLine(temp), temp->type);
+                temp = temp->next;
+            }   while (temp != NULL);
+        }
+    } */
 }
 
 int yyerror (char* yaccProvidedMessage) {
@@ -323,6 +422,8 @@ int main(int argc, char** argv) {
         yyin = stdin;
     }
     SymTable_new();
+    initialize();
     yyparse();
+    print_scopes();
     return 0;
 }

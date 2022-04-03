@@ -34,20 +34,28 @@ typedef struct SymTableEntry{
     } value;
     types type;
     struct SymTableEntry *next;
+    struct SymTableEntry *next_in_scope;
 } symt;
 
 typedef struct SymTable {
 	symt *head[SIZE];
-} Trapezi_Symvolwn;
+} SymTable;
 
-symt ** symtable = NULL;
+typedef struct scope_link {
+    int scope_counter;
+    symt *scope_head;
+    struct scope_link *next;
+} scope_link;
+
 
 /*Hash Table functions*/
 unsigned int SymTable_hash(const char *key);
 const char * getName(symt *input);
-unsigned int * getScope(symt *input);
-unsigned int * getLine(symt *input);
+unsigned int getScope(symt *input);
+unsigned int getLine(symt *input);
 void SymTable_new(void);
 int SymTable_insert(const char *name, unsigned int scope, unsigned int line, types type);
-int SymTable_general_lookup(const char * name);
+int SymTable_general_lookup(const char * name, int scope, types type);
 void SymTable_hide(unsigned int scope);
+void initialize();
+void print_scopes();
