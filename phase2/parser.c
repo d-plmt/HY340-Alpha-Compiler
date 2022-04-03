@@ -1600,7 +1600,7 @@ yyreduce:
     {
   case 44:
 #line 102 "parser.y"
-                        {SymTable_insert((yyval.strVal), scope, total_lines, 2);}
+                                    {SymTable_insert((yyval.strVal), scope, total_lines, 2);}
 #line 1605 "parser.c"
     break;
 
@@ -2007,23 +2007,11 @@ int SymTable_insert(const char *name, unsigned int scope, unsigned int line, typ
             }
             temp->next_in_scope = new_node;
         }
-        //print
-        temp2 = lista;
-        while (temp2 != NULL) {
-            temp = temp2->scope_head;
-            printf("scope: %d\n\t",temp2->scope_counter);
-            while (temp != NULL) {
-                printf("%s\t",getName(temp));
-                temp = temp->next_in_scope;
-            }
-            temp2 = temp2 -> next;
-            printf("\n");
-        }
+        print_scopes();
     }
     else {
         yyerror("Illegal variable or function.\n");
     }
-    //print_table();
 }
 
 int SymTable_general_lookup(const char * name, int scope, types type) {
@@ -2034,7 +2022,7 @@ int SymTable_general_lookup(const char * name, int scope, types type) {
 
     
     while(tmp!=NULL){
-        if(type==1 && tmp->type==1){
+        if(type == tmp->type){
             if(name!= NULL && getName(tmp)!=NULL){
                 if(strcmp(name, getName(tmp))== 0){
                     if(tmp->isActive){
@@ -2069,6 +2057,8 @@ void SymTable_new() {
 void initialize() {
     int i;
 
+    SymTable_new();
+
     for (i=0; i < 499; i++) {
         lera->head[i] = NULL;
     }
@@ -2092,8 +2082,23 @@ void initialize() {
     SymTable_insert("sin", 0, 0, 4);
 }
 
-void print_table() {
-    int i;
+void print_scopes() {
+    symt *temp;
+    scope_link *temp2;
+
+    temp2 = lista;
+    while (temp2 != NULL) {
+        temp = temp2->scope_head;
+        printf("scope: %d\n\t",temp2->scope_counter);
+        while (temp != NULL) {
+            printf("%s\t",getName(temp));
+            temp = temp->next_in_scope;
+        }
+        temp2 = temp2 -> next;
+        printf("\n");
+    }
+
+    /* int i;
     symt *temp;
 
     for (i=0; i < SIZE; i++) {
@@ -2105,7 +2110,7 @@ void print_table() {
                 temp = temp->next;
             }   while (temp != NULL);
         }
-    }
+    } */
 }
 
 int yyerror (char* yaccProvidedMessage) {
@@ -2122,7 +2127,6 @@ int main(int argc, char** argv) {
     else {
         yyin = stdin;
     }
-    SymTable_new();
     initialize();
     yyparse();
     return 0;

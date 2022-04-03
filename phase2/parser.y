@@ -99,8 +99,8 @@ primary:    lvalue
             |const
             ;
 
-lvalue:     IDENTIFIER  {SymTable_insert($$, scope, total_lines, 2);}
-            |LOCAL IDENTIFIER
+lvalue:     IDENTIFIER              {SymTable_insert($$, scope, total_lines, 2);}
+            |LOCAL IDENTIFIER       
             |COL_COL IDENTIFIER
             |member
             ;
@@ -302,12 +302,11 @@ int SymTable_insert(const char *name, unsigned int scope, unsigned int line, typ
             }
             temp->next_in_scope = new_node;
         }
-        //print
+        print_scopes();
     }
     else {
         yyerror("Illegal variable or function.\n");
     }
-    //print_table();
 }
 
 int SymTable_general_lookup(const char * name, int scope, types type) {
@@ -316,9 +315,10 @@ int SymTable_general_lookup(const char * name, int scope, types type) {
 
     tmp = lera->head[index];
 
-    
+
+    //kati paei lathos SOS SOS SOS    
     while(tmp!=NULL){
-        if(type==1 && tmp->type==1){
+        if(type == tmp->type){
             if(name!= NULL && getName(tmp)!=NULL){
                 if(strcmp(name, getName(tmp))== 0){
                     if(tmp->isActive){
@@ -352,6 +352,8 @@ void SymTable_new() {
 
 void initialize() {
     int i;
+
+    SymTable_new();
 
     for (i=0; i < 499; i++) {
         lera->head[i] = NULL;
@@ -421,9 +423,7 @@ int main(int argc, char** argv) {
     else {
         yyin = stdin;
     }
-    SymTable_new();
     initialize();
     yyparse();
-    print_scopes();
     return 0;
 }
