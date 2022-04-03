@@ -22,7 +22,7 @@ typedef struct function{
     unsigned int fline;
 }func;
 
-typedef enum SymbolType {
+typedef enum symt {
 	GLOBAL, LOCAL_SYM, FORMAL, USERFUNC, LIBFUNC
 } types;
 
@@ -34,16 +34,20 @@ typedef struct SymTableEntry{
     } value;
     types type;
     struct SymTableEntry *next;
-} kremastra;
+} symt;
 
 typedef struct SymTable {
-	kremastra *head[SIZE];
+	symt *head[SIZE];
 } Trapezi_Symvolwn;
 
+symt ** symtable = NULL;
 
 /*Hash Table functions*/
 unsigned int SymTable_hash(const char *key);
+const char * getName(symt *input);
+unsigned int * getScope(symt *input);
+unsigned int * getLine(symt *input);
 void SymTable_new(void);
 int SymTable_insert(const char *name, unsigned int scope, unsigned int line, types type);
-int SymTable_lookup(char *name, unsigned int scope, types type);
+int SymTable_general_lookup(const char * name);
 void SymTable_hide(unsigned int scope);

@@ -208,6 +208,30 @@ returnstmt: RETURN SEMICOLON
 
 %%
 
+const char * getName(symt * input){
+    if(input->type == 4 || 5){
+        return input->value.funcVal->fname;
+    }else{
+        return input->value.varVal->vname;
+    }
+}
+
+unsigned int getScope(symt * input){
+    if(input->type == 4 || 5){
+        return input->value.funcVal->fscope;
+    }else{
+        return input->value.varVal->vscope;
+    }
+}
+
+unsigned int getLine(symt * input){
+    if(input->type == 4 || 5){
+        return input->value.funcVal->fline;
+    }else{
+        return input->value.varVal->vline;
+    }
+}
+
 int SymTable_insert(const char *name, unsigned int scope, unsigned int line, types type) {
     kremastra *new_node, *temp;
     unsigned int index = SymTable_hash(name) % 499;
@@ -247,25 +271,22 @@ int SymTable_insert(const char *name, unsigned int scope, unsigned int line, typ
     }
 }
 
-int SymTable_lookup(char *name, unsigned int scope, types type) {
-    unsigned int hash = SymTable_hash(name);
-    hash = hash % 499;
+int SymTable_general_lookup(const char * name) {
+    symt * tmp = NULL;
 
-    //check an einai null
-    kremastra *temp = trapezaki->head[hash];
-
-    while (temp != NULL) {
-        if ((type == 1) && (temp->type == 1)){
-            if (temp->value.varVal->vscope == scope) {
-                if (strcmp(name,temp->value.varVal->vname)) {
+    tmp = symtable[SymTable_hash(name)];
+    
+    while(tmp!=NULL){
+        if(name!= NULL && getName(tmp)!=NULL){
+            if(strcmp(name, getName(tmp))== 0){
+                if(tmp->isActive){
                     return 1;
-                }
+                }else       
+                    return 0;
             }
         }
-        temp = temp->next;
+        tmp = tmp->next;
     }
-    return 1;
-    
 }
 
 unsigned int SymTable_hash(const char *key) {
