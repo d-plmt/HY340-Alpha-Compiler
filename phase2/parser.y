@@ -378,6 +378,26 @@ void initialize() {
     SymTable_insert("sin", 0, 0, 4);
 }
 
+bool isLibraryFunc(const char * funct){
+    if( !strcmp(funct,"print") ||
+    !strcmp(funct,"input") ||
+    !strcmp(funct,"objectmemberkeys") ||
+    !strcmp(funct,"objecttotalmembers") ||
+    !strcmp(funct,"objectcopy") ||
+    !strcmp(funct,"totalarguments") ||
+    !strcmp(funct,"argument") ||
+    !strcmp(funct,"typeof") ||
+    !strcmp(funct,"strtonum") ||
+    !strcmp(funct,"sqrt") ||
+    !strcmp(funct,"cos") ||
+    !strcmp(funct,"sin") )
+  {
+    return true;
+  }else{
+    return false;
+  }
+}
+
 void print_scopes() {
     symt *temp;
     scope_link *temp2;

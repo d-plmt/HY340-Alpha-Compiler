@@ -59,3 +59,4 @@ int SymTable_general_lookup(const char * name, int scope, types type);
 void SymTable_hide(unsigned int scope);
 void initialize();
 void print_scopes();
+bool isLibraryFunc(const char * funct);
