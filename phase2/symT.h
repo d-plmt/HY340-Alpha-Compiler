@@ -33,6 +33,7 @@ typedef struct SymTableEntry{
     	func *funcVal;
     } value;
     types type;
+    int block;
     struct SymTableEntry *next;
     struct SymTableEntry *next_in_scope;
 } symt;
@@ -55,7 +56,7 @@ unsigned int getLine(symt *input);
 void SymTable_new(void);
 int SymTable_insert(const char *name, unsigned int scope, unsigned int line, types type);
 int SymTable_general_lookup(const char * name, int scope, types type);
-void SymTable_hide_reveal(unsigned int scope, char *action);
+void SymTable_hide_reveal(unsigned int previous_scope, unsigned int active_scope);
 void initialize();
 void print_scopes();
 bool isLibraryFunc(const char * funct);

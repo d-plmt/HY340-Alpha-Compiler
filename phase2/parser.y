@@ -150,45 +150,57 @@ func_stmt: stmt func_stmt
 
 block:      LEFT_BRACE {
                     scope = scope + scope_flag;
+                    if (scope_flag == 1) {SymTable_hide_reveal(scope-1,scope);}
                 } RIGHT_BRACE {
                     scope = scope - scope_flag;
+                    if (scope_flag == 1) {SymTable_hide_reveal(scope+1,scope);}
                 }
             |LEFT_BRACE {
                     scope = scope + scope_flag;
+                    if (scope_flag == 1) {SymTable_hide_reveal(scope-1,scope);}
                 } func_stmt RIGHT_BRACE {
                     scope = scope - scope_flag;
+                    if (scope_flag == 1) {SymTable_hide_reveal(scope+1,scope);}
                 } 
             ;
 
-funcdef:    FUNCTION  LEFT_PAR {
+funcdef:    FUNCTION LEFT_PAR {
                     scope++; 
                     scope_flag = 0; 
                     functions++;
+                    SymTable_hide_reveal(scope-1,scope);
                 } 
                 idlist RIGHT_PAR block {
                     if (!(--functions)){
                         scope_flag = 1;
                     } 
                     scope--;
+                    SymTable_hide_reveal(scope+1,scope);
                 }
-            |FUNCTION IDENTIFIER LEFT_PAR {
+            |FUNCTION 
+                IDENTIFIER {
+                    SymTable_insert($2, scope, total_lines, 3);
+                }
+                LEFT_PAR {
                     scope++; 
                     scope_flag = 0; 
                     functions++;
+                    SymTable_hide_reveal(scope-1,scope);
                 } 
                 idlist RIGHT_PAR block {
                     if (!(--functions)){
                         scope_flag = 1;
                     } 
                     scope--;
+                    SymTable_hide_reveal(scope+1,scope);
                 }
             ;
 
 const:      INTEGER | REAL | STRING | NIL | TRUE | FALSE
             ;
 
-idlist:     IDENTIFIER
-            | IDENTIFIER COMMA idlist
+idlist:     IDENTIFIER  {SymTable_insert ($1, scope, total_lines, 2);}
+            | IDENTIFIER COMMA idlist {SymTable_insert ($1, scope, total_lines, 2);}
             |
             ;
 
@@ -253,27 +265,28 @@ void resize_pinaka(unsigned int scope) {
     }
 }
 
-void SymTable_hide_reveal(unsigned int scope, char *action) {
+void SymTable_hide_reveal(unsigned int previous_scope, unsigned int active_scope) {
     scope_link *scope_temp;
     symt *entry_temp;
     int a;
 
-    if (!strcmp(action,"hide")) {
-        a = 0;
-    } else if (!strcmp(action, "reveal")) {
-        a = 1;
-    } else {
-        fprintf(stderr, "Wrong action specified. Symbols remain hidden/revealed.\n");
-    }
-
     scope_temp = lista;
-    while ((scope_temp->scope_counter != scope) && (scope_temp != NULL)) {
+    while (scope_temp != NULL) {
+        if (scope_temp->scope_counter == previous_scope) {
+            entry_temp = scope_temp->scope_head;
+            while (entry_temp != NULL) {
+                entry_temp->isActive = 0;
+                entry_temp = entry_temp->next_in_scope;
+            }
+        }
+        else if (scope_temp->scope_counter == active_scope){
+            entry_temp = scope_temp->scope_head;
+            while (entry_temp != NULL) {
+                entry_temp->isActive = 1;
+                entry_temp = entry_temp->next_in_scope;
+            }
+        }
         scope_temp = scope_temp->next;
-    }
-    entry_temp = scope_temp->scope_head;
-    while (entry_temp != NULL) {
-        entry_temp->isActive = a;
-        entry_temp = entry_temp->next_in_scope;
     }
 }
 
@@ -283,7 +296,7 @@ int SymTable_insert(const char *name, unsigned int scope, unsigned int line, typ
     unsigned int index = SymTable_hash(name) % 499;
     int i;
 
-    if ((type == 4) || (SymTable_general_lookup(strdup(name), scope, type))) {
+    if ((type == 4) || (SymTable_general_lookup(strdup(name), scope, type) > 0)) {
         new_node = malloc(sizeof(symt));
         if (lera->head[index] != NULL) {
             temp = lera->head[index];
@@ -345,11 +358,16 @@ int SymTable_general_lookup(const char * name, int scope, types type) {
     tmp = lera->head[index];
  
     while(tmp!=NULL){
-        if ((!strcmp(getName(tmp),name)) && (getScope(tmp) == scope)) {
+        if (!strcmp(getName(tmp),name)) {
             if (tmp->type == type) {
-                if (type > 1) {
-                    flag = 0;
+                if (type > 2) {
+                    return 0;
                 }
+                flag = 2;
+            }
+            else {
+                fprintf(stderr, "Error: Conflicting types\n");
+                return 0;
             }
         }
         tmp = tmp->next;
