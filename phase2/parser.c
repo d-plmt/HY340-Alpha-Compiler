@@ -1958,13 +1958,37 @@ void resize_pinaka(unsigned int scope) {
     }
 }
 
+void SymTable_hide_reveal(unsigned int scope, char *action) {
+    scope_link *scope_temp;
+    symt *entry_temp;
+    int a;
+
+    if (!strcmp(action,"hide")) {
+        a = 0;
+    } else if (!strcmp(action, "reveal")) {
+        a = 1;
+    } else {
+        fprintf(stderr, "Wrong action specified. Symbols remain hidden/revealed.\n");
+    }
+
+    scope_temp = lista;
+    while ((scope_temp->scope_counter != scope) && (scope_temp != NULL)) {
+        scope_temp = scope_temp->next;
+    }
+    entry_temp = scope_temp->scope_head;
+    while (entry_temp != NULL) {
+        entry_temp->isActive = a;
+        entry_temp = entry_temp->next_in_scope;
+    }
+}
+
 int SymTable_insert(const char *name, unsigned int scope, unsigned int line, types type) {
     symt *new_node, *temp;
     scope_link *temp2;
     unsigned int index = SymTable_hash(name) % 499;
     int i;
 
-    if (SymTable_general_lookup(strdup(name), scope, type)) {
+    if ((type == 4) || (SymTable_general_lookup(strdup(name), scope, type))) {
         new_node = malloc(sizeof(symt));
         if (lera->head[index] != NULL) {
             temp = lera->head[index];
@@ -2010,31 +2034,33 @@ int SymTable_insert(const char *name, unsigned int scope, unsigned int line, typ
         print_scopes();
     }
     else {
-        yyerror("Illegal variable or function.\n");
+        fprintf(stderr,"Illegal variable or function.\n");
     }
 }
 
 int SymTable_general_lookup(const char * name, int scope, types type) {
+    if (isLibraryFunc(name)) {
+        return 0;
+    }
+
     symt * tmp = NULL;
+    int flag = 1;
+
     unsigned int index = SymTable_hash(name) % 499;
-
     tmp = lera->head[index];
-
-    
+ 
     while(tmp!=NULL){
-        if(type == tmp->type){
-            if(name!= NULL && getName(tmp)!=NULL){
-                if(strcmp(name, getName(tmp))== 0){
-                    if(tmp->isActive){
-                        return 1;
-                    }else       
-                        return 0;
+        if ((!strcmp(getName(tmp),name)) && (getScope(tmp) == scope)) {
+            if (tmp->type == type) {
+                if (type > 1) {
+                    printf("%d",type);
+                    flag = 0;
                 }
             }
         }
         tmp = tmp->next;
     }
-    return 1;
+    return flag;
 }
 
 unsigned int SymTable_hash(const char *key) {
@@ -2080,6 +2106,26 @@ void initialize() {
     SymTable_insert("sqrt", 0, 0, 4);
     SymTable_insert("cos", 0, 0, 4);
     SymTable_insert("sin", 0, 0, 4);
+}
+
+bool isLibraryFunc(const char * funct){
+    if( !strcmp(funct,"print") ||
+    !strcmp(funct,"input") ||
+    !strcmp(funct,"objectmemberkeys") ||
+    !strcmp(funct,"objecttotalmembers") ||
+    !strcmp(funct,"objectcopy") ||
+    !strcmp(funct,"totalarguments") ||
+    !strcmp(funct,"argument") ||
+    !strcmp(funct,"typeof") ||
+    !strcmp(funct,"strtonum") ||
+    !strcmp(funct,"sqrt") ||
+    !strcmp(funct,"cos") ||
+    !strcmp(funct,"sin") )
+  {
+    return true;
+  }else{
+    return false;
+  }
 }
 
 void print_scopes() {

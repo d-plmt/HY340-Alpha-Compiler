@@ -47,7 +47,6 @@ typedef struct scope_link {
     struct scope_link *next;
 } scope_link;
 
-
 /*Hash Table functions*/
 unsigned int SymTable_hash(const char *key);
 const char * getName(symt *input);
@@ -56,7 +55,7 @@ unsigned int getLine(symt *input);
 void SymTable_new(void);
 int SymTable_insert(const char *name, unsigned int scope, unsigned int line, types type);
 int SymTable_general_lookup(const char * name, int scope, types type);
-void SymTable_hide(unsigned int scope);
+void SymTable_hide_reveal(unsigned int scope, char *action);
 void initialize();
 void print_scopes();
 bool isLibraryFunc(const char * funct);
