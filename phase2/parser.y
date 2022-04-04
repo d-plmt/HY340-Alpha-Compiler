@@ -2,6 +2,7 @@
     #include <stdbool.h>
     #include <stdio.h>
     #include "symT.h" 
+    #include <stdlib.h>
 
     int yyerror (char* yaccProvidedMessage);
     int yylex(void);
@@ -12,12 +13,15 @@
 
     SymTable *lera;
     scope_link *lista;
+    char *str;
 
-
-    int scope = 0;
+    unsigned int block = 0;
+    unsigned int scope = 0;
     int scope_flag = 1;
     int nested_func_flag = 0;
     int functions = 0;
+    int func_counter = 0;
+
 %}
 
 %start program
@@ -98,9 +102,15 @@ primary:    lvalue
             |LEFT_PAR funcdef RIGHT_PAR
             |const
             ;
-
-lvalue:     IDENTIFIER              {SymTable_insert($$, scope, total_lines, 2);}
-            |LOCAL IDENTIFIER       
+    
+lvalue:     IDENTIFIER              {SymTable_insert($$, scope, total_lines, 2, block);}
+            |LOCAL IDENTIFIER {
+                if (scope == 0) {
+                    SymTable_insert($$, scope, total_lines, 0, block);
+                } else {
+                    SymTable_insert($$, scope, total_lines, 1, block);
+                }
+            }
             |COL_COL IDENTIFIER
             |member
             ;
@@ -149,25 +159,31 @@ func_stmt: stmt func_stmt
             ;
 
 block:      LEFT_BRACE {
+                    block = block + scope_flag;
                     scope = scope + scope_flag;
-                    if (scope_flag == 1) {SymTable_hide_reveal(scope-1,scope);}
+                    if (scope_flag == 1) {SymTable_hide_reveal(-1,scope);}
                 } RIGHT_BRACE {
                     scope = scope - scope_flag;
-                    if (scope_flag == 1) {SymTable_hide_reveal(scope+1,scope);}
+                    if (scope_flag == 1) {SymTable_hide_reveal(scope+1,-1);}
                 }
             |LEFT_BRACE {
+                    block = block + scope_flag;
                     scope = scope + scope_flag;
-                    if (scope_flag == 1) {SymTable_hide_reveal(scope-1,scope);}
+                    if (scope_flag == 1) {SymTable_hide_reveal(-1,scope);}
                 } func_stmt RIGHT_BRACE {
                     scope = scope - scope_flag;
-                    if (scope_flag == 1) {SymTable_hide_reveal(scope+1,scope);}
+                    if (scope_flag == 1) {SymTable_hide_reveal(scope+1,-1);}
                 } 
             ;
 
 funcdef:    FUNCTION LEFT_PAR {
+                    functions++;
+                    func_counter++;
+                    sprintf(str, "%s%d%c","_f",func_counter,'\0');
+                    SymTable_insert(strdup(str), scope, total_lines, 3, block);
                     scope++; 
                     scope_flag = 0; 
-                    functions++;
+                    block++;
                     SymTable_hide_reveal(scope-1,scope);
                 } 
                 idlist RIGHT_PAR block {
@@ -179,12 +195,13 @@ funcdef:    FUNCTION LEFT_PAR {
                 }
             |FUNCTION 
                 IDENTIFIER {
-                    SymTable_insert($2, scope, total_lines, 3);
+                    SymTable_insert($2, scope, total_lines, 3, block);
                 }
                 LEFT_PAR {
                     scope++; 
                     scope_flag = 0; 
                     functions++;
+                    block++;
                     SymTable_hide_reveal(scope-1,scope);
                 } 
                 idlist RIGHT_PAR block {
@@ -199,8 +216,8 @@ funcdef:    FUNCTION LEFT_PAR {
 const:      INTEGER | REAL | STRING | NIL | TRUE | FALSE
             ;
 
-idlist:     IDENTIFIER  {SymTable_insert ($1, scope, total_lines, 2);}
-            | IDENTIFIER COMMA idlist {SymTable_insert ($1, scope, total_lines, 2);}
+idlist:     IDENTIFIER  {SymTable_insert ($1, scope, total_lines, 2, block);}
+            | IDENTIFIER COMMA idlist {SymTable_insert ($1, scope, total_lines, 2, block);}
             |
             ;
 
@@ -272,31 +289,36 @@ void SymTable_hide_reveal(unsigned int previous_scope, unsigned int active_scope
 
     scope_temp = lista;
     while (scope_temp != NULL) {
-        if (scope_temp->scope_counter == previous_scope) {
-            entry_temp = scope_temp->scope_head;
-            while (entry_temp != NULL) {
-                entry_temp->isActive = 0;
-                entry_temp = entry_temp->next_in_scope;
+        if (previous_scope != -1) {
+            if (scope_temp->scope_counter == previous_scope) {
+                entry_temp = scope_temp->scope_head;
+                while (entry_temp != NULL) {
+                    entry_temp->isActive = 0;
+                    entry_temp = entry_temp->next_in_scope;
+                }
             }
         }
-        else if (scope_temp->scope_counter == active_scope){
-            entry_temp = scope_temp->scope_head;
-            while (entry_temp != NULL) {
-                entry_temp->isActive = 1;
-                entry_temp = entry_temp->next_in_scope;
+        if (active_scope != -1) {
+            if (scope_temp->scope_counter == active_scope){
+                entry_temp = scope_temp->scope_head;
+                while (entry_temp != NULL) {
+                    entry_temp->isActive = 1;
+                    entry_temp = entry_temp->next_in_scope;
+                }
             }
         }
+
         scope_temp = scope_temp->next;
     }
 }
 
-int SymTable_insert(const char *name, unsigned int scope, unsigned int line, types type) {
+int SymTable_insert(const char *name, unsigned int scope, unsigned int line, types type, unsigned int block) {
     symt *new_node, *temp;
     scope_link *temp2;
     unsigned int index = SymTable_hash(name) % 499;
     int i;
 
-    if ((type == 4) || (SymTable_general_lookup(strdup(name), scope, type) > 0)) {
+    if ((type == 4) || (SymTable_general_lookup(name, scope, type, block) > 0)) {
         new_node = malloc(sizeof(symt));
         if (lera->head[index] != NULL) {
             temp = lera->head[index];
@@ -312,6 +334,7 @@ int SymTable_insert(const char *name, unsigned int scope, unsigned int line, typ
         new_node->next_in_scope = NULL;
         new_node->isActive = 1;
         new_node->type = type;
+        new_node->block = block;
         if (type < 3) {
             new_node->value.varVal = malloc(sizeof(var));
             new_node->value.varVal->vname = name;
@@ -340,13 +363,34 @@ int SymTable_insert(const char *name, unsigned int scope, unsigned int line, typ
             temp->next_in_scope = new_node;
         }
         print_scopes();
+        //print_hash();
+        
     }
     else {
         fprintf(stderr,"Illegal variable or function.\n");
     }
 }
 
-int SymTable_general_lookup(const char * name, int scope, types type) {
+void print_hash() {
+    SymTable *temp = lera;
+    symt *temp2;
+    int i;
+
+    for (i = 0; i < SIZE; i++) {
+        if (temp->head[i] != NULL) {
+            temp2 = temp->head[i];
+            printf("bucket: %d\n",i);
+            while (temp2 != NULL) {
+                printf("\t%s",getName(temp2));
+                temp2 = temp2->next;
+            }
+            printf("\n");
+        }
+    }
+    printf("\n_____________________________________________\n");
+}
+
+int SymTable_general_lookup(const char * name, unsigned int scope, types type, unsigned int block) {
     if (isLibraryFunc(name)) {
         return 0;
     }
@@ -356,18 +400,26 @@ int SymTable_general_lookup(const char * name, int scope, types type) {
 
     unsigned int index = SymTable_hash(name) % 499;
     tmp = lera->head[index];
- 
+    
     while(tmp!=NULL){
-        if (!strcmp(getName(tmp),name)) {
-            if (tmp->type == type) {
-                if (type > 2) {
-                    return 0;
+        if (strcmp(getName(tmp),name) == 0) {
+            //local
+            if (type == 1) {
+                if (getScope(tmp) == scope) {
+
                 }
-                flag = 2;
             }
-            else {
-                fprintf(stderr, "Error: Conflicting types\n");
-                return 0;
+            //global
+            else if (type == 0) {
+
+            }
+            //libfunc
+            else if (type == 3) {
+
+            }
+            //formal
+            else if (type == 2) {
+
             }
         }
         tmp = tmp->next;
@@ -394,6 +446,8 @@ void SymTable_new() {
 
 void initialize() {
     int i;
+    str = (char *)calloc(1,strlen("_f")+10+1);
+    memset(str, '\0', strlen("_f")+11);
 
     SymTable_new();
 
@@ -406,18 +460,18 @@ void initialize() {
     lista->scope_head = NULL;
     lista->next = NULL;
 
-    SymTable_insert("print", 0, 0, 4);
-    SymTable_insert("input", 0, 0, 4);
-    SymTable_insert("objectmemberkeys", 0, 0, 4);
-    SymTable_insert("objecttotalmembers", 0, 0, 4);
-    SymTable_insert("objectcopy", 0, 0, 4);
-    SymTable_insert("totalarguments", 0, 0, 4);
-    SymTable_insert("argument", 0, 0, 4);
-    SymTable_insert("typeof", 0, 0, 4);
-    SymTable_insert("strtonum", 0, 0, 4);
-    SymTable_insert("sqrt", 0, 0, 4);
-    SymTable_insert("cos", 0, 0, 4);
-    SymTable_insert("sin", 0, 0, 4);
+    SymTable_insert("print", 0, 0, 4, 0);
+    SymTable_insert("input", 0, 0, 4, 0);
+    SymTable_insert("objectmemberkeys", 0, 0, 4, 0);
+    SymTable_insert("objecttotalmembers", 0, 0, 4, 0);
+    SymTable_insert("objectcopy", 0, 0, 4, 0);
+    SymTable_insert("totalarguments", 0, 0, 4, 0);
+    SymTable_insert("argument", 0, 0, 4, 0);
+    SymTable_insert("typeof", 0, 0, 4, 0);
+    SymTable_insert("strtonum", 0, 0, 4, 0);
+    SymTable_insert("sqrt", 0, 0, 4, 0);
+    SymTable_insert("cos", 0, 0, 4, 0);
+    SymTable_insert("sin", 0, 0, 4, 0);
 }
 
 bool isLibraryFunc(const char * funct){
