@@ -104,11 +104,24 @@ primary:    lvalue
             ;
     
 lvalue:     IDENTIFIER {
-                    SymTable_insert($$, scope, total_lines, 2, block);
+
             }
 
             |LOCAL IDENTIFIER {
-                
+                int returned = SymTable_general_lookup($2, scope, 1, block, "local");
+                int realtype = 1;
+                if (scope == 0) {
+                    realtype = 0;
+                }
+                if (returned == 1) {
+                    SymTable_insert ($2, scope, total_lines, realtype, block);
+                }
+                else if (returned == 2) {
+                    fprintf(stdout, "Local variable already defined.\n");
+                }
+                else {
+                    yyerror("Illegal parameter name");
+                }
             }
             |COL_COL IDENTIFIER
             |member
@@ -234,11 +247,21 @@ const:      INTEGER | REAL | STRING | NIL | TRUE | FALSE
             ;
 
 idlist:     IDENTIFIER  {
-                        SymTable_insert ($1, scope, total_lines, 2, block);
+                if (SymTable_general_lookup($1, scope, 2, block, "formal")) {
+                    SymTable_insert ($1, scope, total_lines, 2, block);
                 }
+                else {
+                    yyerror("Illegal parameter name");
+                }
+            }
             | IDENTIFIER COMMA idlist {
-                        SymTable_insert ($1, scope, total_lines, 2, block);
+                if (SymTable_general_lookup($1, scope, 2, block, "formal")) {
+                    SymTable_insert ($1, scope, total_lines, 2, block);
                 }
+                else {
+                    yyerror("Illegal parameter name");
+                }
+            }
             |
             ;
 
@@ -424,7 +447,29 @@ int SymTable_general_lookup(const char * name, unsigned int scope, types type, u
                     return 0;
                 }
             }
-            tmp = tmp->next;
+            tmp = tmp -> next;
+        }
+        return 1;
+    }
+    else if (strcmp(search_mode, "formal") == 0) {
+        while (tmp != NULL) {
+            if (getScope(tmp) == scope && (tmp->block == block)) {
+                if (strcmp(getName(tmp),name) == 0) {
+                    return 0;
+                }
+            }
+            tmp = tmp -> next;
+        }
+        return 1;
+    }
+    else if (strcmp(search_mode, "local") == 0) {
+        while (tmp != NULL) {
+            if (getScope(tmp) == scope && (tmp->block == block)) {
+                if (strcmp(getName(tmp),name) == 0) {
+                    return 2;
+                }
+            }
+            tmp = tmp -> next;
         }
         return 1;
     }
