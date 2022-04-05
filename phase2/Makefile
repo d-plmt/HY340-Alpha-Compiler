@@ -2,7 +2,7 @@ BISON=bison
 GCC =gcc
 FLEX =flex
 all:
-	@bison --yacc --defines --output=parser.c parser.y
+	@bison -v --yacc --defines --output=parser.c parser.y
 	@flex --outfile=al.c al.l
 	@gcc al.c parser.c -o al
 

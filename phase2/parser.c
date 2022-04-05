@@ -90,9 +90,10 @@
     int nested_func_flag = 0;
     int functions = 0;
     int func_counter = 0;
+    int prev_block = 0;
 
 
-#line 96 "parser.c"
+#line 97 "parser.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -240,10 +241,10 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 28 "parser.y"
+#line 29 "parser.y"
 int intVal; double realVal; char *strVal;
 
-#line 247 "parser.c"
+#line 248 "parser.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -623,16 +624,16 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    62,    62,    63,    66,    67,    68,    69,    70,    71,
-      72,    73,    74,    75,    78,    79,    80,    83,    83,    83,
-      83,    83,    83,    83,    83,    83,    83,    83,    83,    83,
-      86,    87,    88,    89,    90,    91,    92,    93,    96,    99,
-     100,   101,   102,   103,   106,   110,   126,   127,   130,   131,
-     132,   133,   136,   137,   138,   141,   142,   145,   148,   151,
-     152,   153,   156,   157,   158,   161,   162,   163,   166,   169,
-     170,   173,   173,   185,   185,   199,   199,   222,   224,   221,
-     246,   246,   246,   246,   246,   246,   249,   257,   265,   268,
-     269,   272,   275,   278,   279
+       0,    63,    63,    64,    67,    68,    69,    70,    71,    72,
+      73,    74,    75,    76,    79,    80,    81,    84,    84,    84,
+      84,    84,    84,    84,    84,    84,    84,    84,    84,    84,
+      87,    88,    89,    90,    91,    92,    93,    94,    97,   100,
+     101,   102,   103,   104,   107,   127,   143,   152,   155,   156,
+     157,   158,   161,   162,   163,   166,   167,   170,   173,   176,
+     177,   178,   181,   182,   183,   186,   187,   188,   191,   194,
+     195,   198,   198,   207,   207,   218,   218,   243,   245,   242,
+     268,   268,   268,   268,   268,   268,   271,   279,   287,   290,
+     291,   294,   297,   300,   301
 };
 #endif
 
@@ -1603,82 +1604,106 @@ yyreduce:
   switch (yyn)
     {
   case 44:
-#line 106 "parser.y"
+#line 107 "parser.y"
                        {
+                int returned = SymTable_general_lookup((yyvsp[0].strVal), scope, 1, block, "new_var");
+                if (returned == 2) {
+                    printf("%s refers to another symbol in the same scope.\n",(yyvsp[0].strVal));
+                }
+                else if (returned == 0) {
+                    printf("%s refers to another symbol in a parent scope.\n", (yyvsp[0].strVal));
+                }
+                else if (returned == 1) {
+                    if (scope == 0) {
+                        SymTable_insert((yyvsp[0].strVal), scope, total_lines, 0, block);
+                    }
+                    else {
+                        SymTable_insert((yyvsp[0].strVal), scope, total_lines, 1, block);
+                    }
+                }
+            
 
             }
-#line 1611 "parser.c"
+#line 1628 "parser.c"
     break;
 
   case 45:
-#line 110 "parser.y"
+#line 127 "parser.y"
                               {
                 int returned = SymTable_general_lookup((yyvsp[0].strVal), scope, 1, block, "local");
                 int realtype = 1;
                 if (scope == 0) {
                     realtype = 0;
                 }
-                if (returned) {
+                if (returned == 1) {
                     SymTable_insert ((yyvsp[0].strVal), scope, total_lines, realtype, block);
                 }
                 else if (returned == 2) {
                     fprintf(stdout, "Local variable already defined.\n");
                 }
                 else {
-                    yyerror("Illegal parameter name");
+                    yyerror("Illegal name");
                 }
             }
-#line 1632 "parser.c"
+#line 1649 "parser.c"
+    break;
+
+  case 46:
+#line 143 "parser.y"
+                                {
+                int returned = SymTable_general_lookup((yyvsp[0].strVal), 0, 0, block, "global_src");
+                if (returned == 2) {
+                    fprintf(stdout, "%s successfully found in global scope.\n", (yyvsp[0].strVal));
+                }
+                else {
+                    fprintf(stdout,"Variable %s not global or undefined.\n", (yyvsp[0].strVal));
+                }
+            }
+#line 1663 "parser.c"
     break;
 
   case 71:
-#line 173 "parser.y"
+#line 198 "parser.y"
                        {
                     block = block + scope_flag;
                     scope = scope + scope_flag;
-                    if (scope_flag == 1) {
-                        SymTable_hide_reveal(-1,scope);
-                    }
                 }
-#line 1644 "parser.c"
+#line 1672 "parser.c"
     break;
 
   case 72:
-#line 179 "parser.y"
+#line 201 "parser.y"
                               {
                     scope = scope - scope_flag;
                     if (scope_flag == 1) {
-                        SymTable_hide_reveal(scope+1,-1);
+                        SymTable_hide(scope+1);
                     }
                 }
-#line 1655 "parser.c"
+#line 1683 "parser.c"
     break;
 
   case 73:
-#line 185 "parser.y"
+#line 207 "parser.y"
                         {
                     block = block + scope_flag;
                     scope = scope + scope_flag;
-                    if (scope_flag == 1) {
-                        SymTable_hide_reveal(-1,scope);
-                    }
                 }
-#line 1667 "parser.c"
+#line 1692 "parser.c"
     break;
 
   case 74:
-#line 191 "parser.y"
+#line 210 "parser.y"
                                         {
                     scope = scope - scope_flag;
                     if (scope_flag == 1) {
-                        SymTable_hide_reveal(scope+1,-1);
+                        SymTable_hide(scope+1);
                     }
                 }
-#line 1678 "parser.c"
+#line 1703 "parser.c"
     break;
 
   case 75:
-#line 199 "parser.y"
+#line 218 "parser.y"
                               {
                     sprintf(str, "%s%d%c","_f",func_counter+1,'\0');
                     if (SymTable_general_lookup(strdup(str), scope, 3, block, "funcdef")) {
@@ -1687,67 +1712,70 @@ yyreduce:
                         SymTable_insert(strdup(str), scope, total_lines, 3, block);
                         scope++; 
                         scope_flag = 0; 
+                        prev_block = block;
                         block++;
-                        SymTable_hide_reveal(scope-1,scope);
+                        SymTable_hide(scope-1);
                     }
                     else {
                         yyerror("Illegal function name");
                     }
                 }
-#line 1698 "parser.c"
+#line 1724 "parser.c"
     break;
 
   case 76:
-#line 214 "parser.y"
+#line 234 "parser.y"
                                        {
                     if (!(--functions)){
                         scope_flag = 1;
                     } 
+
                     scope--;
-                    SymTable_hide_reveal(scope+1,scope);
+                    SymTable_hide(scope+1);
                 }
-#line 1710 "parser.c"
+#line 1737 "parser.c"
     break;
 
   case 77:
-#line 222 "parser.y"
+#line 243 "parser.y"
                            {
                 }
-#line 1717 "parser.c"
+#line 1744 "parser.c"
     break;
 
   case 78:
-#line 224 "parser.y"
+#line 245 "parser.y"
                          {
                     if (SymTable_general_lookup((yyvsp[-2].strVal), scope, 3, block, "funcdef")) {
                         SymTable_insert((yyvsp[-2].strVal), scope, total_lines, 3, block);
                         functions++;
                         scope++; 
                         scope_flag = 0;
+                        prev_block = block;
                         block++;
-                        SymTable_hide_reveal(scope-1,scope);
+                        SymTable_hide(scope-1);
                     }
                     else {
                         yyerror("Illegal function name");
                     }
                 }
-#line 1735 "parser.c"
+#line 1763 "parser.c"
     break;
 
   case 79:
-#line 237 "parser.y"
+#line 259 "parser.y"
                                        {
                         if (!(--functions)){
                             scope_flag = 1;
                         } 
                         scope--;
-                        SymTable_hide_reveal(scope+1,scope);
+                        SymTable_hide(scope+1);
                 }
-#line 1747 "parser.c"
+#line 1775 "parser.c"
     break;
 
   case 86:
-#line 249 "parser.y"
+#line 271 "parser.y"
                         {
                 if (SymTable_general_lookup((yyvsp[0].strVal), scope, 2, block, "formal")) {
                     SymTable_insert ((yyvsp[0].strVal), scope, total_lines, 2, block);
@@ -1756,11 +1784,11 @@ yyreduce:
                     yyerror("Illegal parameter name");
                 }
             }
-#line 1760 "parser.c"
+#line 1788 "parser.c"
     break;
 
   case 87:
-#line 257 "parser.y"
+#line 279 "parser.y"
                                       {
                 if (SymTable_general_lookup((yyvsp[-2].strVal), scope, 2, block, "formal")) {
                     SymTable_insert ((yyvsp[-2].strVal), scope, total_lines, 2, block);
@@ -1769,11 +1797,11 @@ yyreduce:
                     yyerror("Illegal parameter name");
                 }
             }
-#line 1773 "parser.c"
+#line 1801 "parser.c"
     break;
 
 
-#line 1777 "parser.c"
+#line 1805 "parser.c"
 
       default: break;
     }
@@ -2005,7 +2033,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 283 "parser.y"
+#line 305 "parser.y"
 
 
 const char * getName(symt * input){
@@ -2052,32 +2080,36 @@ void resize_pinaka(unsigned int scope) {
     }
 }
 
-void SymTable_hide_reveal(unsigned int previous_scope, unsigned int active_scope) {
+void SymTable_hide(unsigned int scope) {
     scope_link *scope_temp;
     symt *entry_temp;
-    int a;
 
     scope_temp = lista;
     while (scope_temp != NULL) {
-        if (previous_scope != -1) {
-            if (scope_temp->scope_counter == previous_scope) {
-                entry_temp = scope_temp->scope_head;
-                while (entry_temp != NULL) {
-                    entry_temp->isActive = 0;
-                    entry_temp = entry_temp->next_in_scope;
-                }
+        if (scope_temp->scope_counter == scope) {
+            entry_temp = scope_temp->scope_head;
+            while (entry_temp != NULL) {
+                entry_temp->isActive = 0;
+                entry_temp = entry_temp->next_in_scope;
             }
         }
-        if (active_scope != -1) {
-            if (scope_temp->scope_counter == active_scope){
-                entry_temp = scope_temp->scope_head;
-                while (entry_temp != NULL) {
-                    entry_temp->isActive = 1;
-                    entry_temp = entry_temp->next_in_scope;
-                }
-            }
-        }
+        scope_temp = scope_temp->next;
+    }
+}
 
+void SymTable_reveal(unsigned int scope) {
+    scope_link *scope_temp;
+    symt *entry_temp;
+
+    scope_temp = lista;
+    while (scope_temp != NULL) {
+        if (scope_temp->scope_counter == scope) {
+            entry_temp = scope_temp->scope_head;
+            while (entry_temp != NULL) {
+                entry_temp->isActive = 1;
+                entry_temp = entry_temp->next_in_scope;
+            }
+        }
         scope_temp = scope_temp->next;
     }
 }
@@ -2154,8 +2186,40 @@ void print_hash() {
     printf("\n_____________________________________________\n");
 }
 
+int SymTable_smol_lookup(const char *name, unsigned int scope) {
+    symt *tmp = NULL;
+    unsigned int index = SymTable_hash(name) % 499;
+    tmp = lera->head[index];
+
+    while (tmp != NULL) {
+        if (getScope(tmp) == scope) {
+            if (strcmp(getName(tmp), name) == 0) {
+                return 0;
+            }
+        }
+        tmp = tmp -> next;
+    }
+    return 1;
+}
+
+int SymTable_smoller_lookup(const char *name, unsigned int scope, unsigned int block) {
+    symt *tmp = NULL;
+    unsigned int index = SymTable_hash(name) % 499;
+    tmp = lera->head[index];
+
+    while(tmp != NULL) {
+        if ((getScope(tmp) == scope) && (tmp->block == block)) {
+            if (strcmp(getName(tmp), name) == 0) {
+                return 2;
+            }
+        }
+        tmp = tmp -> next;
+    }
+    return 1;
+}
+
 int SymTable_general_lookup(const char * name, unsigned int scope, types type, unsigned int block, char *search_mode) {
-    if (isLibraryFunc(name)) {
+    if (isLibraryFunc(name) && (strcmp("global_src",search_mode))) {
         return 0;
     }
 
@@ -2167,9 +2231,8 @@ int SymTable_general_lookup(const char * name, unsigned int scope, types type, u
     
     if (strcmp(search_mode,"funcdef") == 0) {
         while (tmp != NULL) {
-            if (getScope(tmp) == scope) {
-                if (strcmp(getName(tmp),name) == 0) {
-                    printf("AAAAAA");
+            if (strcmp(getName(tmp),name) == 0) {
+                if (tmp->isActive) {
                     return 0;
                 }
             }
@@ -2178,9 +2241,11 @@ int SymTable_general_lookup(const char * name, unsigned int scope, types type, u
         return 1;
     }
     else if (strcmp(search_mode, "formal") == 0) {
+        
         while (tmp != NULL) {
             if (getScope(tmp) == scope && (tmp->block == block)) {
                 if (strcmp(getName(tmp),name) == 0) {
+                    printf("our block: %d\ttemp block: %d", block, tmp->block);
                     return 0;
                 }
             }
@@ -2199,7 +2264,35 @@ int SymTable_general_lookup(const char * name, unsigned int scope, types type, u
         }
         return 1;
     }
-    return flag;
+    else if (strcmp(search_mode, "global_src") == 0) {
+        printf("\n%s\n",name);
+        if (isLibraryFunc(name)) {return 2;}
+        while (tmp != NULL) {
+            if (strcmp(getName(tmp),name) == 0) {
+                return 2;
+            }
+            tmp = tmp -> next;
+        }
+        return 0;
+    }
+    else if (strcmp(search_mode, "new_var") == 0) {
+        int current_scope;
+        int flag = 1;
+        int mafaka = SymTable_smoller_lookup(name, scope, block);
+        if (mafaka == 2) {  //2: found same variable in same block & scope
+            return 2;
+        }
+        if (scope > 0) {
+            for (current_scope = scope-1; current_scope >= 0; current_scope--) {
+                flag = SymTable_smol_lookup(name, current_scope);
+                if (flag == 0) {
+                    return 0;   //0: found same var in parent scope
+                }
+            }
+        }
+        return mafaka;  //found nothing
+    }
+    return -1;
 }
 
 unsigned int SymTable_hash(const char *key) {
@@ -2284,20 +2377,6 @@ void print_scopes() {
         temp2 = temp2 -> next;
         printf("\n");
     }
-
-    /* int i;
-    symt *temp;
-
-    for (i=0; i < SIZE; i++) {
-        if (lera->head[i] != NULL) {
-            printf("i = %d\n",i);
-            temp = lera->head[i];
-            do {
-                printf("\tname: %s, scope: %u, line: %u, type: %d\n", getName(temp), getScope(temp), getLine(temp), temp->type);
-                temp = temp->next;
-            }   while (temp != NULL);
-        }
-    } */
 }
 
 int yyerror (char* yaccProvidedMessage) {
