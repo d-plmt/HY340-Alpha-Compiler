@@ -22,6 +22,7 @@
     int functions = 0;
     int func_counter = 0;
     int prev_block = 0;
+    int loop_scope = 0;
 
 %}
 
@@ -60,29 +61,55 @@
 
 %%
 
-program:    stmt program
-            |
+program:    stmt program    
+            |   {printf("Program start:\n");}
             ;
 
 stmt:       expr SEMICOLON
-            |ifstmt
-            |whilestmt
-            |forstmt
-            |returnstmt
-            |BREAK SEMICOLON
-            |CONTINUE SEMICOLON
-            |block
-            |funcdef
+            |ifstmt     {printf("\tif statement\n");}
+            |whilestmt  {printf("\twhile statement\n");}
+            |forstmt    {printf("\tfor statement\n");}
+            |returnstmt {printf("\treturn statement\n");}
+            |BREAK SEMICOLON    {
+                if (loop_scope < 1) {
+                    fprintf(stderr, "Keyword \"break\" can't be used without a loop.\n");
+                }
+                else {
+                    printf("\tkeyword \"break\"\n");
+                }
+            }
+            |CONTINUE SEMICOLON {
+                if (loop_scope < 1) {
+                    fprintf(stderr, "Keyword \"continue\" can't be used without a loop.\n");
+                }
+                else {
+                    printf("\tkeyword \"continue\"\n");
+                }
+            }
+            |block      {printf("Block");}
+            |funcdef    {printf("Function definition");}
             |SEMICOLON
             ;
 
 expr:       assignexpr      
-            |expr op expr
+            |expr OP_PLUS expr
+            |expr OP_MINUS expr
+            |expr OP_ASTERISK expr
+            |expr OP_SLASH expr
+            |expr OP_PERCENTAGE expr
+            |expr OP_GREATER expr
+            |expr OP_GREATER_EQ expr
+            |expr OP_LESSER expr
+            |expr OP_LESSER_EQ expr
+            |expr OP_EQ_EQ expr
+            |expr OP_NOT_EQ expr
+            |expr AND expr
+            |expr OR expr
             |term
             ;
 
-op:         OP_PLUS | OP_MINUS | OP_ASTERISK | OP_SLASH | OP_PERCENTAGE | OP_GREATER | OP_GREATER_EQ | OP_LESSER | OP_LESSER_EQ | OP_EQ_EQ | OP_NOT_EQ | AND | OR
-            ;
+/* op:         OP_PLUS | OP_MINUS | OP_ASTERISK | OP_SLASH | OP_PERCENTAGE | OP_GREATER | OP_GREATER_EQ | OP_LESSER | OP_LESSER_EQ | OP_EQ_EQ | OP_NOT_EQ | AND | OR
+            ; */
 
 term:       LEFT_PAR expr RIGHT_PAR
             |OP_MINUS expr
@@ -291,10 +318,20 @@ ifstmt:     IF LEFT_PAR expr RIGHT_PAR stmt
             |IF LEFT_PAR expr RIGHT_PAR stmt ELSE stmt
             ;
 
-whilestmt:  WHILE LEFT_PAR expr RIGHT_PAR stmt
+whilestmt:  WHILE LEFT_PAR expr RIGHT_PAR {
+                loop_scope++;
+            }
+            stmt {
+                loop_scope--;
+            }
             ;
 
-forstmt:    FOR LEFT_PAR elist SEMICOLON expr SEMICOLON elist RIGHT_PAR stmt
+forstmt:    FOR LEFT_PAR elist SEMICOLON expr SEMICOLON elist RIGHT_PAR {
+                loop_scope++;
+            }
+            stmt {
+                loop_scope--;
+            }
             ;
 
 returnstmt: RETURN SEMICOLON
