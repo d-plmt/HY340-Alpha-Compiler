@@ -55,7 +55,7 @@ unsigned int getScope(symt *input);
 unsigned int getLine(symt *input);
 void SymTable_new(void);
 int SymTable_insert(const char *name, unsigned int scope, unsigned int line, types type, unsigned int block);
-int SymTable_general_lookup(const char * name, unsigned int scope, types type, unsigned int block);
+int SymTable_general_lookup(const char * name, unsigned int scope, types type, unsigned int block, char* search_mode);
 void SymTable_hide_reveal(unsigned int previous_scope, unsigned int active_scope);
 void initialize();
 void print_scopes();

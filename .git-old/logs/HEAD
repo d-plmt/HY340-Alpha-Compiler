@@ -1,0 +1,60 @@
+0000000000000000000000000000000000000000 ef55f046091a5000ecc8cfb5b17230dde6e89e8d Dafni <dafniplm@gmail.com> 1645834799 +0200	commit (initial): initial commit
+ef55f046091a5000ecc8cfb5b17230dde6e89e8d 656246c27e7bc5ff8c8bfdf7894e7f06943882ca Dafni <dafniplm@gmail.com> 1645985932 +0200	commit: a
+656246c27e7bc5ff8c8bfdf7894e7f06943882ca 99419d6887e74311bb5067378a079b81ca8d5970 Dafni <dafniplm@gmail.com> 1646006879 +0200	commit: ld;gks;fldgk
+99419d6887e74311bb5067378a079b81ca8d5970 a0a6ddb4dc0b23308d0a239b6b46df08b35b74a5 Dafni <dafniplm@gmail.com> 1646061770 +0200	pull: Fast-forward
+a0a6ddb4dc0b23308d0a239b6b46df08b35b74a5 b848479f4689b2e55450e515fa9da605028663b0 Dafni <dafniplm@gmail.com> 1646066329 +0200	commit: sadassdsadadsd
+b848479f4689b2e55450e515fa9da605028663b0 9a8fab42cc0ef25daa7300e821a14cccd18a3703 Dafni <dafniplm@gmail.com> 1646091440 +0200	commit: strings
+9a8fab42cc0ef25daa7300e821a14cccd18a3703 89c3f8e187b12ee5c5e2162eb96e70b3bc8d5caa Dafni <dafniplm@gmail.com> 1646091577 +0200	commit (merge): a
+89c3f8e187b12ee5c5e2162eb96e70b3bc8d5caa fc7a394deaa893a158d39a2a243c62be73608342 Dafni <dafniplm@gmail.com> 1646091950 +0200	commit: a
+fc7a394deaa893a158d39a2a243c62be73608342 2eb86b5ebcdd962e11abf96b2962bf3f92e51bd1 Dafni <dafniplm@gmail.com> 1646136468 +0200	commit: new function for comments
+2eb86b5ebcdd962e11abf96b2962bf3f92e51bd1 baed8b1150c8c2484eb3ad789327e4874d5c0ec6 Dafni <dafniplm@gmail.com> 1646139175 +0200	commit: vlakeia synarthsh
+baed8b1150c8c2484eb3ad789327e4874d5c0ec6 baed8b1150c8c2484eb3ad789327e4874d5c0ec6 Dafni <dafniplm@gmail.com> 1646142424 +0200	reset: moving to HEAD
+baed8b1150c8c2484eb3ad789327e4874d5c0ec6 3d894e38322f4e246354e842b8f74e04bfdb3c45 Dafni <dafniplm@gmail.com> 1646142430 +0200	pull: Fast-forward
+3d894e38322f4e246354e842b8f74e04bfdb3c45 030e125c68f94adb3deed7031b3a7dd8ebf61f3f Dafni <dafniplm@gmail.com> 1646142950 +0200	commit: identifier
+030e125c68f94adb3deed7031b3a7dd8ebf61f3f d46e22555954c953fc736c973727771553e88c48 Dafni <dafniplm@gmail.com> 1646248102 +0200	pull: Fast-forward
+d46e22555954c953fc736c973727771553e88c48 a02ef77cf194a45bafe9c4125ad266ef23e81668 Dafni <dafniplm@gmail.com> 1646249072 +0200	commit: regex
+a02ef77cf194a45bafe9c4125ad266ef23e81668 0710c56d62d18a9ed2e37aba7ab9581fe67db8dd Dafni <dafniplm@gmail.com> 1646253899 +0200	commit: nested comments
+0710c56d62d18a9ed2e37aba7ab9581fe67db8dd 5f08fa88eab674093f140c2805bdf773b37fd485 Dafni <dafniplm@gmail.com> 1646255431 +0200	commit: nested comments tryhard mode
+5f08fa88eab674093f140c2805bdf773b37fd485 061b87b0d8079fdc59b70d7e18047ea3129372e8 Dafni <dafniplm@gmail.com> 1646259065 +0200	commit: file output
+061b87b0d8079fdc59b70d7e18047ea3129372e8 ef6bfb88f828757fa3e64aed76bf384fabbc6c1c Dafni <dafniplm@gmail.com> 1646317355 +0200	commit: malloc fix
+ef6bfb88f828757fa3e64aed76bf384fabbc6c1c 18ba947594950b064cc72a76c946e83d258fe5a8 Dafni <dafniplm@gmail.com> 1646327119 +0200	commit: help
+18ba947594950b064cc72a76c946e83d258fe5a8 18ba947594950b064cc72a76c946e83d258fe5a8 Dafni <dafniplm@gmail.com> 1646335202 +0200	reset: moving to HEAD
+18ba947594950b064cc72a76c946e83d258fe5a8 7dce3be14d18ea4e1c2a6c9a5a1c95a3c07e587b Dafni <dafniplm@gmail.com> 1646340335 +0200	commit: comments
+7dce3be14d18ea4e1c2a6c9a5a1c95a3c07e587b f177060afbc200dd9991f15d695cd0e828bada6a Dafni <dafniplm@gmail.com> 1646399712 +0200	commit: code so pretty
+f177060afbc200dd9991f15d695cd0e828bada6a 8711c24c0132ccce322e9ddf7144c60693c35a6f Dafni <dafniplm@gmail.com> 1646573368 +0200	commit: string "
+8711c24c0132ccce322e9ddf7144c60693c35a6f fb1b94f38b5c7bd3074627c7a68a4d6165a569fb Dafni <dafniplm@gmail.com> 1648304992 +0200	commit: input only
+fb1b94f38b5c7bd3074627c7a68a4d6165a569fb 8bedbef5bb5dbef68841fba95a19a75bbad0fe33 Dafni <dafniplm@gmail.com> 1648305058 +0200	commit: phase1 folder
+8bedbef5bb5dbef68841fba95a19a75bbad0fe33 453a6dceebf03f1ab393e0eb30156f8dfdf26517 Dafni <dafniplm@gmail.com> 1648306115 +0200	commit: phase2
+453a6dceebf03f1ab393e0eb30156f8dfdf26517 aba916b5b6f4ddb6581380068d2dc10c3d14587f Dafni <dafniplm@gmail.com> 1648308577 +0200	commit: files needed
+aba916b5b6f4ddb6581380068d2dc10c3d14587f aba916b5b6f4ddb6581380068d2dc10c3d14587f Dafni <dafniplm@gmail.com> 1648314133 +0200	reset: moving to HEAD
+aba916b5b6f4ddb6581380068d2dc10c3d14587f aba916b5b6f4ddb6581380068d2dc10c3d14587f Dafni <dafniplm@gmail.com> 1648314200 +0200	reset: moving to HEAD
+aba916b5b6f4ddb6581380068d2dc10c3d14587f aba916b5b6f4ddb6581380068d2dc10c3d14587f Dafni <dafniplm@gmail.com> 1648317330 +0200	reset: moving to HEAD
+aba916b5b6f4ddb6581380068d2dc10c3d14587f aba916b5b6f4ddb6581380068d2dc10c3d14587f Dafni <dafniplm@gmail.com> 1648377646 +0300	reset: moving to HEAD
+aba916b5b6f4ddb6581380068d2dc10c3d14587f cd9d03e2cd8af0570d5330fbc5a4f24dd2913167 Dafni <dafniplm@gmail.com> 1648482949 +0300	pull: Fast-forward
+cd9d03e2cd8af0570d5330fbc5a4f24dd2913167 cd9d03e2cd8af0570d5330fbc5a4f24dd2913167 Dafni <dafniplm@gmail.com> 1648484259 +0300	reset: moving to HEAD
+cd9d03e2cd8af0570d5330fbc5a4f24dd2913167 f7f466a5b71b2a890fff2d4af42f83354f3b5af0 Dafni <dafniplm@gmail.com> 1648484262 +0300	pull: Fast-forward
+f7f466a5b71b2a890fff2d4af42f83354f3b5af0 54a7909bca28dcdb7ade34b9bdba002360e27d5d Dafni <dafniplm@gmail.com> 1648484409 +0300	commit: 100% working uwu
+54a7909bca28dcdb7ade34b9bdba002360e27d5d aa0e3a83cc312259fbac9619afe2b9549b9ab41b Dafni <dafniplm@gmail.com> 1648488556 +0300	commit: den xrhsimopoioume thn add_token pia
+aa0e3a83cc312259fbac9619afe2b9549b9ab41b be8ebbb5a0d67ccab92d79b66dd05bfc1d43d048 Dafni <dafniplm@gmail.com> 1648496059 +0300	commit: help
+be8ebbb5a0d67ccab92d79b66dd05bfc1d43d048 cd2d45cf6e2aed91eaa655be3aaa0473bd5f26a6 Dafni <dafniplm@gmail.com> 1648553218 +0300	commit: wtv
+cd2d45cf6e2aed91eaa655be3aaa0473bd5f26a6 920d6b4bebabfbb533c634c54cf94fda44f20370 Dafni <dafniplm@gmail.com> 1648560474 +0300	commit: proteraiothtes
+920d6b4bebabfbb533c634c54cf94fda44f20370 920d6b4bebabfbb533c634c54cf94fda44f20370 Dafni <dafniplm@gmail.com> 1648566835 +0300	reset: moving to HEAD
+920d6b4bebabfbb533c634c54cf94fda44f20370 4ecfb18fca3716579efd9ca3e2165b5cba968540 Dafni <dafniplm@gmail.com> 1648566837 +0300	pull: Fast-forward
+4ecfb18fca3716579efd9ca3e2165b5cba968540 b6aacaf2b0fda100ae985fd1e8e82f7e33bd7028 Dafni <dafniplm@gmail.com> 1648578027 +0300	pull: Fast-forward
+b6aacaf2b0fda100ae985fd1e8e82f7e33bd7028 e93e3f46f0090ae6fa035fd0f6231325488a4067 Dafni <dafniplm@gmail.com> 1648585244 +0300	commit: grammatikoulitsa
+e93e3f46f0090ae6fa035fd0f6231325488a4067 1a7d082d99984f67657d805da0fb780bc2a11ace Dafni <dafniplm@gmail.com> 1648651518 +0300	pull: Fast-forward
+1a7d082d99984f67657d805da0fb780bc2a11ace b2b6b34d75013d6690f07a08ee3632f4762780ef Dafni <dafniplm@gmail.com> 1648660228 +0300	commit: grammatikoulitsa
+b2b6b34d75013d6690f07a08ee3632f4762780ef ff4d065022202d48e291566ab233899a6f3b7206 Dafni <dafniplm@gmail.com> 1648828384 +0300	commit: scopes
+ff4d065022202d48e291566ab233899a6f3b7206 884789aa6522d13aae701047747208369e28c793 Dafni <dafniplm@gmail.com> 1648828608 +0300	commit: geia
+884789aa6522d13aae701047747208369e28c793 6f9a94b482cbd5dd0d38a1dc9eb83002f878a9e1 Dafni <dafniplm@gmail.com> 1648828942 +0300	commit: o kwdikas omorfhse
+6f9a94b482cbd5dd0d38a1dc9eb83002f878a9e1 88dadff1205684a0f92dc69e62b23c76781998e5 Dafni <dafniplm@gmail.com> 1648830429 +0300	commit: yyparse sthn yyerror mesa
+88dadff1205684a0f92dc69e62b23c76781998e5 eec8278661970cb0f601b498e47b6c8d1a0e9427 Dafni <dafniplm@gmail.com> 1648851695 +0300	commit: hash functionoulinakia
+eec8278661970cb0f601b498e47b6c8d1a0e9427 eec8278661970cb0f601b498e47b6c8d1a0e9427 Dafni <dafniplm@gmail.com> 1649002624 +0300	reset: moving to HEAD
+eec8278661970cb0f601b498e47b6c8d1a0e9427 263e1f2e7ecb70bb1953abab75de916a61c3230d Dafni <dafniplm@gmail.com> 1649002627 +0300	pull: Fast-forward
+263e1f2e7ecb70bb1953abab75de916a61c3230d a8155bdfe2a8752fed0a573b5c6c5ca7fbfbde1c Dafni <dafniplm@gmail.com> 1649013104 +0300	pull: Fast-forward
+a8155bdfe2a8752fed0a573b5c6c5ca7fbfbde1c 19e8eee45ca5ebb8479006260de073368b4e8dc0 Dafni <dafniplm@gmail.com> 1649024132 +0300	commit: uwu
+19e8eee45ca5ebb8479006260de073368b4e8dc0 eec48336c5d2dca2bc7730a66e26983b28a3c694 Dafni <dafniplm@gmail.com> 1649026363 +0300	commit: asd
+eec48336c5d2dca2bc7730a66e26983b28a3c694 7b43b33b74c7c2b69d38a5a88feeae68aefc934b Dafni <dafniplm@gmail.com> 1649076976 +0300	pull: Fast-forward
+7b43b33b74c7c2b69d38a5a88feeae68aefc934b 7abed6d5e7df5c0d71d3f86a939292830fad547f Dafni <dafniplm@gmail.com> 1649085298 +0300	commit: hide lookup libfunc
+7abed6d5e7df5c0d71d3f86a939292830fad547f 7cfd890d99669609f0a1507765385b23379062f0 Dafni <dafniplm@gmail.com> 1649092804 +0300	commit: help
+                                                                                                                                               
