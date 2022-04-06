@@ -93,7 +93,8 @@ extern int yydebug;
     COLON = 299,
     COL_COL = 300,
     DOT = 301,
-    DOT_DOT = 302
+    DOT_DOT = 302,
+    LINE_COMM = 303
   };
 #endif
 /* Tokens.  */
@@ -142,6 +143,7 @@ extern int yydebug;
 #define COL_COL 300
 #define DOT 301
 #define DOT_DOT 302
+#define LINE_COMM 303
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -150,7 +152,7 @@ union YYSTYPE
 #line 30 "parser.y"
 int intVal; double realVal; char *strVal;
 
-#line 154 "parser.h"
+#line 156 "parser.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

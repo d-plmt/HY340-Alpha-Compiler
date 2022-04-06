@@ -15,7 +15,7 @@ INT         [0-9]+
 REAL        {INT}\.{1}{INT}
 STRING      (\")([.\\]|[^"]|(\\\"))*(\")
 IDENTIFIER  [A-Za-z]{1}[0-9A-Za-z_]*
-LINE_COMM   (\/\/)+.+
+LINE_COMM   "//".*
 BLOCK_START (\/\*)
 WHITESPACE  [ ]|"\t"|"\n"
 UNCLOSED_STRING (\")([.\\]|[^"]|(\\\"))*

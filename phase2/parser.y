@@ -23,7 +23,7 @@
     int func_counter = 0;
     int prev_block = 0;
     int loop_scope = 0;
-
+    int call_flag = 0;
 %}
 
 %start program
@@ -33,7 +33,7 @@
 %token <realVal>    REAL
 %token <strVal>     STRING
 %token <strVal>     IDENTIFIER
-%token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT
+%token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT LINE_COMM
 
 
 %type stmt expr term assignexpr primary lvalue member call callsuffix normcall methodcall elist objectdef indexed indexedelem block funcdef const idlist ifstmt whilestmt forstmt returnstmt
@@ -62,17 +62,17 @@
 %%
 
 program:    stmt program    
-            |   {printf("Program start:\n");}
+            |   {printf("\nProgram stopped\n\n");}
             ;
 
-stmt:       expr SEMICOLON
+stmt:       expr SEMICOLON  {printf("Stmt: expr;\n");}
             |ifstmt     {printf("\tif statement\n");}
             |whilestmt  {printf("\twhile statement\n");}
             |forstmt    {printf("\tfor statement\n");}
             |returnstmt {printf("\treturn statement\n");}
             |BREAK SEMICOLON    {
                 if (loop_scope < 1) {
-                    fprintf(stderr, "Keyword \"break\" can't be used without a loop.\n");
+                    fprintf(stderr, "ERROR: Keyword \"break\" can't be used without a loop.\n");
                 }
                 else {
                     printf("\tkeyword \"break\"\n");
@@ -80,78 +80,84 @@ stmt:       expr SEMICOLON
             }
             |CONTINUE SEMICOLON {
                 if (loop_scope < 1) {
-                    fprintf(stderr, "Keyword \"continue\" can't be used without a loop.\n");
+                    fprintf(stderr, "ERROR: Keyword \"continue\" can't be used without a loop.\n");
                 }
                 else {
                     printf("\tkeyword \"continue\"\n");
                 }
             }
-            |block      {printf("Block");}
-            |funcdef    {printf("Function definition");}
+            |block      {printf("\tBlock\n");}
+            |funcdef    {printf("\tFunction definition\n");}
             |SEMICOLON
             ;
 
-expr:       assignexpr      
-            |expr OP_PLUS expr
-            |expr OP_MINUS expr
-            |expr OP_ASTERISK expr
-            |expr OP_SLASH expr
-            |expr OP_PERCENTAGE expr
-            |expr OP_GREATER expr
-            |expr OP_GREATER_EQ expr
-            |expr OP_LESSER expr
-            |expr OP_LESSER_EQ expr
-            |expr OP_EQ_EQ expr
-            |expr OP_NOT_EQ expr
-            |expr AND expr
-            |expr OR expr
-            |term
+expr:       assignexpr      {printf("Assign expression\n");}
+            |expr OP_PLUS expr  {printf("Expr: expr op_plus expr\n");}
+            |expr OP_MINUS expr {printf("Expr: expr op_minus expr\n");}
+            |expr OP_ASTERISK expr  {printf("Expr: expr op_asterisk expr\n");}
+            |expr OP_SLASH expr {printf("Expr: expr op_slash expr\n");}
+            |expr OP_PERCENTAGE expr {printf("Expr: expr op_percentage expr\n");}
+            |expr OP_GREATER expr {printf("Expr: expr op_greater expr\n");}
+            |expr OP_GREATER_EQ expr {printf("Expr: expr op_greater_eq expr\n");}
+            |expr OP_LESSER expr {printf("Expr: expr op_lesser expr\n");}
+            |expr OP_LESSER_EQ expr {printf("Expr: expr op_lesser_eq expr\n");}
+            |expr OP_EQ_EQ expr {printf("Expr: expr op_eq_eq expr\n");}
+            |expr OP_NOT_EQ expr {printf("Expr: expr op_not_eq expr\n");}
+            |expr AND expr {printf("Expr: expr and expr\n");}
+            |expr OR expr {printf("Expr: expr or expr\n");}
+            |term   {printf("Term expression\n");}
             ;
 
 /* op:         OP_PLUS | OP_MINUS | OP_ASTERISK | OP_SLASH | OP_PERCENTAGE | OP_GREATER | OP_GREATER_EQ | OP_LESSER | OP_LESSER_EQ | OP_EQ_EQ | OP_NOT_EQ | AND | OR
             ; */
 
-term:       LEFT_PAR expr RIGHT_PAR
-            |OP_MINUS expr
-            |NOT expr
-            |OP_PLUS_PLUS lvalue
-            |lvalue OP_PLUS_PLUS
-            |OP_MINUS_MINUS lvalue
-            |lvalue OP_MINUS_MINUS
-            |primary
+term:       LEFT_PAR expr RIGHT_PAR {printf("Term: (expr)\n");}
+            |OP_MINUS expr  {printf("Term: -expr\n");}
+            |NOT expr {printf("Term: not expr\n");}
+            |OP_PLUS_PLUS lvalue {printf("Term: ++lvalue\n");}
+            |lvalue OP_PLUS_PLUS {printf("Term: lvalue++\n");}
+            |OP_MINUS_MINUS lvalue {printf("Term: --lvalue\n");}
+            |lvalue OP_MINUS_MINUS {printf("Term: lvalue--\n");}
+            |primary {printf("Term: primary\n");}
             ;
 
-assignexpr: lvalue OP_EQUALS expr
+assignexpr: lvalue OP_EQUALS expr {printf("Assign expression: lvalue = expr\n");}
             ;
 
-primary:    lvalue
-            |call
-            |objectdef
-            |LEFT_PAR funcdef RIGHT_PAR
-            |const
+primary:    lvalue  {printf("Primary: lvalue\n");}
+            |call   {printf("Primary: call\n");}
+            |objectdef {printf("Primary: objectdef\n");}
+            |LEFT_PAR funcdef RIGHT_PAR {printf("Primary: (funcdef)\n");}
+            |const {printf("Primary: const\n");}
             ;
     
 lvalue:     IDENTIFIER {
-                int returned = SymTable_general_lookup($1, scope, 1, block, "new_var");
-                if (returned == 2) {
-                    printf("%s refers to another symbol in the same scope.\n",$1);
-                }
-                else if (returned == 0) {
-                    printf("%s refers to another symbol in a parent scope.\n", $1);
-                }
-                else if (returned == 1) {
-                    if (scope == 0) {
-                        SymTable_insert($1, scope, total_lines, 0, block);
+                if (call_flag == 0) {                     
+                    printf("Lvalue: identifier\n");
+                    int returned = SymTable_general_lookup($1, scope, 1, block, "new_var");
+                    if (returned == 2) {
+                        //fprintf(stdout, "%s refers to another symbol in the same scope.\n",$1);
                     }
-                    else {
-                        SymTable_insert($1, scope, total_lines, 1, block);
+                    else if (returned == 0) {
+                        //fprintf(stdout, "%s refers to another symbol in a parent scope.\n", $1);
+                    }
+                    else if (returned == 1) {
+                        if (scope == 0) {
+                            SymTable_insert($1, scope, total_lines, 0, block);
+                        }
+                        else {
+                            SymTable_insert($1, scope, total_lines, 1, block);
+                        }
+                    }
+                    else if (returned == -1) {
+                        fprintf(stdout, "\nERROR: Cannot access (%s) in scope %d \n", $1, scope);
                     }
                 }
-            
 
             }
 
             |LOCAL IDENTIFIER {
+                printf("Lvalue: local identifier\n");
                 int returned = SymTable_general_lookup($2, scope, 1, block, "local");
                 int realtype = 1;
                 if (scope == 0) {
@@ -161,63 +167,64 @@ lvalue:     IDENTIFIER {
                     SymTable_insert ($2, scope, total_lines, realtype, block);
                 }
                 else if (returned == 2) {
-                    fprintf(stdout, "Local variable already defined.\n");
+                    //fprintf(stdout, "Local variable %s already defined.\n", $2);
                 }
                 else {
-                    yyerror("Illegal name");
+                    fprintf(stdout, "\nERROR: Variable (%s) cannot be defined in scope %d line %d\n", $2, scope, total_lines);
                 }
             }
             |COL_COL IDENTIFIER {
+                printf("Lvalue: ::identifier\n");
                 int returned = SymTable_general_lookup($2, 0, 0, block, "global_src");
                 if (returned == 2) {
-                    fprintf(stdout, "%s successfully found in global scope.\n", $2);
+                    //fprintf(stdout, "Symbol %s successfully found in global scope.\n", $2);
                 }
                 else {
-                    fprintf(stdout,"Variable %s not global or undefined.\n", $2);
+                    fprintf(stdout,"\nERROR: Symbol %s in line %d not global or undefined.\n", $2, total_lines);
                 }
             }
-            |member
+            |member {printf("Lvalue: member\n");}
             ;
 
-member:     lvalue DOT IDENTIFIER
-            |lvalue LEFT_BRACKET expr RIGHT_BRACKET
-            |call DOT IDENTIFIER
-            |call LEFT_BRACKET expr RIGHT_BRACKET
+member:     lvalue DOT IDENTIFIER {printf("Member: lvalue.identifier\n");}
+            |lvalue LEFT_BRACKET expr RIGHT_BRACKET {printf("Member: lvalue[identifier]\n");}
+            |call DOT IDENTIFIER {printf("Member: call.identifier\n");}
+            |call LEFT_BRACKET expr RIGHT_BRACKET {printf("Member: call[identifier]\n");}
             ;
 
-call:       call LEFT_PAR elist RIGHT_PAR
-            |lvalue callsuffix
-            |LEFT_PAR funcdef RIGHT_PAR LEFT_PAR elist RIGHT_PAR
+call:       call {call_flag = 1;}LEFT_PAR elist RIGHT_PAR {call_flag = 0; printf("Call: call(elist)\n");}
+            | lvalue callsuffix { printf("Call: lvalue callsuffix\n");}
+            |LEFT_PAR funcdef RIGHT_PAR {call_flag = 1;} LEFT_PAR elist RIGHT_PAR {call_flag = 0; printf("Call: (funcdef)(elist)\n");}
             ;
         
-callsuffix: normcall
-            |methodcall
+callsuffix: normcall {printf("Callsuffix: normcall\n");}
+            |methodcall {printf("Callsuffix: method\n");}
             ;
 
-normcall:   LEFT_PAR elist RIGHT_PAR
+normcall:   LEFT_PAR {call_flag = 1;} elist RIGHT_PAR {call_flag = 0; printf("Normcall: (elist)\n");}
             ;
 
-methodcall: DOT_DOT IDENTIFIER LEFT_PAR elist RIGHT_PAR
+methodcall: DOT_DOT IDENTIFIER LEFT_PAR {call_flag = 1;} elist RIGHT_PAR {call_flag = 0; printf("Methodcall: ..identifier(elist)\n");}
             ;
 
-elist:      expr
-            | expr COMMA elist
+elist:      expr {printf("Elist: expr\n");}
+            | expr COMMA elist {printf("Elist: expr,...,expr\n");}
             |
             ;
 
-objectdef:  LEFT_BRACKET elist RIGHT_BRACKET
-            |LEFT_BRACKET indexed RIGHT_BRACKET
+objectdef:  LEFT_BRACKET elist RIGHT_BRACKET  {printf("Objectdef: (elist)\n");}
+            |LEFT_BRACKET indexed RIGHT_BRACKET {printf("Objectdef: (indexed)\n");}
             ;
 
-indexed:    indexedelem
-            | indexedelem COMMA indexed
+indexed:    indexedelem {printf("Indexed: indexedelem\n");}
+            | indexedelem COMMA indexed {printf("Indexed: indexedelem,...,indexedelem\n");}
             ;
 
-indexedelem: LEFT_BRACE expr COLON expr RIGHT_BRACE
+indexedelem: LEFT_BRACE expr COLON expr RIGHT_BRACE {printf("Indexedelem: [expr:expr]\n");}
             ;
 
-func_stmt: stmt func_stmt
-            | stmt
+func_stmt: stmt func_stmt {printf("Func_stmt: stmt,...,stmt\n");}
+            | stmt {printf("Func_stmt: stmt\n");}
             ;
 
 block:      LEFT_BRACE {
@@ -228,6 +235,7 @@ block:      LEFT_BRACE {
                     if (scope_flag == 1) {
                         SymTable_hide(scope+1);
                     }
+                    {printf("Block: {}\n");}
                 }
             |LEFT_BRACE {
                     block = block + scope_flag;
@@ -237,9 +245,9 @@ block:      LEFT_BRACE {
                     if (scope_flag == 1) {
                         SymTable_hide(scope+1);
                     }
-                } 
+                }
+                {printf("Block: {func_stmt}\n");} 
             ;
-
 funcdef:    FUNCTION LEFT_PAR {
                     sprintf(str, "%s%d%c","_f",func_counter+1,'\0');
                     if (SymTable_general_lookup(strdup(str), scope, 3, block, "funcdef")) {
@@ -253,7 +261,7 @@ funcdef:    FUNCTION LEFT_PAR {
                         SymTable_hide(scope-1);
                     }
                     else {
-                        yyerror("Illegal function name");
+                        fprintf(stderr,"\nERROR: Function (%s) in scope %d line %d cannot be defined\n",strdup(str),scope,total_lines);
                     }
                 } 
                 idlist RIGHT_PAR block {
@@ -263,6 +271,8 @@ funcdef:    FUNCTION LEFT_PAR {
 
                     scope--;
                     SymTable_hide(scope+1);
+                    SymTable_reveal(scope);
+                    printf("Funcdef: function (idlist) {}\n");
                 }
             |FUNCTION 
                 IDENTIFIER {
@@ -278,42 +288,51 @@ funcdef:    FUNCTION LEFT_PAR {
                         SymTable_hide(scope-1);
                     }
                     else {
-                        yyerror("Illegal function name");
+                        fprintf(stderr,"\nERROR: Function (%s) in scope %d line %d cannot be defined\n",$2,scope,total_lines);
                     }
                 } 
                 idlist RIGHT_PAR block {
-                        if (!(--functions)){
-                            scope_flag = 1;
-                        } 
-                        scope--;
-                        SymTable_hide(scope+1);
+                    if (!(--functions)){
+                        scope_flag = 1;
+                    } 
+                    scope--;
+                    SymTable_hide(scope+1);
+                    SymTable_reveal(scope);
+                    printf("Funcdef: function identifier(idlist) {}\n");
                 }
             ;
 
-const:      INTEGER | REAL | STRING | NIL | TRUE | FALSE
+const:      INTEGER {printf("Const: integer\n");}
+            | REAL {printf("Const: real\n");}
+            | STRING {printf("Const: string\n");}
+            | NIL {printf("Const: nil\n");}
+            | TRUE {printf("Const: true\n");}
+            | FALSE {printf("Const: false\n");}
             ;
 
 idlist:     IDENTIFIER  {
+                {printf("Idlist: identifier\n");}
                 if (SymTable_general_lookup($1, scope, 2, block, "formal")) {
                     SymTable_insert ($1, scope, total_lines, 2, block);
                 }
                 else {
-                    yyerror("Illegal parameter name");
+                    fprintf(stderr,"ERROR: Parameter (%s) in scope %d line %d cannot be defined\n",$1,scope,total_lines);
                 }
             }
             | IDENTIFIER COMMA idlist {
+                {printf("Idlist: identifier,...,identifier\n");}
                 if (SymTable_general_lookup($1, scope, 2, block, "formal")) {
                     SymTable_insert ($1, scope, total_lines, 2, block);
                 }
                 else {
-                    yyerror("Illegal parameter name");
+                    fprintf(stderr,"ERROR: Parameter (%s) in scope %d line %d cannot be defined\n",$1,scope,total_lines);
                 }
             }
             |
             ;
 
-ifstmt:     IF LEFT_PAR expr RIGHT_PAR stmt 
-            |IF LEFT_PAR expr RIGHT_PAR stmt ELSE stmt
+ifstmt:     IF LEFT_PAR expr RIGHT_PAR stmt {printf("Ifstmt: if (expr) stmt\n");}
+            |IF LEFT_PAR expr RIGHT_PAR stmt ELSE stmt {printf("Ifstmt: if (expr) stmt else stmt\n");}
             ;
 
 whilestmt:  WHILE LEFT_PAR expr RIGHT_PAR {
@@ -321,6 +340,7 @@ whilestmt:  WHILE LEFT_PAR expr RIGHT_PAR {
             }
             stmt {
                 loop_scope--;
+                printf("Whilestmt: while (expr) stmt\n");
             }
             ;
 
@@ -329,11 +349,26 @@ forstmt:    FOR LEFT_PAR elist SEMICOLON expr SEMICOLON elist RIGHT_PAR {
             }
             stmt {
                 loop_scope--;
+                printf("Forstmt: for (elist;expr;elist) stmt\n");
             }
             ;
 
-returnstmt: RETURN SEMICOLON
-            |RETURN expr SEMICOLON
+returnstmt: RETURN SEMICOLON {
+                if (scope_flag == 0) {
+                    printf("Returnstmt: return;\n");
+                }
+                else {
+                    fprintf(stderr, "ERROR: Keyword \"return\" in line %d can't be used without a function.\n",total_lines);
+                }
+            }
+            |RETURN expr SEMICOLON {
+                if (scope_flag == 0) {
+                    printf("Returnstmt: return;\n");
+                }
+                else {
+                    fprintf(stderr, "ERROR: Keyword \"return\" in line %d can't be used without a function.\n",total_lines);
+                }
+            }
             ;
 
 
@@ -361,6 +396,22 @@ unsigned int getLine(symt * input){
     }else{
         return input->value.varVal->vline;
     }
+}
+
+char *getType(types type) {
+    if (type == 0) {
+        return "global variable";
+    }
+    if (type == 1) {
+        return "local variable";
+    }
+    if (type == 2) {
+        return "formal argument";
+    }
+    if (type == 3) {
+        return "user function";
+    }
+    return "library function";
 }
 
 void resize_pinaka(unsigned int scope) {
@@ -468,25 +519,6 @@ int SymTable_insert(const char *name, unsigned int scope, unsigned int line, typ
     }
 }
 
-void print_hash() {
-    SymTable *temp = lera;
-    symt *temp2;
-    int i;
-
-    for (i = 0; i < SIZE; i++) {
-        if (temp->head[i] != NULL) {
-            temp2 = temp->head[i];
-            printf("bucket: %d\n",i);
-            while (temp2 != NULL) {
-                printf("\t%s",getName(temp2));
-                temp2 = temp2->next;
-            }
-            printf("\n");
-        }
-    }
-    printf("\n_____________________________________________\n");
-}
-
 int SymTable_smol_lookup(const char *name, unsigned int scope) {
     symt *tmp = NULL;
     unsigned int index = SymTable_hash(name) % 499;
@@ -495,9 +527,17 @@ int SymTable_smol_lookup(const char *name, unsigned int scope) {
     while (tmp != NULL) {
         if (getScope(tmp) == scope) {
             if (strcmp(getName(tmp), name) == 0) {
-                return 0;
+                if (scope == 0) {
+                    return 0;
+                }
+                else {
+                    return -1;
+                }
             }
         }
+                        if (strcmp("f",getName(tmp))==0) {
+                    //printf("\n\n\t\t\t\t\tf active: %d\tscope: %u\n",tmp->isActive, getScope(tmp));
+                }
         tmp = tmp -> next;
     }
     return 1;
@@ -509,16 +549,18 @@ int SymTable_smoller_lookup(const char *name, unsigned int scope, unsigned int b
     tmp = lera->head[index];
 
     while(tmp != NULL) {
-        if ((getScope(tmp) == scope) && (tmp->block == block)) {
-            if (strcmp(getName(tmp), name) == 0) {
+        if (strcmp(getName(tmp), name) == 0) {
+            if (tmp->isActive) {
                 return 2;
             }
+        }
+        if (strcmp("InitCircle",getName(tmp))==0) {
+            //printf("\n\n\t\t\t\t\tInitCircle active: %d\n",tmp->isActive);
         }
         tmp = tmp -> next;
     }
     return 1;
 }
-
 int SymTable_general_lookup(const char * name, unsigned int scope, types type, unsigned int block, char *search_mode) {
     if (isLibraryFunc(name) && (strcmp("global_src",search_mode))) {
         return 0;
@@ -544,9 +586,8 @@ int SymTable_general_lookup(const char * name, unsigned int scope, types type, u
     else if (strcmp(search_mode, "formal") == 0) {
         
         while (tmp != NULL) {
-            if (getScope(tmp) == scope && (tmp->block == block)) {
-                if (strcmp(getName(tmp),name) == 0) {
-                    printf("our block: %d\ttemp block: %d", block, tmp->block);
+            if (strcmp(getName(tmp),name) == 0) {
+                if (tmp->isActive) {
                     return 0;
                 }
             }
@@ -556,8 +597,10 @@ int SymTable_general_lookup(const char * name, unsigned int scope, types type, u
     }
     else if (strcmp(search_mode, "local") == 0) {
         while (tmp != NULL) {
-            if (getScope(tmp) == scope && (tmp->block == block)) {
-                if (strcmp(getName(tmp),name) == 0) {
+            if (strcmp(getName(tmp),name) == 0) {
+                if (strcmp("a1",getName(tmp))==0) {
+                }
+                if ((getScope(tmp) == scope) && tmp->isActive) {
                     return 2;
                 }
             }
@@ -566,7 +609,6 @@ int SymTable_general_lookup(const char * name, unsigned int scope, types type, u
         return 1;
     }
     else if (strcmp(search_mode, "global_src") == 0) {
-        printf("\n%s\n",name);
         if (isLibraryFunc(name)) {return 2;}
         while (tmp != NULL) {
             if (strcmp(getName(tmp),name) == 0) {
@@ -578,7 +620,6 @@ int SymTable_general_lookup(const char * name, unsigned int scope, types type, u
     }
     else if (strcmp(search_mode, "new_var") == 0) {
         int current_scope;
-        int flag = 1;
         int mafaka = SymTable_smoller_lookup(name, scope, block);
         if (mafaka == 2) {  //2: found same variable in same block & scope
             return 2;
@@ -586,10 +627,11 @@ int SymTable_general_lookup(const char * name, unsigned int scope, types type, u
         if (scope > 0) {
             for (current_scope = scope-1; current_scope >= 0; current_scope--) {
                 flag = SymTable_smol_lookup(name, current_scope);
-                if (flag == 0) {
-                    return 0;   //0: found same var in parent scope
+                if (flag == -1) {
+                    return -1;   //0: found same var in parent scope
                 }
             }
+            return flag;
         }
         return mafaka;  //found nothing
     }
@@ -670,14 +712,33 @@ void print_scopes() {
     temp2 = lista;
     while (temp2 != NULL) {
         temp = temp2->scope_head;
-        printf("scope: %d\n\t",temp2->scope_counter);
+        printf("---------\tscope: %d\t---------\n\n",temp2->scope_counter);
         while (temp != NULL) {
-            printf("%s\t",getName(temp));
+            printf("\"%s\"\t[%s]\t(line: %u)\t(scope: %u)\n",getName(temp),getType(temp->type),getLine(temp), getScope(temp));
             temp = temp->next_in_scope;
         }
         temp2 = temp2 -> next;
         printf("\n");
     }
+}
+
+void print_hash() {
+    SymTable *temp = lera;
+    symt *temp2;
+    int i;
+
+    for (i = 0; i < SIZE; i++) {
+        if (temp->head[i] != NULL) {
+            temp2 = temp->head[i];
+            printf("bucket: %d\n",i);
+            while (temp2 != NULL) {
+                printf("\t\"%s\"\t[%s]\t(line: %u)\t(scope: %u)\n",getName(temp2),getType(temp2->type),getLine(temp2), getScope(temp2));
+                temp2 = temp2->next;
+            }
+            printf("\n");
+        }
+    }
+    printf("\n_____________________________________________\n");
 }
 
 int yyerror (char* yaccProvidedMessage) {
@@ -696,6 +757,7 @@ int main(int argc, char** argv) {
     }
     initialize();
     yyparse();
-    print_hash();
+    //print_hash();
+    print_scopes();
     return 0;
 }
