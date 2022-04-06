@@ -36,7 +36,7 @@
 %token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT LINE_COMM
 
 
-%type stmt expr term assignexpr primary lvalue member call callsuffix normcall methodcall elist objectdef indexed indexedelem block funcdef const idlist ifstmt whilestmt forstmt returnstmt
+%type stmt expr term assignexpr primary member call callsuffix normcall methodcall elist objectdef indexed indexedelem block funcdef const idlist ifstmt whilestmt forstmt returnstmt
 
 /* %type <strVal>	stmt
 %type		expr
@@ -46,6 +46,7 @@
 %type <strVal>	elist objectdef indexed indexedelem
 %type <strVal>	block funcdef const idlist
 %type <strVal>	ifstmt whilestmt forstmt returnstmt */
+%type <strVal> lvalue
 
 %right OP_EQUALS
 %left OR
@@ -114,9 +115,30 @@ expr:       assignexpr      {printf("Assign expression\n");}
 term:       LEFT_PAR expr RIGHT_PAR {printf("Term: (expr)\n");}
             |OP_MINUS expr  {printf("Term: -expr\n");}
             |NOT expr {printf("Term: not expr\n");}
-            |OP_PLUS_PLUS lvalue {printf("Term: ++lvalue\n");}
-            |lvalue OP_PLUS_PLUS {printf("Term: lvalue++\n");}
-            |OP_MINUS_MINUS lvalue {printf("Term: --lvalue\n");}
+            |OP_PLUS_PLUS lvalue {
+                if (SymTable_type_lookup($2,scope) == 0) {
+                    printf("ERROR. Attempting to use function as lvalue\n");
+                }
+                else {
+                    printf("Term: ++lvalue\n");
+                }
+            }
+            |lvalue OP_PLUS_PLUS {
+                if (SymTable_type_lookup($1,scope) == 0) {
+                    printf("ERROR. Attempting to use function as lvalue\n");
+                }
+                else {
+                    printf("Term: lvalue++\n");
+                }
+            }
+            |OP_MINUS_MINUS lvalue {
+                if (SymTable_type_lookup($2,scope) == 0) {
+                    printf("ERROR. Attempting to use function as lvalue\n");
+                }
+                else {
+                    printf("Term: --lvalue\n");
+                }
+            }
             |lvalue OP_MINUS_MINUS {printf("Term: lvalue--\n");}
             |primary {printf("Term: primary\n");}
             ;
@@ -262,6 +284,7 @@ funcdef:    FUNCTION LEFT_PAR {
                     }
                     else {
                         fprintf(stderr,"\nERROR: Function (%s) in scope %d line %d cannot be defined\n",strdup(str),scope,total_lines);
+                        yyerror("");
                     }
                 } 
                 idlist RIGHT_PAR block {
@@ -289,6 +312,7 @@ funcdef:    FUNCTION LEFT_PAR {
                     }
                     else {
                         fprintf(stderr,"\nERROR: Function (%s) in scope %d line %d cannot be defined\n",$2,scope,total_lines);
+                        yyerror("");
                     }
                 } 
                 idlist RIGHT_PAR block {
@@ -519,6 +543,22 @@ int SymTable_insert(const char *name, unsigned int scope, unsigned int line, typ
     }
 }
 
+int SymTable_type_lookup(const char *name, unsigned int scope) {
+    symt *temp = NULL;
+    unsigned int index = SymTable_hash(name) % 499;
+    temp = lera->head[index];
+    while (temp != NULL) {
+        if (strcmp(getName(temp),name) == 0) {
+            if (temp->isActive) {
+                return 1;
+            }
+            return 0;
+        }
+        temp = temp->next;
+    }
+    return 1;
+}
+
 int SymTable_smol_lookup(const char *name, unsigned int scope) {
     symt *tmp = NULL;
     unsigned int index = SymTable_hash(name) % 499;
@@ -744,7 +784,8 @@ void print_hash() {
 int yyerror (char* yaccProvidedMessage) {
     fprintf(stderr, "%s: at line %d, before token: %s\n", yaccProvidedMessage, total_lines, yytext);
     fprintf(stderr, "INPUT NOT VALID\n");
-    exit(1);
+    print_scopes();
+    exit(0);
 }
 
 int main(int argc, char** argv) {
