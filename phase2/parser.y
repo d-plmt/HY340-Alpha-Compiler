@@ -36,7 +36,7 @@
 %token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT
 
 
-%type stmt expr op term assignexpr primary lvalue member call callsuffix normcall methodcall elist objectdef indexed indexedelem block funcdef const idlist ifstmt whilestmt forstmt returnstmt
+%type stmt expr term assignexpr primary lvalue member call callsuffix normcall methodcall elist objectdef indexed indexedelem block funcdef const idlist ifstmt whilestmt forstmt returnstmt
 
 /* %type <strVal>	stmt
 %type		expr
@@ -54,7 +54,7 @@
 %nonassoc OP_GREATER OP_GREATER_EQ OP_LESSER OP_LESSER_EQ
 %left OP_PLUS OP_MINUS
 %left OP_ASTERISK OP_SLASH OP_PERCENTAGE
-%right NOT OP_PLUS_PLUS OP_MINUS_MINUS UMINUS
+%right NOT OP_PLUS_PLUS OP_MINUS_MINUS
 %left DOT DOT_DOT
 %left LEFT_BRACE RIGHT_BRACE
 %left LEFT_PAR RIGHT_PAR
@@ -207,12 +207,10 @@ elist:      expr
 
 objectdef:  LEFT_BRACKET elist RIGHT_BRACKET
             |LEFT_BRACKET indexed RIGHT_BRACKET
-            |LEFT_BRACKET RIGHT_BRACKET
             ;
 
 indexed:    indexedelem
             | indexedelem COMMA indexed
-            |
             ;
 
 indexedelem: LEFT_BRACE expr COLON expr RIGHT_BRACE
@@ -468,8 +466,6 @@ int SymTable_insert(const char *name, unsigned int scope, unsigned int line, typ
         }
         temp->next_in_scope = new_node;
     }
-    print_scopes();
-    //print_hash();
 }
 
 void print_hash() {
@@ -700,5 +696,6 @@ int main(int argc, char** argv) {
     }
     initialize();
     yyparse();
+    print_hash();
     return 0;
 }
