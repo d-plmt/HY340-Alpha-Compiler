@@ -72,7 +72,7 @@ int SymTable_general_lookup(const char *name, unsigned int scope, types type, un
 int SymTable_smol_lookup(const char *name, unsigned int scope);
 int SymTable_smoller_lookup(const char *name, unsigned int scope, unsigned int block);
 int SymTable_type_lookup(const char *name, unsigned int scope);
-symt* SymTable_lookup(const char *new_symbol_name, unsigned int scope, unsigned int block, char *search_mode); 
+symt* SymTable_lookup(const char *new_symbol_name, unsigned int scope, char *search_mode); 
 void SymTable_hide(unsigned int scope);
 void SymTable_reveal(unsigned int scope);
 

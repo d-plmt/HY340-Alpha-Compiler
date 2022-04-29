@@ -5,19 +5,20 @@ void SymTable_hide(unsigned int scope) {
     scope_link *scope_temp;
     symt *entry_temp;
 
+    if (!scope) {return;}
     scope_temp = lista;
-    while (scope_temp != NULL) {
-        if (scope_temp->scope_counter == scope) {
-            entry_temp = scope_temp->scope_head;
-            while (entry_temp != NULL) {
-                if (!isLibraryFunc(getName(entry_temp))) {
-                    printf("\033[0;33mHiding %s  type: %s\n\033[0m",getName(entry_temp),getType(entry_temp->type));
-                    entry_temp->isActive = 0;
-                }
-                entry_temp = entry_temp->next_in_scope;
-            }
-        }
+    while ((scope_temp->scope_counter < scope) && (scope_temp != NULL)) {
         scope_temp = scope_temp->next;
+    }
+    if (scope_temp != NULL) {
+        entry_temp = scope_temp->scope_head;
+        while (entry_temp != NULL) {
+            if (entry_temp->isActive) {
+                printf("\033[0;33mHiding %s  type: %s\n\033[0m",getName(entry_temp),getType(entry_temp->type));
+                entry_temp->isActive = 0;
+            }
+            entry_temp = entry_temp->next_in_scope;
+        }
     }
 }
 
@@ -25,19 +26,20 @@ void SymTable_reveal(unsigned int scope) {
     scope_link *scope_temp;
     symt *entry_temp;
 
+    if (!scope) {return;}
     scope_temp = lista;
-    while (scope_temp != NULL) {
-        if (scope_temp->scope_counter == scope) {
-            entry_temp = scope_temp->scope_head;
-            while (entry_temp != NULL) {
-                    if (!isLibraryFunc(getName(entry_temp))) {
-                        printf("\033[0;33mRevealing %s  type: %s\n\033[0m",getName(entry_temp),getType(entry_temp->type));
-                        entry_temp->isActive = 1;
-                    }
-                entry_temp = entry_temp->next_in_scope;
-            }
-        }
+    while ((scope_temp->scope_counter < scope) && (scope_temp != NULL)) {
         scope_temp = scope_temp->next;
+    }
+    if (scope_temp != NULL) {
+        entry_temp = scope_temp->scope_head;
+        while (entry_temp != NULL) {
+                if (!entry_temp->isActive) {
+                    printf("\033[0;33mRevealing %s  type: %s\n\033[0m",getName(entry_temp),getType(entry_temp->type));
+                    entry_temp->isActive = 1;
+                }
+            entry_temp = entry_temp->next_in_scope;
+        }
     }
 }
 
@@ -112,7 +114,7 @@ int SymTable_insert(const char *name, unsigned int scope, unsigned int line, typ
     }
 }
 
-symt* SymTable_lookup(const char *new_symbol_name, unsigned int scope, unsigned int block, char *search_mode) {
+symt* SymTable_lookup(const char *new_symbol_name, unsigned int scope, char *search_mode) {
     symt *temp = NULL;
     unsigned int index = SymTable_hash(new_symbol_name) % 499;
 
@@ -136,13 +138,13 @@ symt* SymTable_lookup(const char *new_symbol_name, unsigned int scope, unsigned 
     else if (!strcmp(search_mode, "global_src")) {
         while (temp != NULL) {
             printf("\tsymbol %s scope %u block %u\n",getName(temp),getScope(temp),temp->block);
-            if (!strcmp(new_symbol_name,getName(temp)) && (getScope(temp) == 0) && (temp->block == 0)) {
+            if (!strcmp(new_symbol_name,getName(temp)) && (getScope(temp) == 0)) {
                 return temp;
             }
             temp = temp->next;
         }
-        return NULL;
     }
+    //else if (!strcmp(search_mode, ""))
     return NULL;
 }
 

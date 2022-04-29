@@ -1,5 +1,2 @@
-x;
-function a(){
-::x=5;}
-y;
-{::y=4;}
+{a=2; function (){function (){b;}} a=3;}
+{a=5;}

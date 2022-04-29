@@ -20,7 +20,6 @@
     int functions = 0;
     int func_counter = 0;
     int prev_block = 0;
-    int next_block = 1;
     int loop_scope = 0;
     int call_flag = 0;
 %}
@@ -213,7 +212,8 @@ lvalue:     IDENTIFIER {
             }
             |COL_COL IDENTIFIER {
                 printf("Lvalue: ::identifier\n");
-                if (SymTable_lookup($2, scope, block, "global_src") != NULL) {
+                printf("\tscope: %u, block: %d\n",scope,block);
+                if (SymTable_lookup($2, scope, "global_src") != NULL) {
                     fprintf(stdout, "Symbol %s successfully found in global scope.\n", $2);
                 }
                 else {
@@ -298,15 +298,14 @@ block:      LEFT_BRACE {
             ;
 funcdef:    FUNCTION LEFT_PAR {
                     sprintf(str, "%s%d%c","_f",func_counter+1,'\0');
-                    if (SymTable_lookup(strdup(str), scope, block, "funcdef") == NULL) {
+                    if (SymTable_lookup(strdup(str), scope, "funcdef") == NULL) {
                         functions++;
                         func_counter++;
                         SymTable_insert(strdup(str), scope, total_lines, 3, block);
                         scope++; 
                         scope_flag = 0; 
                         prev_block = block;
-                        block = next_block;
-                        next_block++;
+                        block++;
                         SymTable_hide(scope-1);
                     }
                     else {
@@ -320,7 +319,6 @@ funcdef:    FUNCTION LEFT_PAR {
                     } 
 
                     scope--;
-                    block = prev_block;
                     SymTable_hide(scope+1);
                     SymTable_reveal(scope);
                     printf("Funcdef: function (idlist) {}\n");
@@ -329,7 +327,7 @@ funcdef:    FUNCTION LEFT_PAR {
                 IDENTIFIER {
                 }
                 LEFT_PAR {
-                    if (SymTable_lookup($2, scope, block, "funcdef") == NULL) {
+                    if (SymTable_lookup($2, scope, "funcdef") == NULL) {
                         SymTable_insert($2, scope, total_lines, 3, block);
                         functions++;
                         scope++; 
@@ -348,7 +346,6 @@ funcdef:    FUNCTION LEFT_PAR {
                         scope_flag = 1;
                     } 
                     scope--;
-                    block = prev_block;
                     SymTable_hide(scope+1);
                     SymTable_reveal(scope);
                     printf("Funcdef: function identifier(idlist) {}\n");
