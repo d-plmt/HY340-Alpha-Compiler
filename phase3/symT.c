@@ -164,7 +164,7 @@ symt* SymTable_lookup(const char *new_symbol_name, unsigned int scope, char *sea
     }
     else if (!strcmp(search_mode, "call_src")) {
         while (temp != NULL) {
-            if (!strcmp(new_symbol_name, getName(temp)) && (getScope(temp) < scope) && (temp->isActive)) {
+            if (!strcmp(new_symbol_name, getName(temp)) && (temp->isActive)) {
                 return temp;
             }
             temp = temp->next;

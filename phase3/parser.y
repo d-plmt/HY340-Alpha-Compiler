@@ -149,14 +149,19 @@ term:       LEFT_PAR expr RIGHT_PAR {printf("Term: (expr)\n");}
             |primary {printf("Term: primary\n");}
             ;
 
-assignexpr: lvalue OP_EQUALS expr {                
-                if (SymTable_type_lookup($1,scope) == 0) {
+assignexpr: lvalue OP_EQUALS expr {     
+            symt *tmp = NULL;
+            tmp = SymTable_lookup($1, scope, "call_src"); 
+            printf("lvalue: %s",$1);          
+            if (tmp != NULL) {
+                if (tmp->type > 2) {
                     printf("\033[0;31mERROR. Attempting to use function as lvalue\n\033[0m");
                 }
                 else {
                     printf("Assign expression: lvalue = expr\n");
                 }
             }
+        }
             ;
 
 primary:    lvalue  {printf("Primary: lvalue\n");}

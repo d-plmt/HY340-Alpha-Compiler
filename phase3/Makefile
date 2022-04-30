@@ -16,6 +16,6 @@ a:
 	@flex --outfile=al.c al.l
 	@gcc symT.c al.c parser.c -o al
 	@echo "Executing program:"
-	@./al test.txt
+	@./al testfiles/Errors/Error0.asc
 	
 	
