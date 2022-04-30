@@ -166,28 +166,46 @@ primary:    lvalue  {printf("Primary: lvalue\n");}
             |const {printf("Primary: const\n");}
             ;
     
-lvalue:     IDENTIFIER {
-                if (func_flag) {
-                    
-                }
-                if (call_flag == 0) {                     
+lvalue:     IDENTIFIER {                    
                     printf("Lvalue: identifier\n");
                     symt *tmp = NULL;
                     tmp = SymTable_lookup($1, scope, "local");
                     if (tmp != NULL) {
-                        if (tmp->type > 2){
-                            printf("AAAAAAAAAAAAA");
-                            fprintf(stdout, "\033[0;31mERROR: Attempting to use function as lvalue\n\033[0m");
+                        if (func_flag) {
+                            if (tmp->type > 2){
+                                printf("AAAAAAAAAAAAA");
+                                fprintf(stdout, "\033[0;31mERROR: Attempting to use function as lvalue\n\033[0m");
+                            }
+                        }
+                        else {
+                            fprintf(stdout, "Calling symbol %s.\n",$1);
                         }
                     }
                     else {
-                        tmp = SymTable_lookup($1, scope, "var_src");
-                        if (tmp != NULL) {
-                            fprintf(stdout, "\033[0;31mERROR: Cannot access variable %s in this scope\n\033[0m",$1);
+                        if (func_flag) {
+                            tmp = SymTable_lookup($1, scope, "var_src");
+                            if (tmp != NULL) {
+                                fprintf(stdout, "\033[0;31mERROR: Cannot access variable %s in this scope\n\033[0m",$1);
+                            }
+                            else {
+                                SymTable_insert($1, scope, total_lines, 1, block);
+                            }
                         }
                         else {
-                            SymTable_insert($1, scope, total_lines, 1, block);
+                            tmp = SymTable_lookup($1, scope, "call_src");
+                            if (tmp != NULL) {
+                                fprintf(stdout, "Calling symbol %s in parent scope.\n", $1);
+                            }
+                            else {
+                                if (scope == 0) {
+                                    SymTable_insert($1, scope, total_lines, 0, block);
+                                }
+                                else {
+                                    SymTable_insert($1, scope, total_lines, 1, block);
+                                }
+                            }
                         }
+
                     }
                     // int returned = SymTable_general_lookup($1, scope, 1, block, "new_var");
                     // if (returned == 2) {
@@ -209,7 +227,6 @@ lvalue:     IDENTIFIER {
                     //     fprintf(stdout, "\033[0;31mERROR: Cannot access (%s) in scope %d \n\033[0m", $1, scope);
                     //     //fprintf(stdout,"\033[0m");
                     // }
-                }
 
             }
 
@@ -261,7 +278,7 @@ member:     lvalue DOT IDENTIFIER {printf("Member: lvalue.identifier\n");}
             ;
 
 call:       call {call_flag = 1;}LEFT_PAR elist RIGHT_PAR {call_flag = 0; printf("Call: call(elist)\n");}
-            | lvalue callsuffix { printf("Call: lvalue callsuffix\n");}
+            | lvalue {call_flag=1;}callsuffix { printf("Call: lvalue callsuffix\n");}
             |LEFT_PAR funcdef RIGHT_PAR {call_flag = 1;} LEFT_PAR elist RIGHT_PAR {call_flag = 0; printf("Call: (funcdef)(elist)\n");}
             ;
         
@@ -321,9 +338,9 @@ block:      LEFT_BRACE {
                 {printf("Block: {func_stmt}\n");} 
             ;
 funcdef:    FUNCTION LEFT_PAR {
-                    func_flag = 1;
                     sprintf(str, "%s%d%c","_f",func_counter+1,'\0');
                     if (SymTable_lookup(strdup(str), scope, "funcdef") == NULL) {
+                        func_flag = 1;
                         functions++;
                         func_counter++;
                         SymTable_insert(strdup(str), scope, total_lines, 3, block);
@@ -342,19 +359,19 @@ funcdef:    FUNCTION LEFT_PAR {
                     if (!(--functions)){
                         scope_flag = 1;
                     } 
-
+                    func_flag = 0;
                     scope--;
                     SymTable_hide(scope+1);
                     SymTable_reveal(scope);
                     printf("Funcdef: function (idlist) {}\n");
-                    func_flag = 0;
                 }
-            |FUNCTION {func_flag = 1;}
+            |FUNCTION 
                 IDENTIFIER {
                 }
                 LEFT_PAR {
                     if (SymTable_lookup($2, scope, "funcdef") == NULL) {
                         SymTable_insert($2, scope, total_lines, 3, block);
+                        {func_flag=1;}
                         functions++;
                         scope++; 
                         scope_flag = 0;
@@ -371,11 +388,11 @@ funcdef:    FUNCTION LEFT_PAR {
                     if (!(--functions)){
                         scope_flag = 1;
                     } 
+                    func_flag=0;
                     scope--;
                     SymTable_hide(scope+1);
                     SymTable_reveal(scope);
                     printf("Funcdef: function identifier(idlist) {}\n");
-                    func_flag = 0;
                 }
             ;
 

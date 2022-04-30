@@ -1,1 +1,2 @@
-input(x);
+function f(){}
+f++;
