@@ -1,2 +1,1 @@
-{a=2; function (){function (){b;}} a=3;}
-{a=5;}
+input(x);

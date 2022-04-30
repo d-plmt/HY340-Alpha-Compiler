@@ -85,12 +85,12 @@
     unsigned int block = 0;
     unsigned int scope = 0;
     int scope_flag = 1;
-    int nested_func_flag = 0;
     int functions = 0;
     int func_counter = 0;
     int prev_block = 0;
     int loop_scope = 0;
     int call_flag = 0;
+    int func_flag = 0;
 
 #line 96 "parser.c"
 
@@ -627,12 +627,12 @@ static const yytype_int16 yyrline[] =
       80,    88,    89,    90,    93,    94,    95,    96,    97,    98,
       99,   100,   101,   102,   103,   104,   105,   106,   107,   113,
      114,   115,   116,   124,   133,   141,   149,   152,   162,   163,
-     164,   165,   166,   169,   196,   213,   230,   233,   234,   235,
-     236,   239,   239,   240,   241,   241,   244,   245,   248,   248,
-     251,   251,   254,   255,   256,   259,   260,   263,   264,   267,
-     270,   271,   274,   274,   286,   290,   286,   299,   299,   327,
-     329,   326,   355,   356,   357,   358,   359,   360,   363,   372,
-     381,   384,   385,   388,   388,   397,   397,   406,   414
+     164,   165,   166,   169,   213,   234,   251,   254,   255,   256,
+     257,   260,   260,   261,   262,   262,   265,   266,   269,   269,
+     272,   272,   275,   276,   277,   280,   281,   284,   285,   288,
+     291,   292,   295,   295,   307,   311,   307,   320,   320,   348,
+     350,   347,   376,   377,   378,   379,   380,   381,   384,   393,
+     402,   405,   406,   409,   409,   418,   418,   427,   435
 };
 #endif
 
@@ -694,15 +694,15 @@ static const yytype_int16 yypact[] =
      245,   291,    48,    53,    43,   354,    57,  -150,  -150,  -150,
      245,   245,   245,   245,   245,   245,   245,   245,   245,   245,
      245,   245,   245,  -150,   245,  -150,  -150,   245,  -150,    88,
-      91,  -150,  -150,  -150,   245,    97,    68,   375,   396,    63,
-      70,   108,  -150,    74,  -150,   156,    79,   269,   245,  -150,
-    -150,    83,  -150,    81,   508,   495,     3,     3,  -150,  -150,
+    -150,  -150,  -150,  -150,   245,    91,    63,   375,   396,    68,
+      74,    99,  -150,    67,  -150,   156,    78,   269,   245,  -150,
+    -150,    80,  -150,    79,   508,   495,     3,     3,  -150,  -150,
     -150,   521,   521,    56,    56,    56,    56,   480,   417,   245,
-    -150,    82,   438,  -150,   245,   156,  -150,   245,  -150,    93,
-      85,  -150,  -150,  -150,   245,  -150,  -150,    84,  -150,    90,
-    -150,  -150,    96,   126,   156,   333,   108,   108,   109,  -150,
+    -150,   116,   438,  -150,   245,   156,  -150,   245,  -150,    81,
+      85,  -150,  -150,  -150,   245,  -150,  -150,    94,  -150,    90,
+      96,  -150,   104,   113,   156,   333,    99,    99,   101,  -150,
      459,   245,  -150,   245,  -150,   156,  -150,   245,   105,  -150,
-    -150,  -150,   110,   112,  -150,   114,   109,  -150,  -150,  -150,
+    -150,  -150,   110,   112,  -150,   114,   101,  -150,  -150,  -150,
     -150,   156,  -150
 };
 
@@ -720,13 +720,13 @@ static const yytype_int8 yydefact[] =
        0,    62,     0,     0,    67,     0,     0,    45,     1,     2,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     4,     0,    33,    35,     0,    58,     0,
-       0,    53,    56,    57,     0,     0,     0,     0,     0,     0,
+      60,    53,    56,    57,     0,     0,     0,     0,     0,     0,
        0,    90,    98,     0,    73,    71,     0,     0,    64,    65,
       66,     0,    29,    41,    26,    27,    15,    16,    17,    18,
       19,    24,    25,    20,    22,    21,    23,    37,     0,    64,
       47,     0,     0,    49,    64,     0,    93,     0,    80,    88,
        0,    54,    70,    75,     0,    63,    68,     0,    48,     0,
-      60,    50,     0,    91,     0,     0,    90,    90,     0,    76,
+       0,    50,     0,    91,     0,     0,    90,    90,     0,    76,
        0,    64,    59,    64,    52,     0,    94,    64,     0,    89,
       78,    69,     0,     0,    92,     0,     0,    55,    61,    95,
       81,     0,    96
@@ -745,7 +745,7 @@ static const yytype_int16 yypgoto[] =
 static const yytype_int16 yydefgoto[] =
 {
       -1,    25,    26,    27,    28,    29,    30,    31,    32,    33,
-      96,   147,    91,    92,   129,    93,   163,    62,    34,    63,
+      96,   147,    91,    92,   129,    93,   131,    62,    34,    63,
       64,   106,    35,    58,    59,   159,    36,   101,   100,   156,
       37,   140,    38,    39,   154,    40,   181,    41
 };
@@ -764,12 +764,12 @@ static const yytype_int16 yytable[] =
       95,   114,   115,   116,   117,   118,   119,   120,   121,   122,
      123,   124,   125,   126,   145,   127,     8,   153,   128,    72,
       73,    74,    75,    76,   104,   132,   111,   109,   -73,   -73,
-     -73,   -73,   110,    84,   130,   149,   166,   131,   113,    61,
-     152,    85,    86,   133,    87,   137,    88,   174,   134,    87,
-     138,    88,    89,    90,   139,   141,   143,    89,    90,    60,
-      61,   -54,   150,   182,   161,    61,   158,   172,   155,   173,
-      70,   162,    71,   175,   165,   160,   157,   164,    72,    73,
-      74,    75,    76,    77,    78,    20,   176,    79,    80,    81,
+     -73,   -73,   110,    84,   130,   149,   166,   133,   113,    61,
+     152,    85,    86,   134,    87,   139,    88,   174,   141,    87,
+     137,    88,    89,    90,   138,   143,    60,    89,    90,   -54,
+      61,   165,   150,   182,   157,    61,   158,   172,   155,   173,
+      70,   162,    71,   175,   161,   160,   163,    20,    72,    73,
+      74,    75,    76,    77,    78,   164,   176,    79,    80,    81,
       82,   177,    61,   178,    61,   179,    69,    83,    61,     1,
        2,     3,     4,     5,     0,     6,     7,     8,     9,    10,
       11,   146,    12,     0,    13,    14,    15,    16,   142,     0,
@@ -825,11 +825,11 @@ static const yytype_int16 yycheck[] =
       79,    80,    81,    82,   108,    84,    11,   135,    87,    23,
       24,    25,    26,    27,    37,    94,    43,    39,    32,    33,
       34,    35,    39,    22,     6,   129,   154,     6,    41,   108,
-     134,    30,    31,     6,    38,    42,    40,   165,    40,    38,
-      40,    40,    46,    47,     6,    41,    37,    46,    47,    36,
-     129,    40,    40,   181,    40,   134,    41,   161,   137,   163,
-      15,    41,    17,   167,     8,   144,    43,    41,    23,    24,
-      25,    26,    27,    28,    29,    36,    41,    32,    33,    34,
+     134,    30,    31,    40,    38,     6,    40,   165,    41,    38,
+      42,    40,    46,    47,    40,    37,    36,    46,    47,    40,
+     129,     8,     6,   181,    43,   134,    41,   161,   137,   163,
+      15,    41,    17,   167,    40,   144,    40,    36,    23,    24,
+      25,    26,    27,    28,    29,    41,    41,    32,    33,    34,
       35,    41,   161,    41,   163,    41,    26,    42,   167,     3,
        4,     5,     6,     7,    -1,     9,    10,    11,    12,    13,
       14,   111,    16,    -1,    18,    19,    20,    21,   105,    -1,
@@ -890,10 +890,10 @@ static const yytype_int8 yystos[] =
       77,    76,    42,    75,    37,    51,    70,    52,    43,    39,
       39,    43,    41,    41,    52,    52,    52,    52,    52,    52,
       52,    52,    52,    52,    52,    52,    52,    52,    52,    63,
-       6,     6,    52,     6,    40,    41,    41,    42,    40,     6,
+       6,    65,    52,     6,    40,    41,    41,    42,    40,     6,
       80,    41,    70,    37,    44,    66,    68,    60,    39,    66,
-      40,    39,    66,    51,    83,    52,    78,    43,    41,    74,
-      52,    40,    41,    65,    41,     8,    51,    42,    80,    80,
+       6,    39,    66,    51,    83,    52,    78,    43,    41,    74,
+      52,    40,    41,    40,    41,     8,    51,    42,    80,    80,
       71,    37,    66,    66,    51,    66,    41,    41,    41,    41,
       71,    85,    51
 };
@@ -1909,56 +1909,77 @@ yyreduce:
                        {
                 if (call_flag == 0) {                     
                     printf("Lvalue: identifier\n");
-                    int returned = SymTable_general_lookup((yyvsp[0].strVal), scope, 1, block, "new_var");
-                    if (returned == 2) {
-                        //fprintf(stdout, "%s refers to another symbol in the same scope.\n",$1);
+                    symt *tmp = NULL;
+                    tmp = SymTable_lookup((yyvsp[0].strVal), scope, "local");
+                    if (tmp != NULL) {
+                        if (tmp->type > 2){
+                            printf("AAAAAAAAAAAAA");
+                            fprintf(stdout, "\033[0;31mERROR: Attempting to use function as lvalue\n\033[0m");
+                        }
                     }
-                    else if (returned == 0) {
-                        //fprintf(stdout, "%s refers to another symbol in a parent scope.\n", $1);
-                    }
-                    else if (returned == 1) {
-                        if (scope == 0) {
-                            SymTable_insert((yyvsp[0].strVal), scope, total_lines, 0, block);
+                    else {
+                        tmp = SymTable_lookup((yyvsp[0].strVal), scope, "var_src");
+                        if (tmp != NULL) {
+                            fprintf(stdout, "\033[0;31mERROR: Cannot access variable %s in this scope\n\033[0m",(yyvsp[0].strVal));
                         }
                         else {
                             SymTable_insert((yyvsp[0].strVal), scope, total_lines, 1, block);
                         }
                     }
-                    else if (returned == -1) {
-                        //fprintf(stdout,"\033[0;31m");
-                        fprintf(stdout, "\033[0;31mERROR: Cannot access (%s) in scope %d \n\033[0m", (yyvsp[0].strVal), scope);
-                        //fprintf(stdout,"\033[0m");
-                    }
+                    // int returned = SymTable_general_lookup($1, scope, 1, block, "new_var");
+                    // if (returned == 2) {
+                    //     //fprintf(stdout, "%s refers to another symbol in the same scope.\n",$1);
+                    // }
+                    // else if (returned == 0) {
+                    //     //fprintf(stdout, "%s refers to another symbol in a parent scope.\n", $1);
+                    // }
+                    // else if (returned == 1) {
+                    //     if (scope == 0) {
+                    //         SymTable_insert($1, scope, total_lines, 0, block);
+                    //     }
+                    //     else {
+                    //         SymTable_insert($1, scope, total_lines, 1, block);
+                    //     }
+                    // }
+                    // else if (returned == -1) {
+                    //     //fprintf(stdout,"\033[0;31m");
+                    //     fprintf(stdout, "\033[0;31mERROR: Cannot access (%s) in scope %d \n\033[0m", $1, scope);
+                    //     //fprintf(stdout,"\033[0m");
+                    // }
                 }
 
             }
-#line 1936 "parser.c"
+#line 1953 "parser.c"
     break;
 
   case 44:
-#line 196 "parser.y"
+#line 213 "parser.y"
                               {
                 printf("Lvalue: local identifier\n");
-                int returned = SymTable_general_lookup((yyvsp[0].strVal), scope, 1, block, "local");
-                int realtype = 1;
-                if (scope == 0) {
-                    realtype = 0;
-                }
-                if (returned == 1) {
-                    SymTable_insert ((yyvsp[0].strVal), scope, total_lines, realtype, block);
-                }
-                else if (returned == 2) {
-                    //fprintf(stdout, "Local variable %s already defined.\n", $2);
+                // int returned = SymTable_general_lookup($2, scope, 1, block, "local");
+                // int realtype = 1;
+                // if (scope == 0) {
+                //     realtype = 0;
+                // }
+                // if (returned == 1) {
+                //     SymTable_insert ($2, scope, total_lines, realtype, block);
+                // }
+                // else if (returned == 2) {
+                //     //fprintf(stdout, "Local variable %s already defined.\n", $2);
+                // }
+                if (SymTable_lookup((yyvsp[0].strVal), scope, "local") == NULL) {
+                    SymTable_insert((yyvsp[0].strVal), scope, total_lines, 1, block);
                 }
                 else {
-                    fprintf(stdout, "\033[0;31mERROR: Variable (%s) cannot be defined in scope %d line %d\n", (yyvsp[0].strVal), scope, total_lines);
+
+                    fprintf(stdout, "\033[0;31mERROR: Variable (%s) cannot be defined in scope %d line %d\n\033[0m", (yyvsp[0].strVal), scope, total_lines);
                 }
             }
-#line 1958 "parser.c"
+#line 1979 "parser.c"
     break;
 
   case 45:
-#line 213 "parser.y"
+#line 234 "parser.y"
                                 {
                 printf("Lvalue: ::identifier\n");
                 printf("\tscope: %u, block: %d\n",scope,block);
@@ -1976,171 +1997,171 @@ yyreduce:
                 //     fprintf(stdout,"\033[0;31mERROR: Symbol %s in line %d not global or undefined.\n\033[0m", $2, total_lines);
                 // }
             }
-#line 1980 "parser.c"
+#line 2001 "parser.c"
     break;
 
   case 46:
-#line 230 "parser.y"
+#line 251 "parser.y"
                     {printf("Lvalue: member\n");}
-#line 1986 "parser.c"
+#line 2007 "parser.c"
     break;
 
   case 47:
-#line 233 "parser.y"
+#line 254 "parser.y"
                                   {printf("Member: lvalue.identifier\n");}
-#line 1992 "parser.c"
+#line 2013 "parser.c"
     break;
 
   case 48:
-#line 234 "parser.y"
+#line 255 "parser.y"
                                                     {printf("Member: lvalue[identifier]\n");}
-#line 1998 "parser.c"
+#line 2019 "parser.c"
     break;
 
   case 49:
-#line 235 "parser.y"
+#line 256 "parser.y"
                                  {printf("Member: call.identifier\n");}
-#line 2004 "parser.c"
+#line 2025 "parser.c"
     break;
 
   case 50:
-#line 236 "parser.y"
+#line 257 "parser.y"
                                                   {printf("Member: call[identifier]\n");}
-#line 2010 "parser.c"
+#line 2031 "parser.c"
     break;
 
   case 51:
-#line 239 "parser.y"
+#line 260 "parser.y"
                  {call_flag = 1;}
-#line 2016 "parser.c"
+#line 2037 "parser.c"
     break;
 
   case 52:
-#line 239 "parser.y"
+#line 260 "parser.y"
                                                           {call_flag = 0; printf("Call: call(elist)\n");}
-#line 2022 "parser.c"
+#line 2043 "parser.c"
     break;
 
   case 53:
-#line 240 "parser.y"
+#line 261 "parser.y"
                                 { printf("Call: lvalue callsuffix\n");}
-#line 2028 "parser.c"
+#line 2049 "parser.c"
     break;
 
   case 54:
-#line 241 "parser.y"
+#line 262 "parser.y"
                                         {call_flag = 1;}
-#line 2034 "parser.c"
+#line 2055 "parser.c"
     break;
 
   case 55:
-#line 241 "parser.y"
+#line 262 "parser.y"
                                                                                   {call_flag = 0; printf("Call: (funcdef)(elist)\n");}
-#line 2040 "parser.c"
+#line 2061 "parser.c"
     break;
 
   case 56:
-#line 244 "parser.y"
+#line 265 "parser.y"
                      {printf("Callsuffix: normcall\n");}
-#line 2046 "parser.c"
+#line 2067 "parser.c"
     break;
 
   case 57:
-#line 245 "parser.y"
+#line 266 "parser.y"
                         {printf("Callsuffix: method\n");}
-#line 2052 "parser.c"
+#line 2073 "parser.c"
     break;
 
   case 58:
-#line 248 "parser.y"
+#line 269 "parser.y"
                      {call_flag = 1;}
-#line 2058 "parser.c"
+#line 2079 "parser.c"
     break;
 
   case 59:
-#line 248 "parser.y"
+#line 269 "parser.y"
                                                       {call_flag = 0; printf("Normcall: (elist)\n");}
-#line 2064 "parser.c"
+#line 2085 "parser.c"
     break;
 
   case 60:
-#line 251 "parser.y"
-                                        {call_flag = 1;}
-#line 2070 "parser.c"
+#line 272 "parser.y"
+                    {call_flag = 1;}
+#line 2091 "parser.c"
     break;
 
   case 61:
-#line 251 "parser.y"
-                                                                         {call_flag = 0; printf("Methodcall: ..identifier(elist)\n");}
-#line 2076 "parser.c"
+#line 272 "parser.y"
+                                                                          {call_flag = 0; printf("Methodcall: ..identifier(elist)\n");}
+#line 2097 "parser.c"
     break;
 
   case 62:
-#line 254 "parser.y"
+#line 275 "parser.y"
                  {printf("Elist: expr\n");}
-#line 2082 "parser.c"
+#line 2103 "parser.c"
     break;
 
   case 63:
-#line 255 "parser.y"
+#line 276 "parser.y"
                                {printf("Elist: expr,...,expr\n");}
-#line 2088 "parser.c"
+#line 2109 "parser.c"
     break;
 
   case 65:
-#line 259 "parser.y"
+#line 280 "parser.y"
                                               {printf("Objectdef: (elist)\n");}
-#line 2094 "parser.c"
+#line 2115 "parser.c"
     break;
 
   case 66:
-#line 260 "parser.y"
+#line 281 "parser.y"
                                                 {printf("Objectdef: (indexed)\n");}
-#line 2100 "parser.c"
+#line 2121 "parser.c"
     break;
 
   case 67:
-#line 263 "parser.y"
+#line 284 "parser.y"
                         {printf("Indexed: indexedelem\n");}
-#line 2106 "parser.c"
+#line 2127 "parser.c"
     break;
 
   case 68:
-#line 264 "parser.y"
+#line 285 "parser.y"
                                         {printf("Indexed: indexedelem,...,indexedelem\n");}
-#line 2112 "parser.c"
+#line 2133 "parser.c"
     break;
 
   case 69:
-#line 267 "parser.y"
+#line 288 "parser.y"
                                                     {printf("Indexedelem: [expr:expr]\n");}
-#line 2118 "parser.c"
+#line 2139 "parser.c"
     break;
 
   case 70:
-#line 270 "parser.y"
+#line 291 "parser.y"
                           {printf("Func_stmt: stmt,...,stmt\n");}
-#line 2124 "parser.c"
+#line 2145 "parser.c"
     break;
 
   case 71:
-#line 271 "parser.y"
+#line 292 "parser.y"
                    {printf("Func_stmt: stmt\n");}
-#line 2130 "parser.c"
+#line 2151 "parser.c"
     break;
 
   case 72:
-#line 274 "parser.y"
+#line 295 "parser.y"
                        {
                     block = block + scope_flag;
                     scope = scope + scope_flag;
                     printf("\t\t\tBlock: %d\tScope: %d\n",block, scope);
                 }
-#line 2140 "parser.c"
+#line 2161 "parser.c"
     break;
 
   case 73:
-#line 278 "parser.y"
+#line 299 "parser.y"
                               {
                     scope = scope - scope_flag;
                     if (scope_flag == 1) {
@@ -2149,21 +2170,21 @@ yyreduce:
                     printf("\t\t\tBlock: %d\tScope: %d\n",block, scope);
                     {printf("Block: {}\n");}
                 }
-#line 2153 "parser.c"
+#line 2174 "parser.c"
     break;
 
   case 74:
-#line 286 "parser.y"
+#line 307 "parser.y"
                         {
                     block = block + scope_flag;
                     scope = scope + scope_flag;
                     printf("\t\t\tBlock: %d\tScope: %d\n",block, scope);
                 }
-#line 2163 "parser.c"
+#line 2184 "parser.c"
     break;
 
   case 75:
-#line 290 "parser.y"
+#line 311 "parser.y"
                                         {
                     scope = scope - scope_flag;
                     if (scope_flag == 1) {
@@ -2171,17 +2192,17 @@ yyreduce:
                     }
                     printf("\t\t\tBlock: %d\tScope: %d\n",block, scope);
                 }
-#line 2175 "parser.c"
+#line 2196 "parser.c"
     break;
 
   case 76:
-#line 297 "parser.y"
+#line 318 "parser.y"
                 {printf("Block: {func_stmt}\n");}
-#line 2181 "parser.c"
+#line 2202 "parser.c"
     break;
 
   case 77:
-#line 299 "parser.y"
+#line 320 "parser.y"
                               {
                     sprintf(str, "%s%d%c","_f",func_counter+1,'\0');
                     if (SymTable_lookup(strdup(str), scope, "funcdef") == NULL) {
@@ -2192,18 +2213,18 @@ yyreduce:
                         scope_flag = 0; 
                         prev_block = block;
                         block++;
-                        SymTable_hide(scope-1);
+                        //SymTable_hide(scope-1);
                     }
                     else {
                         fprintf(stderr,"\033[0;31mERROR: Function (%s) in scope %d line %d cannot be defined\n\033[0m",strdup(str),scope,total_lines);
                         yyerror("");
                     }
                 }
-#line 2203 "parser.c"
+#line 2224 "parser.c"
     break;
 
   case 78:
-#line 316 "parser.y"
+#line 337 "parser.y"
                                        {
                     if (!(--functions)){
                         scope_flag = 1;
@@ -2214,18 +2235,18 @@ yyreduce:
                     SymTable_reveal(scope);
                     printf("Funcdef: function (idlist) {}\n");
                 }
-#line 2218 "parser.c"
+#line 2239 "parser.c"
     break;
 
   case 79:
-#line 327 "parser.y"
+#line 348 "parser.y"
                            {
                 }
-#line 2225 "parser.c"
+#line 2246 "parser.c"
     break;
 
   case 80:
-#line 329 "parser.y"
+#line 350 "parser.y"
                          {
                     if (SymTable_lookup((yyvsp[-2].strVal), scope, "funcdef") == NULL) {
                         SymTable_insert((yyvsp[-2].strVal), scope, total_lines, 3, block);
@@ -2234,18 +2255,18 @@ yyreduce:
                         scope_flag = 0;
                         prev_block = block;
                         block++;
-                        SymTable_hide(scope-1);
+                        //SymTable_hide(scope-1);
                     }
                     else {
                         fprintf(stderr,"\033[0;31mERROR: Function (%s) in scope %d line %d cannot be defined\n\033[0m",(yyvsp[-2].strVal),scope,total_lines);
                         yyerror("");
                     }
                 }
-#line 2245 "parser.c"
+#line 2266 "parser.c"
     break;
 
   case 81:
-#line 344 "parser.y"
+#line 365 "parser.y"
                                        {
                     if (!(--functions)){
                         scope_flag = 1;
@@ -2255,47 +2276,47 @@ yyreduce:
                     SymTable_reveal(scope);
                     printf("Funcdef: function identifier(idlist) {}\n");
                 }
-#line 2259 "parser.c"
+#line 2280 "parser.c"
     break;
 
   case 82:
-#line 355 "parser.y"
+#line 376 "parser.y"
                     {printf("Const: integer\n");}
-#line 2265 "parser.c"
+#line 2286 "parser.c"
     break;
 
   case 83:
-#line 356 "parser.y"
+#line 377 "parser.y"
                    {printf("Const: real\n");}
-#line 2271 "parser.c"
+#line 2292 "parser.c"
     break;
 
   case 84:
-#line 357 "parser.y"
+#line 378 "parser.y"
                      {printf("Const: string\n");}
-#line 2277 "parser.c"
+#line 2298 "parser.c"
     break;
 
   case 85:
-#line 358 "parser.y"
+#line 379 "parser.y"
                   {printf("Const: nil\n");}
-#line 2283 "parser.c"
+#line 2304 "parser.c"
     break;
 
   case 86:
-#line 359 "parser.y"
+#line 380 "parser.y"
                    {printf("Const: true\n");}
-#line 2289 "parser.c"
+#line 2310 "parser.c"
     break;
 
   case 87:
-#line 360 "parser.y"
+#line 381 "parser.y"
                     {printf("Const: false\n");}
-#line 2295 "parser.c"
+#line 2316 "parser.c"
     break;
 
   case 88:
-#line 363 "parser.y"
+#line 384 "parser.y"
                         {
                 {printf("Idlist: identifier\n");}
                 if (SymTable_general_lookup((yyvsp[0].strVal), scope, 2, block, "formal")) {
@@ -2305,11 +2326,11 @@ yyreduce:
                     fprintf(stderr,"\033[0;31mERROR: Parameter (%s) in scope %d line %d cannot be defined\n\033[0m",(yyvsp[0].strVal),scope,total_lines);
                 }
             }
-#line 2309 "parser.c"
+#line 2330 "parser.c"
     break;
 
   case 89:
-#line 372 "parser.y"
+#line 393 "parser.y"
                                       {
                 {printf("Idlist: identifier,...,identifier\n");}
                 if (SymTable_general_lookup((yyvsp[-2].strVal), scope, 2, block, "formal")) {
@@ -2319,57 +2340,57 @@ yyreduce:
                     fprintf(stderr,"\033[0;31mERROR: Parameter (%s) in scope %d line %d cannot be defined\n\033[0m",(yyvsp[-2].strVal),scope,total_lines);
                 }
             }
-#line 2323 "parser.c"
+#line 2344 "parser.c"
     break;
 
   case 91:
-#line 384 "parser.y"
+#line 405 "parser.y"
                                             {printf("Ifstmt: if (expr) stmt\n");}
-#line 2329 "parser.c"
+#line 2350 "parser.c"
     break;
 
   case 92:
-#line 385 "parser.y"
+#line 406 "parser.y"
                                                        {printf("Ifstmt: if (expr) stmt else stmt\n");}
-#line 2335 "parser.c"
+#line 2356 "parser.c"
     break;
 
   case 93:
-#line 388 "parser.y"
+#line 409 "parser.y"
                                           {
                 loop_scope++;
             }
-#line 2343 "parser.c"
+#line 2364 "parser.c"
     break;
 
   case 94:
-#line 391 "parser.y"
+#line 412 "parser.y"
                  {
                 loop_scope--;
                 printf("Whilestmt: while (expr) stmt\n");
             }
-#line 2352 "parser.c"
+#line 2373 "parser.c"
     break;
 
   case 95:
-#line 397 "parser.y"
+#line 418 "parser.y"
                                                                         {
                 loop_scope++;
             }
-#line 2360 "parser.c"
+#line 2381 "parser.c"
     break;
 
   case 96:
-#line 400 "parser.y"
+#line 421 "parser.y"
                  {
                 loop_scope--;
                 printf("Forstmt: for (elist;expr;elist) stmt\n");
             }
-#line 2369 "parser.c"
+#line 2390 "parser.c"
     break;
 
   case 97:
-#line 406 "parser.y"
+#line 427 "parser.y"
                              {
                 if (scope_flag == 0) {
                     printf("Returnstmt: return;\n");
@@ -2378,11 +2399,11 @@ yyreduce:
                     fprintf(stderr, "\033[0;31mERROR: Keyword \"return\" in line %d can't be used without a function.\n\033[0m",total_lines);
                 }
             }
-#line 2382 "parser.c"
+#line 2403 "parser.c"
     break;
 
   case 98:
-#line 414 "parser.y"
+#line 435 "parser.y"
                                    {
                 if (scope_flag == 0) {
                     printf("Returnstmt: return;\n");
@@ -2391,11 +2412,11 @@ yyreduce:
                     fprintf(stderr, "\033[0;31mERROR: Keyword \"return\" in line %d can't be used without a function.\n\033[0m",total_lines);
                 }
             }
-#line 2395 "parser.c"
+#line 2416 "parser.c"
     break;
 
 
-#line 2399 "parser.c"
+#line 2420 "parser.c"
 
       default: break;
     }
@@ -2627,7 +2648,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 425 "parser.y"
+#line 446 "parser.y"
 
 
 void initialize() {

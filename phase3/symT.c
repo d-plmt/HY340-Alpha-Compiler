@@ -7,7 +7,7 @@ void SymTable_hide(unsigned int scope) {
 
     if (!scope) {return;}
     scope_temp = lista;
-    while ((scope_temp->scope_counter < scope) && (scope_temp != NULL)) {
+    while ((scope_temp != NULL) && (scope_temp->scope_counter < scope)) {
         scope_temp = scope_temp->next;
     }
     if (scope_temp != NULL) {
@@ -28,7 +28,7 @@ void SymTable_reveal(unsigned int scope) {
 
     if (!scope) {return;}
     scope_temp = lista;
-    while ((scope_temp->scope_counter < scope) && (scope_temp != NULL)) {
+    while ((scope_temp != NULL) && (scope_temp->scope_counter < scope)) {
         scope_temp = scope_temp->next;
     }
     if (scope_temp != NULL) {
@@ -120,6 +120,7 @@ symt* SymTable_lookup(const char *new_symbol_name, unsigned int scope, char *sea
 
     temp = lera -> head[index];
     if (isLibraryFunc(new_symbol_name)) {
+        printf("BBBB\n");
         while(temp != NULL) {
             if (!strcmp(new_symbol_name,getName(temp))) {
                 return temp;
@@ -144,7 +145,23 @@ symt* SymTable_lookup(const char *new_symbol_name, unsigned int scope, char *sea
             temp = temp->next;
         }
     }
-    //else if (!strcmp(search_mode, ""))
+    else if (!strcmp(search_mode, "formal") || !strcmp(search_mode, "local")) {
+        while (temp != NULL) {
+            printf("\tsymbol %s scope %u block %u\n",getName(temp),getScope(temp),temp->block);
+            if (!strcmp(new_symbol_name,getName(temp)) && (getScope(temp) == scope) && (temp->isActive)) {
+                return temp;
+            }
+            temp = temp->next;
+        }
+    }
+    else if (!strcmp(search_mode, "var_src")) {
+        while (temp != NULL) {
+            if (!strcmp(new_symbol_name, getName(temp)) && (getScope(temp) < scope) && (temp->type < 3) && (temp->isActive)) {
+                return temp;
+            }
+            temp = temp->next;
+        }
+    }
     return NULL;
 }
 

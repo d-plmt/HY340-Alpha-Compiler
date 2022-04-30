@@ -16,12 +16,12 @@
     unsigned int block = 0;
     unsigned int scope = 0;
     int scope_flag = 1;
-    int nested_func_flag = 0;
     int functions = 0;
     int func_counter = 0;
     int prev_block = 0;
     int loop_scope = 0;
     int call_flag = 0;
+    int func_flag = 0;
 %}
 
 %start program
@@ -167,47 +167,71 @@ primary:    lvalue  {printf("Primary: lvalue\n");}
             ;
     
 lvalue:     IDENTIFIER {
+                if (func_flag) {
+                    
+                }
                 if (call_flag == 0) {                     
                     printf("Lvalue: identifier\n");
-                    int returned = SymTable_general_lookup($1, scope, 1, block, "new_var");
-                    if (returned == 2) {
-                        //fprintf(stdout, "%s refers to another symbol in the same scope.\n",$1);
+                    symt *tmp = NULL;
+                    tmp = SymTable_lookup($1, scope, "local");
+                    if (tmp != NULL) {
+                        if (tmp->type > 2){
+                            printf("AAAAAAAAAAAAA");
+                            fprintf(stdout, "\033[0;31mERROR: Attempting to use function as lvalue\n\033[0m");
+                        }
                     }
-                    else if (returned == 0) {
-                        //fprintf(stdout, "%s refers to another symbol in a parent scope.\n", $1);
-                    }
-                    else if (returned == 1) {
-                        if (scope == 0) {
-                            SymTable_insert($1, scope, total_lines, 0, block);
+                    else {
+                        tmp = SymTable_lookup($1, scope, "var_src");
+                        if (tmp != NULL) {
+                            fprintf(stdout, "\033[0;31mERROR: Cannot access variable %s in this scope\n\033[0m",$1);
                         }
                         else {
                             SymTable_insert($1, scope, total_lines, 1, block);
                         }
                     }
-                    else if (returned == -1) {
-                        //fprintf(stdout,"\033[0;31m");
-                        fprintf(stdout, "\033[0;31mERROR: Cannot access (%s) in scope %d \n\033[0m", $1, scope);
-                        //fprintf(stdout,"\033[0m");
-                    }
+                    // int returned = SymTable_general_lookup($1, scope, 1, block, "new_var");
+                    // if (returned == 2) {
+                    //     //fprintf(stdout, "%s refers to another symbol in the same scope.\n",$1);
+                    // }
+                    // else if (returned == 0) {
+                    //     //fprintf(stdout, "%s refers to another symbol in a parent scope.\n", $1);
+                    // }
+                    // else if (returned == 1) {
+                    //     if (scope == 0) {
+                    //         SymTable_insert($1, scope, total_lines, 0, block);
+                    //     }
+                    //     else {
+                    //         SymTable_insert($1, scope, total_lines, 1, block);
+                    //     }
+                    // }
+                    // else if (returned == -1) {
+                    //     //fprintf(stdout,"\033[0;31m");
+                    //     fprintf(stdout, "\033[0;31mERROR: Cannot access (%s) in scope %d \n\033[0m", $1, scope);
+                    //     //fprintf(stdout,"\033[0m");
+                    // }
                 }
 
             }
 
             |LOCAL IDENTIFIER {
                 printf("Lvalue: local identifier\n");
-                int returned = SymTable_general_lookup($2, scope, 1, block, "local");
-                int realtype = 1;
-                if (scope == 0) {
-                    realtype = 0;
-                }
-                if (returned == 1) {
-                    SymTable_insert ($2, scope, total_lines, realtype, block);
-                }
-                else if (returned == 2) {
-                    //fprintf(stdout, "Local variable %s already defined.\n", $2);
+                // int returned = SymTable_general_lookup($2, scope, 1, block, "local");
+                // int realtype = 1;
+                // if (scope == 0) {
+                //     realtype = 0;
+                // }
+                // if (returned == 1) {
+                //     SymTable_insert ($2, scope, total_lines, realtype, block);
+                // }
+                // else if (returned == 2) {
+                //     //fprintf(stdout, "Local variable %s already defined.\n", $2);
+                // }
+                if (SymTable_lookup($2, scope, "local") == NULL) {
+                    SymTable_insert($2, scope, total_lines, 1, block);
                 }
                 else {
-                    fprintf(stdout, "\033[0;31mERROR: Variable (%s) cannot be defined in scope %d line %d\n", $2, scope, total_lines);
+
+                    fprintf(stdout, "\033[0;31mERROR: Variable (%s) cannot be defined in scope %d line %d\n\033[0m", $2, scope, total_lines);
                 }
             }
             |COL_COL IDENTIFIER {
@@ -248,7 +272,7 @@ callsuffix: normcall {printf("Callsuffix: normcall\n");}
 normcall:   LEFT_PAR {call_flag = 1;} elist RIGHT_PAR {call_flag = 0; printf("Normcall: (elist)\n");}
             ;
 
-methodcall: DOT_DOT IDENTIFIER LEFT_PAR {call_flag = 1;} elist RIGHT_PAR {call_flag = 0; printf("Methodcall: ..identifier(elist)\n");}
+methodcall: DOT_DOT {call_flag = 1;} IDENTIFIER LEFT_PAR  elist RIGHT_PAR {call_flag = 0; printf("Methodcall: ..identifier(elist)\n");}
             ;
 
 elist:      expr {printf("Elist: expr\n");}
@@ -297,6 +321,7 @@ block:      LEFT_BRACE {
                 {printf("Block: {func_stmt}\n");} 
             ;
 funcdef:    FUNCTION LEFT_PAR {
+                    func_flag = 1;
                     sprintf(str, "%s%d%c","_f",func_counter+1,'\0');
                     if (SymTable_lookup(strdup(str), scope, "funcdef") == NULL) {
                         functions++;
@@ -306,7 +331,7 @@ funcdef:    FUNCTION LEFT_PAR {
                         scope_flag = 0; 
                         prev_block = block;
                         block++;
-                        SymTable_hide(scope-1);
+                        //SymTable_hide(scope-1);
                     }
                     else {
                         fprintf(stderr,"\033[0;31mERROR: Function (%s) in scope %d line %d cannot be defined\n\033[0m",strdup(str),scope,total_lines);
@@ -322,8 +347,9 @@ funcdef:    FUNCTION LEFT_PAR {
                     SymTable_hide(scope+1);
                     SymTable_reveal(scope);
                     printf("Funcdef: function (idlist) {}\n");
+                    func_flag = 0;
                 }
-            |FUNCTION 
+            |FUNCTION {func_flag = 1;}
                 IDENTIFIER {
                 }
                 LEFT_PAR {
@@ -334,7 +360,7 @@ funcdef:    FUNCTION LEFT_PAR {
                         scope_flag = 0;
                         prev_block = block;
                         block++;
-                        SymTable_hide(scope-1);
+                        //SymTable_hide(scope-1);
                     }
                     else {
                         fprintf(stderr,"\033[0;31mERROR: Function (%s) in scope %d line %d cannot be defined\n\033[0m",$2,scope,total_lines);
@@ -349,6 +375,7 @@ funcdef:    FUNCTION LEFT_PAR {
                     SymTable_hide(scope+1);
                     SymTable_reveal(scope);
                     printf("Funcdef: function identifier(idlist) {}\n");
+                    func_flag = 0;
                 }
             ;
 
