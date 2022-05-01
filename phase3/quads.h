@@ -49,3 +49,7 @@ typedef struct quad {
     unsigned        label;
     unsigned        line;
 } quad;
+
+quad*           quads = (quad*) 0;
+unsigned        total = 0;
+unsigned int    currQuad = 0;
