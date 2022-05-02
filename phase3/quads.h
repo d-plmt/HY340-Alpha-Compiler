@@ -6,14 +6,14 @@
 
 typedef enum iopcode {
     assign,         add,            sub,
-    mul,            div_iop,            mod,
+    mul,            div_iop,        mod,
     uminus,         and,            or,
     not,            if_eq,          if_noteq,
     if_lesseq,      if_greatereq,   if_less,
-    if_greater,     call,           param,
-    ret,            getretval,      funcstart,
-    funcend,        tablecreate,    tablegetelem,
-    tablesetelem
+    if_greater,     jump,           call,           
+    param,          ret,            getretval,      
+    funcstart,      funcend,        tablecreate,    
+    tablegetelem,   tablesetelem
 } iopcode;
 
 typedef enum expr_t {
@@ -55,7 +55,6 @@ unsigned        total = 0;
 unsigned int    currQuad = 0;
 
 int currscope(){return }; //epistrefei to scope
-symt *lookup(const char *name, unsigned int scope); //epistrefei to sumvolo se sugkekrimeno scope
 symt *newsymbol(const char *name);
 
 char *newtempname(void); //paragei kai epistrefei ena neo onoma gia mia proswrini metavliti xrisimopoiontas mia metavliti tempcounter
