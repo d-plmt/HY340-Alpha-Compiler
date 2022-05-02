@@ -53,3 +53,11 @@ typedef struct quad {
 quad*           quads = (quad*) 0;
 unsigned        total = 0;
 unsigned int    currQuad = 0;
+
+int currscope(){return }; //epistrefei to scope
+symt *lookup(const char *name, unsigned int scope); //epistrefei to sumvolo se sugkekrimeno scope
+symt *newsymbol(const char *name);
+
+char *newtempname(void); //paragei kai epistrefei ena neo onoma gia mia proswrini metavliti xrisimopoiontas mia metavliti tempcounter
+symt *newtemp(void); //epistrefei mia nea krufi metavliti sto scope i mia diathesimi metavliti
+void resettemp(void); //midenizei ton tempcounter

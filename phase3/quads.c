@@ -1,5 +1,7 @@
 #include "quads.h"
 
+int tempcounter = 0;
+
 void expand (void){
     assert (total == currQuad);
     quad* p = (quad*)malloc(NEW_SIZE);
@@ -28,4 +30,23 @@ void emit (
     p -> result = result;
     p -> label  = label;
     p -> line   = line;
+}
+
+char *newtempname(void){
+    return "_t" + tempcounter;
+}
+
+void resettemp(void){
+    tempcounter = 0;
+}
+
+//den eimai sigouri an einai Sym_Table i symt gt mperdeutika ligo
+symt *newtemp(void){
+    char *name = newtempname();
+    symt *sym = lookup(name, currscope());
+    if (sym == NULL){
+        return newsymbol(name);
+    }else{
+        return sym;
+    }
 }
