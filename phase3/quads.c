@@ -40,7 +40,6 @@ void resettemp(void){
     tempcounter = 0;
 }
 
-//den eimai sigouri an einai Sym_Table i symt gt mperdeutika ligo
 symt *newtemp(void){
     char *name = newtempname();
     symt *sym = lookup(name, currscope());
