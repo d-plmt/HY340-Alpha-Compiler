@@ -70,6 +70,18 @@ void exitscopespace(void){
     --scopeSpaceCounter;
 } 
 
+/*function */
+expr* emit_iftableitem(expr* e){
+    if (e->type != tableitem_e) 
+        return e;
+    else{
+        expr* result = newexpr (var_e);
+        result->sym = newtemp();
+        emit(tablegetelem,e,e->index,result,currQuad,); 
+        return result; 
+    }
+}
+
 /*function pou paragei onomata krufwn metavlitwn 
 tempcounter = eswteriki metavliti pou metraei 
 tis uparxouses krufes metavlites*/

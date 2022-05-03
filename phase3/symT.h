@@ -63,6 +63,13 @@ typedef struct scope_link
     struct scope_link *next;
 } scope_link;
 
+typedef enum scopespace_t{
+    programvar,
+    functionlocal,
+    formalarg
+} scopespace_t;
+
+
 /*Hash Table functions*/
 unsigned int SymTable_hash(const char *key);
 

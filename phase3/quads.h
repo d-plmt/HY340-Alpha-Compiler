@@ -7,7 +7,7 @@
 unsigned programVarOffset       = 0;
 unsigned functionLocalOffset    = 0;
 unsigned formalArgOffset        = 0;
-unsigned scopeSpaceCounter      = 0;
+unsigned scopeSpaceCounter      = 1;
 
 typedef enum iopcode {
     assign,         add,            sub,
@@ -59,11 +59,28 @@ quad*           quads = (quad*) 0;
 unsigned        total = 0;
 unsigned int    currQuad = 0;
 
+typedef enum symbol_t  {
+    var_s, 
+    programfunc_s, 
+    libraryfunc_s
+}symbol_t;
+
+typedef struct symbol {
+    enum symbol_t   type;
+    char*           name;
+    scopespace_t    space;
+    unsigned        offset;
+    unsigned        scope;
+    unsigned        line;
+};
+
 scopespace_t currentscopespace(void);
 unsigned currscopeoffset (void);
 void inccurrscopeoffset (void);
 void enterscopespace (void);
 void exitscopespace (void);
+
+expr* emit_iftableitem(expr* e); //paragei tin entoli pou lamvanei ena stoixeio otan exoume lvalue.id kai to lvalue einai stoixeio pinaka
 
 int currscope(){return }; //epistrefei to scope
 symt *newsymbol(const char *name);
