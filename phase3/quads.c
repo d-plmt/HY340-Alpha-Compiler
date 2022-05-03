@@ -2,6 +2,7 @@
 
 int tempcounter = 0;
 
+/*expands quad table*/
 void expand (void){
     assert (total == currQuad);
     quad* p = (quad*)malloc(NEW_SIZE);
@@ -13,6 +14,7 @@ void expand (void){
     total += EXPAND_SIZE;
 }
 
+/*function produces a new instruction*/
 void emit (
     iopcode     op,
     expr*       arg1,
@@ -32,10 +34,50 @@ void emit (
     p -> line   = line;
 }
 
+scopespace_t currentscopespace(void){
+    if (scopeSpaceCounter == 1)
+        return programvar;
+    else if (scopeSpaceCounter % 2 == 0)
+        return formalarg;
+    else
+        return functionlocal;
+}
+
+unsigned currscopeoffset(void){
+    switch (currscopespace()){
+        case programvar     : return programVarOffset;
+        case functionlocal  : return functionLocalOffset;
+        case formalarg      : return formalArgOffset;
+        default             : assert(0);
+    }
+}
+
+void inccurrscopeoffset(void){
+    switch (currscopespace()){
+        case programvar     : return ++programVarOffset; break;
+        case functionlocal  : return ++functionLocalOffset; break;
+        case formalarg      : return ++formalArgOffset; break;
+        default             : assert(0);
+    }
+}
+
+void enterscopespace(void){
+    ++scopeSpaceCounter;
+}
+
+void exitscopespace(void){
+    assert(scopeSpaceCounter > 1);
+    --scopeSpaceCounter;
+} 
+
+/*function pou paragei onomata krufwn metavlitwn 
+tempcounter = eswteriki metavliti pou metraei 
+tis uparxouses krufes metavlites*/
 char *newtempname(void){
     return "_t" + tempcounter;
 }
 
+/*function pou midenizei ton tempcounter*/
 void resettemp(void){
     tempcounter = 0;
 }
