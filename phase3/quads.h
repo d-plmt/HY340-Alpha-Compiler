@@ -4,6 +4,11 @@
 #define CURR_SIZE   (total*sizeof(quad))
 #define NEW_SIZE    (EXPAND_SIZE*sizeof(quad)+CURR_SIZE)
 
+unsigned programVarOffset       = 0;
+unsigned functionLocalOffset    = 0;
+unsigned formalArgOffset        = 0;
+unsigned scopeSpaceCounter      = 0;
+
 typedef enum iopcode {
     assign,         add,            sub,
     mul,            div_iop,        mod,
@@ -53,6 +58,12 @@ typedef struct quad {
 quad*           quads = (quad*) 0;
 unsigned        total = 0;
 unsigned int    currQuad = 0;
+
+scopespace_t currentscopespace(void);
+unsigned currscopeoffset (void);
+void inccurrscopeoffset (void);
+void enterscopespace (void);
+void exitscopespace (void);
 
 int currscope(){return }; //epistrefei to scope
 symt *newsymbol(const char *name);
