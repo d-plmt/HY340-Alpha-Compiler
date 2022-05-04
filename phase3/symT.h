@@ -46,7 +46,6 @@ typedef struct SymTableEntry
         func *funcVal;
     } value;
     types type;
-    unsigned int block;
     struct SymTableEntry *next;
     struct SymTableEntry *next_in_scope;
 } symt;
@@ -74,11 +73,7 @@ typedef enum scopespace_t{
 unsigned int SymTable_hash(const char *key);
 
 void SymTable_new(void);
-int SymTable_insert(const char *name, unsigned int scope, unsigned int line, types type, unsigned int block);
-int SymTable_general_lookup(const char *name, unsigned int scope, types type, unsigned int block, char *search_mode);
-int SymTable_smol_lookup(const char *name, unsigned int scope);
-int SymTable_smoller_lookup(const char *name, unsigned int scope, unsigned int block);
-int SymTable_type_lookup(const char *name, unsigned int scope);
+int SymTable_insert(const char *name, unsigned int scope, unsigned int line, types type);
 symt* SymTable_lookup(const char *new_symbol_name, unsigned int scope, char *search_mode); 
 void SymTable_hide(unsigned int scope);
 void SymTable_reveal(unsigned int scope);

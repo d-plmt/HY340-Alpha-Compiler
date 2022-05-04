@@ -92,7 +92,7 @@ expr* newexpr_conststring(char* s);
 expr* newexpr_constnum(double i);
 expr* newexpr_constbool(unsigned int b);
 
-int currscope(){return }; //epistrefei to scope
+int currscope(); //epistrefei to scope
 symt *newsymbol(const char *name);
 
 char *newtempname(void); //paragei kai epistrefei ena neo onoma gia mia proswrini metavliti xrisimopoiontas mia metavliti tempcounter

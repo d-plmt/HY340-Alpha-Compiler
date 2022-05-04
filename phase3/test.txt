@@ -1,1 +1,1 @@
-function a() {print(x);}
+function(){--a; local a++;}

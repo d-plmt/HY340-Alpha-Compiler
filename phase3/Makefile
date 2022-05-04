@@ -16,6 +16,6 @@ a:
 	@flex --outfile=al.c al.l
 	@gcc symT.c al.c parser.c -o al
 	@echo "Executing program:"
-	@./al testfiles/Working/Tree.asc
+	@./al test.txt
 	
 	

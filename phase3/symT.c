@@ -63,7 +63,7 @@ void resize_pinaka(unsigned int scope) {
     }
 }
 
-int SymTable_insert(const char *name, unsigned int scope, unsigned int line, types type, unsigned int block) {
+int SymTable_insert(const char *name, unsigned int scope, unsigned int line, types type) {
     symt *new_node, *temp;
     scope_link *temp2;
     unsigned int index = SymTable_hash(name) % 499;
@@ -84,7 +84,6 @@ int SymTable_insert(const char *name, unsigned int scope, unsigned int line, typ
     new_node->next_in_scope = NULL;
     new_node->isActive = 1;
     new_node->type = type;
-    new_node->block = block;
     if (type < 3) {
         new_node->value.varVal = malloc(sizeof(var));
         new_node->value.varVal->vname = name;
@@ -138,7 +137,6 @@ symt* SymTable_lookup(const char *new_symbol_name, unsigned int scope, char *sea
     }
     else if (!strcmp(search_mode, "global_src")) {
         while (temp != NULL) {
-            //printf("\tsymbol %s scope %u block %u\n",getName(temp),getScope(temp),temp->block);
             if (!strcmp(new_symbol_name,getName(temp)) && (getScope(temp) == 0)) {
                 return temp;
             }
@@ -147,7 +145,6 @@ symt* SymTable_lookup(const char *new_symbol_name, unsigned int scope, char *sea
     }
     else if (!strcmp(search_mode, "formal") || !strcmp(search_mode, "local")) {
         while (temp != NULL) {
-            //printf("\tsymbol %s scope %u block %u\n",getName(temp),getScope(temp),temp->block);
             if (!strcmp(new_symbol_name,getName(temp)) && (getScope(temp) == scope) && (temp->isActive)) {
                 return temp;
             }
@@ -171,143 +168,6 @@ symt* SymTable_lookup(const char *new_symbol_name, unsigned int scope, char *sea
         }
     }
     return NULL;
-}
-
-int SymTable_type_lookup(const char *name, unsigned int scope) {
-    symt *temp = NULL;
-    unsigned int index = SymTable_hash(name) % 499;
-    temp = lera->head[index];
-    while (temp != NULL) {
-        if (strcmp(getName(temp),name) == 0) {
-            if (temp->isActive) {
-                if (temp->type < 3) {
-                    return 1;
-                }
-                return 0;
-            }
-        }
-        temp = temp->next;
-    }
-    return 1;
-}
-
-int SymTable_smol_lookup(const char *name, unsigned int scope) {
-    symt *tmp = NULL;
-    unsigned int index = SymTable_hash(name) % 499;
-    tmp = lera->head[index];
-
-    while (tmp != NULL) {
-        if (getScope(tmp) == scope) {
-            if (strcmp(getName(tmp), name) == 0) {
-                if (scope == 0) {
-                    return 0;
-                }
-                else {
-                    return -1;
-                }
-            }
-        }
-                        if (strcmp("f",getName(tmp))==0) {
-                    //printf("\n\n\t\t\t\t\tf active: %d\tscope: %u\n",tmp->isActive, getScope(tmp));
-                }
-        tmp = tmp -> next;
-    }
-    return 1;
-}
-
-int SymTable_smoller_lookup(const char *name, unsigned int scope, unsigned int block) {
-    symt *tmp = NULL;
-    unsigned int index = SymTable_hash(name) % 499;
-    tmp = lera->head[index];
-
-    while(tmp != NULL) {
-        if (strcmp(getName(tmp), name) == 0) {
-            if (tmp->isActive) {
-                return 2;
-            }
-        }
-        if (strcmp("InitCircle",getName(tmp))==0) {
-            //printf("\n\n\t\t\t\t\tInitCircle active: %d\n",tmp->isActive);
-        }
-        tmp = tmp -> next;
-    }
-    return 1;
-}
-int SymTable_general_lookup(const char * name, unsigned int scope, types type, unsigned int block, char *search_mode) {
-    if (isLibraryFunc(name) && (strcmp("global_src",search_mode))) {
-        return 0;
-    }
-
-    symt * tmp = NULL;
-    int flag = 1;
-
-    unsigned int index = SymTable_hash(name) % 499;
-    tmp = lera->head[index];
-    
-    if (strcmp(search_mode,"funcdef") == 0) {
-        while (tmp != NULL) {
-            if (strcmp(getName(tmp),name) == 0) {
-                if (tmp->isActive) {
-                    return 0;
-                }
-            }
-            tmp = tmp -> next;
-        }
-        return 1;
-    }
-    else if (strcmp(search_mode, "formal") == 0) {
-        
-        while (tmp != NULL) {
-            if (strcmp(getName(tmp),name) == 0) {
-                if (tmp->isActive) {
-                    return 0;
-                }
-            }
-            tmp = tmp -> next;
-        }
-        return 1;
-    }
-    else if (strcmp(search_mode, "local") == 0) {
-        while (tmp != NULL) {
-            if (strcmp(getName(tmp),name) == 0) {
-                if (strcmp("a1",getName(tmp))==0) {
-                }
-                if ((getScope(tmp) == scope) && tmp->isActive) {
-                    return 2;
-                }
-            }
-            tmp = tmp -> next;
-        }
-        return 1;
-    }
-    else if (strcmp(search_mode, "global_src") == 0) {
-        if (isLibraryFunc(name)) {return 2;}
-        while (tmp != NULL) {
-            if (strcmp(getName(tmp),name) == 0) {
-                return 2;
-            }
-            tmp = tmp -> next;
-        }
-        return 0;
-    }
-    else if (strcmp(search_mode, "new_var") == 0) {
-        int current_scope;
-        int mafaka = SymTable_smoller_lookup(name, scope, block);
-        if (mafaka == 2) {  //2: found same variable in same block & scope
-            return 2;
-        }
-        if (scope > 0) {
-            for (current_scope = scope-1; current_scope >= 0; current_scope--) {
-                flag = SymTable_smol_lookup(name, current_scope);
-                if (flag == -1) {
-                    return -1;   //0: found same var in parent scope
-                }
-            }
-            return flag;
-        }
-        return mafaka;  //found nothing
-    }
-    return -1;
 }
 
 unsigned int SymTable_hash(const char *key) {
