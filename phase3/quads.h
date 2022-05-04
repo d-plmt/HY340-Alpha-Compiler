@@ -80,13 +80,17 @@ unsigned currscopeoffset (void);
 void inccurrscopeoffset (void);
 void enterscopespace (void);
 void exitscopespace (void);
+void resetformalargsoffset(void); //midenizei to offset twn formal args
+void resetfunctionlocalsoffset(void); //midenizei to offset twn local functions
+void restorecurrscopeoffset(unsigned n);
 
 expr* emit_iftableitem(expr* e); //paragei tin entoli pou lamvanei ena stoixeio otan exoume lvalue.id kai to lvalue einai stoixeio pinaka
-expr* newexpr(expr_t t);
-expr* newexpr_conststring(char* s);
 expr* lvalue_expr (symbol* sym);
 expr* make_call(expr* lv, expr* reversed_elist);
+expr* newexpr(expr_t t);
+expr* newexpr_conststring(char* s);
 expr* newexpr_constnum(double i);
+expr* newexpr_constbool(unsigned int b);
 
 int currscope(){return }; //epistrefei to scope
 symt *newsymbol(const char *name);
@@ -97,10 +101,8 @@ void resettemp(void); //midenizei ton tempcounter
 unsigned int istempname(char* s); //anagnwrizei an einai krufi metavliti
 unsigned int istempexpr(expr* e); //
 
-void resetformalargsoffset(void); //midenizei to offset twn formal args
-void resetfunctionlocalsoffset(void); //midenizei to offset twn local functions
-void restorecurrscopeoffset(unsigned n);
 unsigned nextquadlabel(void);
 void patchlabel(unsigned quadNo, unsigned label); //sumplirwnei ena arxika undefined label enos quad
+
 
 void check_arith(expr* e, const char* context); //sunartisi pou tsekarei an xrisimopoieitai swsta to expr se ariumhtiko 

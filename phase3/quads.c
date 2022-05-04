@@ -179,6 +179,12 @@ expr* newexpr_constnum(double i){
     return e;
 }
 
+expr* newexpr_constbool(unsigned int b){
+    expr* e = newexpr(constbool_e);
+    e->boolConst = !!b; //etsi to exei alla den katalavainw ti ennoei
+    return e;
+}
+
 unsigned int istempname(char* s){
     return *s == '_';
 }
