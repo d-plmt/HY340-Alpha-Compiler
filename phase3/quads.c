@@ -77,9 +77,22 @@ expr* emit_iftableitem(expr* e){
     else{
         expr* result = newexpr (var_e);
         result->sym = newtemp();
-        emit(tablegetelem,e,e->index,result,currQuad,); 
+        emit(tablegetelem,e,e->index,result,currQuad,total_lines);
         return result; 
     }
+}
+
+expr* newexpr(expr_t t){
+    expr* e = (expr*)malloc(sizeof(expr));
+    memset(e, 0, sizeof(expr));
+    e->type = t;
+    return e;
+}
+
+expr* newexpr_conststring(char* s){
+    expr* e = newexpr(conststring_e);
+    e->strConst = strdup(s);
+    return e;
 }
 
 /*function pou paragei onomata krufwn metavlitwn 
@@ -103,3 +116,84 @@ symt *newtemp(void){
         return sym;
     }
 }
+
+void resetformalargsoffset(void){
+    formalArgOffset = 0;
+}
+
+void resetfunctionlocalsoffset(void){
+    functionLocalOffset = 0;
+}
+
+void restorecurrscopeoffset(unsigned n){
+    switch (currentscopespace()){
+        case programvar     : programVarOffset = n; break;
+        case functionlocal  : functionLocalOffset = n; break;
+        case formalarg      : formalArgOffset = n; break;
+        default             : assert(0);
+    }
+}
+
+unsigned nextquadlabel(void){
+    return currQuad;
+}
+
+void patchlabel(unsigned quadNo, unsigned label){
+    assert(quadNo < currQuad);
+    quads[quadNo].label = label;
+}
+
+expr* lvalue_expr (symbol* sym){
+    assert(sym);
+    expr* e = (expr*)malloc(sizeof(expr));
+    memset(e, 0, sizeof(expr));
+
+    e->next = (expr*) 0;
+    e->sym = sym;
+
+    switch (sym->type){
+        case var_s          : e->type = var_e; break;
+        case programfunc_s  : e->type = programfunc_e; break;
+        case libraryfunc_s  : e->type = libraryfunc_e; break;
+        default             : assert(0);
+    }
+    return e;
+}
+
+expr* make_call(expr* lv, expr* reversed_elist){
+    expr* func = emit_iftableitem(lv);
+    while (reversed_elist) {
+        emit(param, reversed_elist, NULL, NULL, currQuad, total_lines); 
+        reversed_elist = reversed_elist->next;
+    }
+    emit(call, func, NULL, NULL, currQuad, total_lines); 
+    expr* result = newexpr(var_e);
+    result->sym = newtemp();
+    emit(getretval, NULL,NULL, result, currQuad, total_lines); 
+    return result;
+}
+
+expr* newexpr_constnum(double i){
+    expr* e = newexpr(constnum_e);
+    e->numConst = i;
+    return e;
+}
+
+unsigned int istempname(char* s){
+    return *s == '_';
+}
+
+unsigned int istempexpr(expr* e){
+    return e->sym && istempname(e->sym->name); //prepei na vroume pws tha pairnei to fname i to vname
+}
+
+void check_arith(expr* e, const char* context){
+    if( e->type == constbool_e      ||
+        e->type == conststring_e    ||
+        e->type == nil_e            ||
+        e->type == newtable_e       ||
+        e->type == programfunc_e    ||
+        e->type == libraryfunc_e    ||
+        e->type == boolexpr_e)
+        fprintf(strerror, "Illegal expr used in %s!", context);
+} 
