@@ -99,7 +99,7 @@ expr* newexpr_conststring(char* s){
 tempcounter = eswteriki metavliti pou metraei 
 tis uparxouses krufes metavlites*/
 char *newtempname(void){
-    return "_t" + tempcounter;
+    return "_t" + tempcounter + '\0';
 }
 
 /*function pou midenizei ton tempcounter*/
@@ -109,10 +109,11 @@ void resettemp(void){
 
 symt *newtemp(void){
     char *name = newtempname();
-    symt *sym = lookup(name, currscope());
+    symt *sym = SymTable_lookup(name, currscope(), "local");    //EDW CHECK
     if (sym == NULL){
         return newsymbol(name);
     }else{
+        sym->
         return sym;
     }
 }

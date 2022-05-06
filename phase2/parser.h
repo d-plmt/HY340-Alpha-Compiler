@@ -43,7 +43,7 @@
 #if YYDEBUG
 extern int yydebug;
 #endif
-##
+
 /* Token type.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE

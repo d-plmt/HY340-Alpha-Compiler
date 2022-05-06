@@ -16,6 +16,6 @@ a:
 	@flex --outfile=al.c al.l
 	@gcc al.c parser.c -o al
 	@echo "Executing program:"
-	@./al testfiles/Errors/Error12.asc
+	@./al testfiles/Errors/Error0.asc
 	
 	

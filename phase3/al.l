@@ -1,7 +1,8 @@
 %{
 	#include "parser.h"
-    #include "decl.h"
     #include <stdio.h>
+
+    char* string_reformatting(char* initial_string);
 
     int total_lines = 1;
     int total_tokens = 0;
@@ -156,69 +157,3 @@ char* string_reformatting(char *initial_string) {
     return formatted_string;
 }
 
-/*add new token to struct alpha_token_t*/
-struct alpha_token_t *head = NULL;
-struct alpha_token_t *tail = NULL;
-
-void add_alpha_token_t(int token_number, int line, char *type, char *tiexei){
-
-    struct alpha_token_t * newtoken = (struct alpha_token_t *)malloc(sizeof(struct alpha_token_t));
-
-    newtoken->token_line = line;
-    newtoken->token_number = token_number;
-    newtoken->token_type = type;
-    newtoken->token_tiexeimesa = tiexei;
-    newtoken->next_token = NULL;
-
-    if(head == NULL){
-        head = newtoken;
-        tail = newtoken;
-    }
-    else {
-        tail->next_token = newtoken;
-        tail = newtoken;
-    }
-
-}
-
-
-/* int main(int argc, char** argv) {
-    if (argc > 1) {
-        yyin = fopen(argv[1], "r");
-        printf("Reading from input file \"%s\"\n",argv[1]);
-    }
-    else {
-        fprintf(stderr,"ERROR. No input file specified\n");
-    }
-    alpha_yylex(head);
-
-    
-    struct alpha_token_t *temp = head;
-    if (argc > 2) {
-        FILE *fp;
-
-        fp = fopen(argv[2], "w+");
-        fprintf(fp, "\n  Line\tToken#\t  Content\tCategory\n");
-        while (temp != NULL) {
-            fprintf(fp, "  %d\t#%d\t  \"%s\"\t\t%s\n",temp->token_line,temp->token_number,temp->token_tiexeimesa, temp->token_type);
-            temp = temp->next_token;
-        }
-        if (opened_block > 0) {
-            fprintf(fp, "Warning: Unclosed block comment.\n");
-        }
-        fclose(fp);
-        printf("Output saved to file \"%s\"\n",argv[2]);
-    }
-    else {
-        printf("\n  Line\tToken#\t  Content\tCategory\n");
-        while (temp != NULL) {
-            printf("  %d\t#%d\t  \"%s\"\t\t%s\n",temp->token_line,temp->token_number,temp->token_tiexeimesa, temp->token_type);
-            temp = temp->next_token;
-        }
-        if (opened_block > 0) {
-            fprintf(stderr,"Warning: Unclosed block comment.\n");
-        }
-    }
-
-    return 0;
-} */

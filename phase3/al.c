@@ -527,16 +527,17 @@ char *yytext;
 #line 1 "al.l"
 #line 2 "al.l"
 	#include "parser.h"
-    #include "decl.h"
     #include <stdio.h>
+
+    char* string_reformatting(char* initial_string);
 
     int total_lines = 1;
     int total_tokens = 0;
     int opened_block = 0;
     int block_starting_line = 0;
-#line 538 "al.c"
+#line 539 "al.c"
 
-#line 540 "al.c"
+#line 541 "al.c"
 
 #define INITIAL 0
 #define FIND_NESTED_COMMENT 1
@@ -754,11 +755,11 @@ YY_DECL
 		}
 
 	{
-#line 25 "al.l"
+#line 26 "al.l"
 
 
 
-#line 762 "al.c"
+#line 763 "al.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -818,260 +819,260 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 28 "al.l"
+#line 29 "al.l"
 {++total_lines;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 29 "al.l"
+#line 30 "al.l"
 {return IF;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 30 "al.l"
+#line 31 "al.l"
 {return ELSE;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 31 "al.l"
+#line 32 "al.l"
 {return WHILE;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 32 "al.l"
+#line 33 "al.l"
 {return FOR;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 33 "al.l"
+#line 34 "al.l"
 {return FUNCTION;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 34 "al.l"
+#line 35 "al.l"
 {return RETURN;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 35 "al.l"
+#line 36 "al.l"
 {return BREAK;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 36 "al.l"
+#line 37 "al.l"
 {return CONTINUE;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 37 "al.l"
+#line 38 "al.l"
 {return AND;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 38 "al.l"
+#line 39 "al.l"
 {return NOT;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 39 "al.l"
+#line 40 "al.l"
 {return OR;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 40 "al.l"
+#line 41 "al.l"
 {return LOCAL;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 41 "al.l"
+#line 42 "al.l"
 {return TRUE;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 42 "al.l"
+#line 43 "al.l"
 {return FALSE;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 43 "al.l"
+#line 44 "al.l"
 {return NIL;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 44 "al.l"
+#line 45 "al.l"
 {return OP_EQUALS;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 45 "al.l"
+#line 46 "al.l"
 {return OP_PLUS;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 46 "al.l"
+#line 47 "al.l"
 {return OP_MINUS;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 47 "al.l"
+#line 48 "al.l"
 {return OP_ASTERISK;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 48 "al.l"
+#line 49 "al.l"
 {return OP_SLASH;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 49 "al.l"
+#line 50 "al.l"
 {return OP_PERCENTAGE;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 50 "al.l"
+#line 51 "al.l"
 {return OP_EQ_EQ;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 51 "al.l"
+#line 52 "al.l"
 {return OP_NOT_EQ;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 52 "al.l"
+#line 53 "al.l"
 {return OP_PLUS_PLUS;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 53 "al.l"
+#line 54 "al.l"
 {return OP_MINUS_MINUS;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 54 "al.l"
+#line 55 "al.l"
 {return OP_GREATER;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 55 "al.l"
+#line 56 "al.l"
 {return OP_LESSER;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 56 "al.l"
+#line 57 "al.l"
 {return OP_GREATER_EQ;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 57 "al.l"
+#line 58 "al.l"
 {return OP_LESSER_EQ;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 58 "al.l"
+#line 59 "al.l"
 {return LEFT_BRACE;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 59 "al.l"
+#line 60 "al.l"
 {return RIGHT_BRACE;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 60 "al.l"
+#line 61 "al.l"
 {return LEFT_BRACKET;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 61 "al.l"
+#line 62 "al.l"
 {return RIGHT_BRACKET;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 62 "al.l"
+#line 63 "al.l"
 {return LEFT_PAR;}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 63 "al.l"
+#line 64 "al.l"
 {return RIGHT_PAR;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 64 "al.l"
+#line 65 "al.l"
 {return SEMICOLON;}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 65 "al.l"
+#line 66 "al.l"
 {return COMMA;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 66 "al.l"
+#line 67 "al.l"
 {return COLON;}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 67 "al.l"
+#line 68 "al.l"
 {return COL_COL;}
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 68 "al.l"
+#line 69 "al.l"
 {return DOT;}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 69 "al.l"
+#line 70 "al.l"
 {return DOT_DOT;}
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 71 "al.l"
+#line 72 "al.l"
 {yylval.intVal = atoi(yytext); return INTEGER;}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 72 "al.l"
+#line 73 "al.l"
 {yylval.realVal = atof(yytext); return REAL;}
 	YY_BREAK
 case 45:
 /* rule 45 can match eol */
 YY_RULE_SETUP
-#line 73 "al.l"
+#line 74 "al.l"
 {yylval.strVal = strdup(string_reformatting(strdup(yytext))); return STRING;}
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 74 "al.l"
+#line 75 "al.l"
 {yylval.strVal = yylval.strVal = strdup(yytext); return IDENTIFIER;}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 75 "al.l"
+#line 76 "al.l"
 {;}
 	YY_BREAK
 case 48:
 /* rule 48 can match eol */
 YY_RULE_SETUP
-#line 76 "al.l"
+#line 77 "al.l"
 {;}
 	YY_BREAK
 case 49:
 /* rule 49 can match eol */
 YY_RULE_SETUP
-#line 77 "al.l"
+#line 78 "al.l"
 {fprintf(stderr,"Warning: Unclosed string literal at line %d\n",total_lines);}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 78 "al.l"
+#line 79 "al.l"
 {++total_tokens; fprintf(stderr,"Undefined input %s line %d\n",strdup(yytext),total_lines);}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 81 "al.l"
+#line 82 "al.l"
 {
     opened_block = 1;
     block_starting_line = 0;
@@ -1082,7 +1083,7 @@ YY_RULE_SETUP
 case 52:
 /* rule 52 can match eol */
 YY_RULE_SETUP
-#line 88 "al.l"
+#line 89 "al.l"
 {
     ++total_lines;
     ++block_starting_line;
@@ -1090,14 +1091,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 93 "al.l"
+#line 94 "al.l"
 {
     opened_block++;
 }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 97 "al.l"
+#line 98 "al.l"
 {
     opened_block--;
 
@@ -1111,10 +1112,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 109 "al.l"
+#line 110 "al.l"
 ECHO;
 	YY_BREAK
-#line 1118 "al.c"
+#line 1119 "al.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(FIND_NESTED_COMMENT):
 	yyterminate();
@@ -2120,7 +2121,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 109 "al.l"
+#line 110 "al.l"
 
 
 char* string_reformatting(char *initial_string) {
@@ -2171,70 +2172,4 @@ char* string_reformatting(char *initial_string) {
     return formatted_string;
 }
 
-/*add new token to struct alpha_token_t*/
-struct alpha_token_t *head = NULL;
-struct alpha_token_t *tail = NULL;
-
-void add_alpha_token_t(int token_number, int line, char *type, char *tiexei){
-
-    struct alpha_token_t * newtoken = (struct alpha_token_t *)malloc(sizeof(struct alpha_token_t));
-
-    newtoken->token_line = line;
-    newtoken->token_number = token_number;
-    newtoken->token_type = type;
-    newtoken->token_tiexeimesa = tiexei;
-    newtoken->next_token = NULL;
-
-    if(head == NULL){
-        head = newtoken;
-        tail = newtoken;
-    }
-    else {
-        tail->next_token = newtoken;
-        tail = newtoken;
-    }
-
-}
-
-
-/* int main(int argc, char** argv) {
-    if (argc > 1) {
-        yyin = fopen(argv[1], "r");
-        printf("Reading from input file \"%s\"\n",argv[1]);
-    }
-    else {
-        fprintf(stderr,"ERROR. No input file specified\n");
-    }
-    alpha_yylex(head);
-
-    
-    struct alpha_token_t *temp = head;
-    if (argc > 2) {
-        FILE *fp;
-
-        fp = fopen(argv[2], "w+");
-        fprintf(fp, "\n  Line\tToken#\t  Content\tCategory\n");
-        while (temp != NULL) {
-            fprintf(fp, "  %d\t#%d\t  \"%s\"\t\t%s\n",temp->token_line,temp->token_number,temp->token_tiexeimesa, temp->token_type);
-            temp = temp->next_token;
-        }
-        if (opened_block > 0) {
-            fprintf(fp, "Warning: Unclosed block comment.\n");
-        }
-        fclose(fp);
-        printf("Output saved to file \"%s\"\n",argv[2]);
-    }
-    else {
-        printf("\n  Line\tToken#\t  Content\tCategory\n");
-        while (temp != NULL) {
-            printf("  %d\t#%d\t  \"%s\"\t\t%s\n",temp->token_line,temp->token_number,temp->token_tiexeimesa, temp->token_type);
-            temp = temp->next_token;
-        }
-        if (opened_block > 0) {
-            fprintf(stderr,"Warning: Unclosed block comment.\n");
-        }
-    }
-
-    return 0;
-} */
 

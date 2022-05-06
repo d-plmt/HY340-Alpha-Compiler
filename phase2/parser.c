@@ -628,13 +628,13 @@ static const yytype_int16 yyrline[] =
        0,    65,    65,    66,    69,    70,    71,    72,    73,    74,
       82,    90,    91,    92,    95,    96,    97,    98,    99,   100,
      101,   102,   103,   104,   105,   106,   107,   108,   109,   115,
-     116,   117,   118,   126,   134,   142,   143,   146,   149,   150,
-     151,   152,   153,   156,   181,   198,   208,   211,   212,   213,
-     214,   217,   217,   218,   219,   219,   222,   223,   226,   226,
-     229,   229,   232,   233,   234,   237,   238,   241,   242,   245,
-     248,   249,   252,   252,   262,   265,   262,   273,   273,   301,
-     303,   300,   329,   330,   331,   332,   333,   334,   337,   346,
-     355,   358,   359,   362,   362,   371,   371,   380,   388
+     116,   117,   118,   126,   134,   142,   143,   146,   151,   152,
+     153,   154,   155,   158,   183,   200,   210,   213,   214,   215,
+     216,   219,   219,   220,   221,   221,   224,   225,   228,   228,
+     231,   231,   234,   235,   236,   239,   240,   243,   244,   247,
+     250,   251,   254,   254,   264,   267,   264,   275,   275,   303,
+     305,   302,   331,   332,   333,   334,   335,   336,   339,   348,
+     357,   360,   361,   364,   364,   373,   373,   382,   390
 };
 #endif
 
@@ -1857,51 +1857,53 @@ yyreduce:
 
   case 37:
 #line 146 "parser.y"
-                                  {printf("Assign expression: lvalue = expr\n");}
-#line 1862 "parser.c"
+                                  {
+                printf("\n\n\t\t%s\n\n",(yyvsp[-2].strVal));
+                printf("Assign expression: lvalue = expr\n");}
+#line 1864 "parser.c"
     break;
 
   case 38:
-#line 149 "parser.y"
+#line 151 "parser.y"
                     {printf("Primary: lvalue\n");}
-#line 1868 "parser.c"
+#line 1870 "parser.c"
     break;
 
   case 39:
-#line 150 "parser.y"
+#line 152 "parser.y"
                     {printf("Primary: call\n");}
-#line 1874 "parser.c"
+#line 1876 "parser.c"
     break;
 
   case 40:
-#line 151 "parser.y"
+#line 153 "parser.y"
                        {printf("Primary: objectdef\n");}
-#line 1880 "parser.c"
+#line 1882 "parser.c"
     break;
 
   case 41:
-#line 152 "parser.y"
+#line 154 "parser.y"
                                         {printf("Primary: (funcdef)\n");}
-#line 1886 "parser.c"
+#line 1888 "parser.c"
     break;
 
   case 42:
-#line 153 "parser.y"
+#line 155 "parser.y"
                    {printf("Primary: const\n");}
-#line 1892 "parser.c"
+#line 1894 "parser.c"
     break;
 
   case 43:
-#line 156 "parser.y"
+#line 158 "parser.y"
                        {
                 if (call_flag == 0) {                     
                     printf("Lvalue: identifier\n");
                     int returned = SymTable_general_lookup((yyvsp[0].strVal), scope, 1, block, "new_var");
                     if (returned == 2) {
-                        fprintf(stdout, "%s refers to another symbol in the same scope.\n",(yyvsp[0].strVal));
+                        //fprintf(stdout, "%s refers to another symbol in the same scope.\n",$1);
                     }
                     else if (returned == 0) {
-                        fprintf(stdout, "%s refers to another symbol in a parent scope.\n", (yyvsp[0].strVal));
+                        //fprintf(stdout, "%s refers to another symbol in a parent scope.\n", $1);
                     }
                     else if (returned == 1) {
                         if (scope == 0) {
@@ -1917,11 +1919,11 @@ yyreduce:
                 }
 
             }
-#line 1921 "parser.c"
+#line 1923 "parser.c"
     break;
 
   case 44:
-#line 181 "parser.y"
+#line 183 "parser.y"
                               {
                 printf("Lvalue: local identifier\n");
                 int returned = SymTable_general_lookup((yyvsp[0].strVal), scope, 1, block, "local");
@@ -1939,11 +1941,11 @@ yyreduce:
                     fprintf(stdout, "\nERROR: Variable (%s) cannot be defined in scope %d line %d\n", (yyvsp[0].strVal), scope, total_lines);
                 }
             }
-#line 1943 "parser.c"
+#line 1945 "parser.c"
     break;
 
   case 45:
-#line 198 "parser.y"
+#line 200 "parser.y"
                                 {
                 printf("Lvalue: ::identifier\n");
                 int returned = SymTable_general_lookup((yyvsp[0].strVal), 0, 0, block, "global_src");
@@ -1954,170 +1956,170 @@ yyreduce:
                     fprintf(stdout,"\nERROR: Symbol %s in line %d not global or undefined.\n", (yyvsp[0].strVal), total_lines);
                 }
             }
-#line 1958 "parser.c"
+#line 1960 "parser.c"
     break;
 
   case 46:
-#line 208 "parser.y"
+#line 210 "parser.y"
                     {printf("Lvalue: member\n");}
-#line 1964 "parser.c"
+#line 1966 "parser.c"
     break;
 
   case 47:
-#line 211 "parser.y"
+#line 213 "parser.y"
                                   {printf("Member: lvalue.identifier\n");}
-#line 1970 "parser.c"
+#line 1972 "parser.c"
     break;
 
   case 48:
-#line 212 "parser.y"
+#line 214 "parser.y"
                                                     {printf("Member: lvalue[identifier]\n");}
-#line 1976 "parser.c"
+#line 1978 "parser.c"
     break;
 
   case 49:
-#line 213 "parser.y"
+#line 215 "parser.y"
                                  {printf("Member: call.identifier\n");}
-#line 1982 "parser.c"
+#line 1984 "parser.c"
     break;
 
   case 50:
-#line 214 "parser.y"
+#line 216 "parser.y"
                                                   {printf("Member: call[identifier]\n");}
-#line 1988 "parser.c"
+#line 1990 "parser.c"
     break;
 
   case 51:
-#line 217 "parser.y"
+#line 219 "parser.y"
                  {call_flag = 1;}
-#line 1994 "parser.c"
+#line 1996 "parser.c"
     break;
 
   case 52:
-#line 217 "parser.y"
+#line 219 "parser.y"
                                                           {call_flag = 0; printf("Call: call(elist)\n");}
-#line 2000 "parser.c"
+#line 2002 "parser.c"
     break;
 
   case 53:
-#line 218 "parser.y"
+#line 220 "parser.y"
                                 { printf("Call: lvalue callsuffix\n");}
-#line 2006 "parser.c"
+#line 2008 "parser.c"
     break;
 
   case 54:
-#line 219 "parser.y"
+#line 221 "parser.y"
                                         {call_flag = 1;}
-#line 2012 "parser.c"
+#line 2014 "parser.c"
     break;
 
   case 55:
-#line 219 "parser.y"
+#line 221 "parser.y"
                                                                                   {call_flag = 0; printf("Call: (funcdef)(elist)\n");}
-#line 2018 "parser.c"
+#line 2020 "parser.c"
     break;
 
   case 56:
-#line 222 "parser.y"
+#line 224 "parser.y"
                      {printf("Callsuffix: normcall\n");}
-#line 2024 "parser.c"
+#line 2026 "parser.c"
     break;
 
   case 57:
-#line 223 "parser.y"
+#line 225 "parser.y"
                         {printf("Callsuffix: method\n");}
-#line 2030 "parser.c"
+#line 2032 "parser.c"
     break;
 
   case 58:
-#line 226 "parser.y"
+#line 228 "parser.y"
                      {call_flag = 1;}
-#line 2036 "parser.c"
+#line 2038 "parser.c"
     break;
 
   case 59:
-#line 226 "parser.y"
+#line 228 "parser.y"
                                                       {call_flag = 0; printf("Normcall: (elist)\n");}
-#line 2042 "parser.c"
+#line 2044 "parser.c"
     break;
 
   case 60:
-#line 229 "parser.y"
+#line 231 "parser.y"
                                         {call_flag = 1;}
-#line 2048 "parser.c"
+#line 2050 "parser.c"
     break;
 
   case 61:
-#line 229 "parser.y"
+#line 231 "parser.y"
                                                                          {call_flag = 0; printf("Methodcall: ..identifier(elist)\n");}
-#line 2054 "parser.c"
+#line 2056 "parser.c"
     break;
 
   case 62:
-#line 232 "parser.y"
+#line 234 "parser.y"
                  {printf("Elist: expr\n");}
-#line 2060 "parser.c"
+#line 2062 "parser.c"
     break;
 
   case 63:
-#line 233 "parser.y"
+#line 235 "parser.y"
                                {printf("Elist: expr,...,expr\n");}
-#line 2066 "parser.c"
+#line 2068 "parser.c"
     break;
 
   case 65:
-#line 237 "parser.y"
+#line 239 "parser.y"
                                               {printf("Objectdef: (elist)\n");}
-#line 2072 "parser.c"
+#line 2074 "parser.c"
     break;
 
   case 66:
-#line 238 "parser.y"
+#line 240 "parser.y"
                                                 {printf("Objectdef: (indexed)\n");}
-#line 2078 "parser.c"
+#line 2080 "parser.c"
     break;
 
   case 67:
-#line 241 "parser.y"
+#line 243 "parser.y"
                         {printf("Indexed: indexedelem\n");}
-#line 2084 "parser.c"
+#line 2086 "parser.c"
     break;
 
   case 68:
-#line 242 "parser.y"
+#line 244 "parser.y"
                                         {printf("Indexed: indexedelem,...,indexedelem\n");}
-#line 2090 "parser.c"
+#line 2092 "parser.c"
     break;
 
   case 69:
-#line 245 "parser.y"
+#line 247 "parser.y"
                                                     {printf("Indexedelem: [expr:expr]\n");}
-#line 2096 "parser.c"
+#line 2098 "parser.c"
     break;
 
   case 70:
-#line 248 "parser.y"
+#line 250 "parser.y"
                           {printf("Func_stmt: stmt,...,stmt\n");}
-#line 2102 "parser.c"
+#line 2104 "parser.c"
     break;
 
   case 71:
-#line 249 "parser.y"
+#line 251 "parser.y"
                    {printf("Func_stmt: stmt\n");}
-#line 2108 "parser.c"
+#line 2110 "parser.c"
     break;
 
   case 72:
-#line 252 "parser.y"
+#line 254 "parser.y"
                        {
                     block = block + scope_flag;
                     scope = scope + scope_flag;
                 }
-#line 2117 "parser.c"
+#line 2119 "parser.c"
     break;
 
   case 73:
-#line 255 "parser.y"
+#line 257 "parser.y"
                               {
                     scope = scope - scope_flag;
                     if (scope_flag == 1) {
@@ -2125,37 +2127,37 @@ yyreduce:
                     }
                     {printf("Block: {}\n");}
                 }
-#line 2129 "parser.c"
+#line 2131 "parser.c"
     break;
 
   case 74:
-#line 262 "parser.y"
+#line 264 "parser.y"
                         {
                     block = block + scope_flag;
                     scope = scope + scope_flag;
                 }
-#line 2138 "parser.c"
+#line 2140 "parser.c"
     break;
 
   case 75:
-#line 265 "parser.y"
+#line 267 "parser.y"
                                         {
                     scope = scope - scope_flag;
                     if (scope_flag == 1) {
                         SymTable_hide(scope+1);
                     }
                 }
-#line 2149 "parser.c"
+#line 2151 "parser.c"
     break;
 
   case 76:
-#line 271 "parser.y"
+#line 273 "parser.y"
                 {printf("Block: {func_stmt}\n");}
-#line 2155 "parser.c"
+#line 2157 "parser.c"
     break;
 
   case 77:
-#line 273 "parser.y"
+#line 275 "parser.y"
                               {
                     sprintf(str, "%s%d%c","_f",func_counter+1,'\0');
                     if (SymTable_general_lookup(strdup(str), scope, 3, block, "funcdef")) {
@@ -2173,11 +2175,11 @@ yyreduce:
                         yyerror("");
                     }
                 }
-#line 2177 "parser.c"
+#line 2179 "parser.c"
     break;
 
   case 78:
-#line 290 "parser.y"
+#line 292 "parser.y"
                                        {
                     if (!(--functions)){
                         scope_flag = 1;
@@ -2188,18 +2190,18 @@ yyreduce:
                     SymTable_reveal(scope);
                     printf("Funcdef: function (idlist) {}\n");
                 }
-#line 2192 "parser.c"
+#line 2194 "parser.c"
     break;
 
   case 79:
-#line 301 "parser.y"
+#line 303 "parser.y"
                            {
                 }
-#line 2199 "parser.c"
+#line 2201 "parser.c"
     break;
 
   case 80:
-#line 303 "parser.y"
+#line 305 "parser.y"
                          {
                     if (SymTable_general_lookup((yyvsp[-2].strVal), scope, 3, block, "funcdef")) {
                         SymTable_insert((yyvsp[-2].strVal), scope, total_lines, 3, block);
@@ -2215,11 +2217,11 @@ yyreduce:
                         yyerror("");
                     }
                 }
-#line 2219 "parser.c"
+#line 2221 "parser.c"
     break;
 
   case 81:
-#line 318 "parser.y"
+#line 320 "parser.y"
                                        {
                     if (!(--functions)){
                         scope_flag = 1;
@@ -2229,47 +2231,47 @@ yyreduce:
                     SymTable_reveal(scope);
                     printf("Funcdef: function identifier(idlist) {}\n");
                 }
-#line 2233 "parser.c"
+#line 2235 "parser.c"
     break;
 
   case 82:
-#line 329 "parser.y"
+#line 331 "parser.y"
                     {printf("Const: integer\n");}
-#line 2239 "parser.c"
+#line 2241 "parser.c"
     break;
 
   case 83:
-#line 330 "parser.y"
+#line 332 "parser.y"
                    {printf("Const: real\n");}
-#line 2245 "parser.c"
+#line 2247 "parser.c"
     break;
 
   case 84:
-#line 331 "parser.y"
+#line 333 "parser.y"
                      {printf("Const: string\n");}
-#line 2251 "parser.c"
+#line 2253 "parser.c"
     break;
 
   case 85:
-#line 332 "parser.y"
+#line 334 "parser.y"
                   {printf("Const: nil\n");}
-#line 2257 "parser.c"
+#line 2259 "parser.c"
     break;
 
   case 86:
-#line 333 "parser.y"
+#line 335 "parser.y"
                    {printf("Const: true\n");}
-#line 2263 "parser.c"
+#line 2265 "parser.c"
     break;
 
   case 87:
-#line 334 "parser.y"
+#line 336 "parser.y"
                     {printf("Const: false\n");}
-#line 2269 "parser.c"
+#line 2271 "parser.c"
     break;
 
   case 88:
-#line 337 "parser.y"
+#line 339 "parser.y"
                         {
                 {printf("Idlist: identifier\n");}
                 if (SymTable_general_lookup((yyvsp[0].strVal), scope, 2, block, "formal")) {
@@ -2279,11 +2281,11 @@ yyreduce:
                     fprintf(stderr,"ERROR: Parameter (%s) in scope %d line %d cannot be defined\n",(yyvsp[0].strVal),scope,total_lines);
                 }
             }
-#line 2283 "parser.c"
+#line 2285 "parser.c"
     break;
 
   case 89:
-#line 346 "parser.y"
+#line 348 "parser.y"
                                       {
                 {printf("Idlist: identifier,...,identifier\n");}
                 if (SymTable_general_lookup((yyvsp[-2].strVal), scope, 2, block, "formal")) {
@@ -2293,57 +2295,57 @@ yyreduce:
                     fprintf(stderr,"ERROR: Parameter (%s) in scope %d line %d cannot be defined\n",(yyvsp[-2].strVal),scope,total_lines);
                 }
             }
-#line 2297 "parser.c"
+#line 2299 "parser.c"
     break;
 
   case 91:
-#line 358 "parser.y"
+#line 360 "parser.y"
                                             {printf("Ifstmt: if (expr) stmt\n");}
-#line 2303 "parser.c"
+#line 2305 "parser.c"
     break;
 
   case 92:
-#line 359 "parser.y"
+#line 361 "parser.y"
                                                        {printf("Ifstmt: if (expr) stmt else stmt\n");}
-#line 2309 "parser.c"
+#line 2311 "parser.c"
     break;
 
   case 93:
-#line 362 "parser.y"
+#line 364 "parser.y"
                                           {
                 loop_scope++;
             }
-#line 2317 "parser.c"
+#line 2319 "parser.c"
     break;
 
   case 94:
-#line 365 "parser.y"
+#line 367 "parser.y"
                  {
                 loop_scope--;
                 printf("Whilestmt: while (expr) stmt\n");
             }
-#line 2326 "parser.c"
+#line 2328 "parser.c"
     break;
 
   case 95:
-#line 371 "parser.y"
+#line 373 "parser.y"
                                                                         {
                 loop_scope++;
             }
-#line 2334 "parser.c"
+#line 2336 "parser.c"
     break;
 
   case 96:
-#line 374 "parser.y"
+#line 376 "parser.y"
                  {
                 loop_scope--;
                 printf("Forstmt: for (elist;expr;elist) stmt\n");
             }
-#line 2343 "parser.c"
+#line 2345 "parser.c"
     break;
 
   case 97:
-#line 380 "parser.y"
+#line 382 "parser.y"
                              {
                 if (scope_flag == 0) {
                     printf("Returnstmt: return;\n");
@@ -2352,11 +2354,11 @@ yyreduce:
                     fprintf(stderr, "ERROR: Keyword \"return\" in line %d can't be used without a function.\n",total_lines);
                 }
             }
-#line 2356 "parser.c"
+#line 2358 "parser.c"
     break;
 
   case 98:
-#line 388 "parser.y"
+#line 390 "parser.y"
                                    {
                 if (scope_flag == 0) {
                     printf("Returnstmt: return;\n");
@@ -2365,11 +2367,11 @@ yyreduce:
                     fprintf(stderr, "ERROR: Keyword \"return\" in line %d can't be used without a function.\n",total_lines);
                 }
             }
-#line 2369 "parser.c"
+#line 2371 "parser.c"
     break;
 
 
-#line 2373 "parser.c"
+#line 2375 "parser.c"
 
       default: break;
     }
@@ -2601,7 +2603,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 399 "parser.y"
+#line 401 "parser.y"
 
 
 const char * getName(symt * input){
@@ -2753,7 +2755,6 @@ int SymTable_type_lookup(const char *name, unsigned int scope) {
     symt *temp = NULL;
     unsigned int index = SymTable_hash(name) % 499;
     temp = lera->head[index];
-    printf("\t\t\t\t\t\tAAAAAAAAAAAAAAAAAAAAAAA\t\n");
     while (temp != NULL) {
         if (strcmp(getName(temp),name) == 0) {
             if (temp->isActive) {
