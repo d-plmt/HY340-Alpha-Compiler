@@ -11,6 +11,7 @@
 %}
 
 %option noyywrap
+%option yylineno
 
 INT         [0-9]+  
 REAL        {INT}\.{1}{INT}
@@ -26,7 +27,7 @@ UNCLOSED_STRING (\")([.\\]|[^"]|(\\\"))*
 %%
 
 
-\n              {++total_lines;}
+\n              {}
 if              {return IF;}
 else            {return ELSE;}
 while           {return WHILE;}
@@ -75,8 +76,8 @@ nil             {return NIL;}
 {IDENTIFIER}    {yylval.strVal = yylval.strVal = strdup(yytext); return IDENTIFIER;}
 {LINE_COMM}     {;}
 {WHITESPACE}    {;}
-{UNCLOSED_STRING} {fprintf(stderr,"Warning: Unclosed string literal at line %d\n",total_lines);}
-.               {++total_tokens; fprintf(stderr,"Undefined input %s line %d\n",strdup(yytext),total_lines);}
+{UNCLOSED_STRING} {fprintf(stderr,"Warning: Unclosed string literal at line %d\n",yylineno);}
+.               {++total_tokens; fprintf(stderr,"Undefined input %s line %d\n",strdup(yytext),yylineno);}
 
 
 {BLOCK_START} {
@@ -87,7 +88,6 @@ nil             {return NIL;}
 }
 
 <FIND_NESTED_COMMENT>"\n" {
-    ++total_lines;
     ++block_starting_line;
 }
 
@@ -116,7 +116,7 @@ char* string_reformatting(char *initial_string) {
 
     *(initial_string++);    
     j=0;
-    starting_line = total_lines;
+    starting_line = yylineno;
     formatted_string = malloc(sizeof(char*)); //tha to xrhsimopoihsoume sto telos gia to \0
     current = initial_string;
     for (i=0; i<strlen(initial_string)-1;i++) {
@@ -144,7 +144,6 @@ char* string_reformatting(char *initial_string) {
             *(current++);
         }
         else if (*current == '\n'){
-            ++total_lines;
         }
         else {
             formatted_string[j] = *current;

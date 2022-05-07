@@ -1,13 +1,11 @@
+#ifndef QUADS_H_INCLUDED
+#define QUADS_H_INCLUDED
+
 #include "symT.h"
 
 #define EXPAND_SIZE 1024
 #define CURR_SIZE   (total*sizeof(quad))
 #define NEW_SIZE    (EXPAND_SIZE*sizeof(quad)+CURR_SIZE)
-
-unsigned programVarOffset       = 0;
-unsigned functionLocalOffset    = 0;
-unsigned formalArgOffset        = 0;
-extern int total_lines;
 
 typedef enum iopcode {
     assign,         add,            sub,
@@ -80,7 +78,7 @@ symt *newsymbol(const char *name); //auto de to xreiazomaste, exoume thn symtabl
 char *newtempname(void); //paragei kai epistrefei ena neo onoma gia mia proswrini metavliti xrisimopoiontas mia metavliti tempcounter
 symt *newtemp(void); //epistrefei mia nea krufi metavliti sto scope i mia diathesimi metavliti
 void resettemp(void); //midenizei ton tempcounter
-unsigned int istempname(char* s); //anagnwrizei an einai krufi metavliti
+unsigned int istempname(const char* s); //anagnwrizei an einai krufi metavliti
 unsigned int istempexpr(expr* e); //
 
 unsigned nextquadlabel(void);
@@ -88,3 +86,5 @@ void patchlabel(unsigned quadNo, unsigned label); //sumplirwnei ena arxika undef
 
 
 void check_arith(expr* e, const char* context); //sunartisi pou tsekarei an xrisimopoieitai swsta to expr se ariumhtiko 
+
+#endif

@@ -10,7 +10,11 @@
 #define SIZE 499
 #define HASH_MULTIPLIER 65599
 
+extern int yylineno;
 unsigned int currentscope = 0;
+unsigned programVarOffset       = 0;
+unsigned functionLocalOffset    = 0;
+unsigned formalArgOffset        = 0;
 unsigned scopeSpaceCounter      = 1;
 
 typedef enum symbol_t  {
@@ -70,6 +74,8 @@ void resize_pinaka(unsigned int scope);
 const char *getName(symt *input);
 unsigned int getScope(symt *input);
 unsigned int getLine(symt *input);
+char *getType(symbol_t type);
+
 scope_link *lista;
 SymTable *lera;
 

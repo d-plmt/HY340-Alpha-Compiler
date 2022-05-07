@@ -1,5 +1,4 @@
 #include "symT.h"
-#include "quads.h"
 
 //scopespace shit
 scopespace_t currentscopespace(void){
@@ -38,6 +37,9 @@ void exitscopespace(void){
     --scopeSpaceCounter;
 } 
 
+int currscope() {
+    return currentscope;
+}
 
 
 void SymTable_hide(unsigned int scope) {
@@ -127,14 +129,13 @@ symt* SymTable_insert(const char *name, unsigned int line, scopespace_t space, s
     new_node->offset = currscopeoffset();
     new_node->space = space;
     new_node->type = type;
-    new_node->type = type;
     new_node->next = NULL;
     new_node->next_in_scope = NULL;
 
 
-    resize_pinaka(scope);
+    resize_pinaka(currscope());
     temp2 = lista;
-    while (temp2->scope_counter != scope) {
+    while (temp2->scope_counter != currscope()) {
         temp2 = temp2 -> next;
     }
     if (temp2->scope_head == NULL) {
@@ -225,43 +226,25 @@ void SymTable_new() {
 }
 
 const char * getName(symt * input){
-    if(input->type == 4 || 5){
-        return input->value.funcVal->fname;
-    }else{
-        return input->value.varVal->vname;
-    }
+    return (input->name);
 }
 
 unsigned int getScope(symt * input){
-    if(input->type == 4 || 5){
-        return input->value.funcVal->fscope;
-    }else{
-        return input->value.varVal->vscope;
-    }
+    return (input->scope);
 }
 
 unsigned int getLine(symt * input){
-    if(input->type == 4 || 5){
-        return input->value.funcVal->fline;
-    }else{
-        return input->value.varVal->vline;
-    }
+    return (input->line);
 }
 
-char *getType(types type) {
+char *getType(symbol_t type) {
     if (type == 0) {
-        return "global variable";
+        return "var_s";
     }
     if (type == 1) {
-        return "local variable";
+        return "programfunc_s";
     }
-    if (type == 2) {
-        return "formal argument";
-    }
-    if (type == 3) {
-        return "user function";
-    }
-    return "library function";
+    return "libraryfunc_s";
 }
 
 bool isLibraryFunc(const char * funct){

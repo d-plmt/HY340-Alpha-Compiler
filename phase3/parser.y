@@ -2,13 +2,13 @@
     #include <stdbool.h>
     #include <stdio.h>
     #include "quads.h" 
+    #include "symT.h"
     #include <stdlib.h>
 
     int yyerror (char* yaccProvidedMessage);
     int yylex(void);
     int lvalue_checker(const char *name);
 
-    extern int total_lines;
     extern char* yytext;
     extern FILE* yyin;
 
@@ -63,7 +63,7 @@ stmt:       expr SEMICOLON  {printf("Stmt: expr;\n");}
             |returnstmt {printf("\treturn statement\n");}
             |BREAK SEMICOLON    {
                 if (loop_scope < 1) {
-                    fprintf(stderr, "\033[0;31mERROR. Line %d: Keyword \"break\" can't be used without a loop.\n\033[0m", total_lines);
+                    fprintf(stderr, "\033[0;31mERROR. Line %d: Keyword \"break\" can't be used without a loop.\n\033[0m", yylineno);
                 }
                 else {
                     printf("\tkeyword \"break\"\n");
@@ -71,7 +71,7 @@ stmt:       expr SEMICOLON  {printf("Stmt: expr;\n");}
             }
             |CONTINUE SEMICOLON {
                 if (loop_scope < 1) {
-                    fprintf(stderr, "\033[0;31mERROR. Line %d: Keyword \"continue\" can't be used without a loop.\n\033[0m", total_lines);
+                    fprintf(stderr, "\033[0;31mERROR. Line %d: Keyword \"continue\" can't be used without a loop.\n\033[0m", yylineno);
                 }
                 else {
                     printf("\tkeyword \"continue\"\n");
@@ -107,7 +107,7 @@ term:       LEFT_PAR expr RIGHT_PAR {printf("Term: (expr)\n");}
                     printf("Term: ++lvalue\n");
                 }
                 else {
-                    printf("\033[0;31mERROR. Line %d: Attempting to use function as lvalue\n\033[0m",total_lines);
+                    printf("\033[0;31mERROR. Line %d: Attempting to use function as lvalue\n\033[0m",yylineno);
                 }
             }
             |lvalue OP_PLUS_PLUS {
@@ -115,7 +115,7 @@ term:       LEFT_PAR expr RIGHT_PAR {printf("Term: (expr)\n");}
                     printf("Term: lvalue++\n");
                 }
                 else {
-                    printf("\033[0;31mERROR. Line %d: Attempting to use function as lvalue\n\033[0m",total_lines);
+                    printf("\033[0;31mERROR. Line %d: Attempting to use function as lvalue\n\033[0m",yylineno);
                 }
             }
             |OP_MINUS_MINUS lvalue {
@@ -123,7 +123,7 @@ term:       LEFT_PAR expr RIGHT_PAR {printf("Term: (expr)\n");}
                     printf("Term: --lvalue\n");
                 }
                 else {
-                    printf("\033[0;31mERROR. Line %d: Attempting to use function as lvalue\n\033[0m",total_lines);
+                    printf("\033[0;31mERROR. Line %d: Attempting to use function as lvalue\n\033[0m",yylineno);
                 }
             }
             |lvalue OP_MINUS_MINUS {                
@@ -131,7 +131,7 @@ term:       LEFT_PAR expr RIGHT_PAR {printf("Term: (expr)\n");}
                     printf("Term: lvalue--\n");
                 }
                 else {
-                    printf("\033[0;31mERROR. Line %d: Attempting to use function as lvalue\n\033[0m",total_lines);
+                    printf("\033[0;31mERROR. Line %d: Attempting to use function as lvalue\n\033[0m",yylineno);
                 }
             }
             |primary {printf("Term: primary\n");}
@@ -146,7 +146,7 @@ assignexpr: lvalue OP_EQUALS expr {
                         tmp_symbol = SymTable_lookup(ourVar, tmp_scope, "local");
                         if (tmp_symbol != NULL) {
                             if (tmp_symbol->type > 2) {
-                                fprintf(stdout, "\033[0;31mError. Line %d: Attempting to use function  %s as lvalue\n\033[0m",total_lines, ourVar);
+                                fprintf(stdout, "\033[0;31mError. Line %d: Attempting to use function  %s as lvalue\n\033[0m",yylineno, ourVar);
                                 found_flag = 1;
                                 break;
                             }
@@ -193,7 +193,7 @@ lvalue:     IDENTIFIER {
                                 if (tmp_symbol != NULL) {
                                     if (tmp_scope != 0) {
                                         if (tmp_symbol->type < 3) {
-                                            fprintf(stdout, "\033[0;31mError. Line %d: Cannot access variable %s in this scope\n\033[0m",total_lines, $IDENTIFIER);
+                                            fprintf(stdout, "\033[0;31mError. Line %d: Cannot access variable %s in this scope\n\033[0m",yylineno, $IDENTIFIER);
                                             found_flag = 1;
                                             break;
                                         }
@@ -212,7 +212,7 @@ lvalue:     IDENTIFIER {
                                 tmp_scope--;
                             }
                             if (!found_flag) {
-                                SymTable_insert($IDENTIFIER, total_lines, functionlocal, var_s);
+                                SymTable_insert($IDENTIFIER, yylineno, functionlocal, var_s);
                             }
                         }
                         else { //den eimai se synarthsh
@@ -221,12 +221,12 @@ lvalue:     IDENTIFIER {
                                 fprintf(stdout, "Calling symbol %s in parent scope.\n", $1);
                             }
                             else { //alliws kanw eisagwgh
-                                SymTable_insert($IDENTIFIER, total_lines, programvar, var_s);
+                                SymTable_insert($IDENTIFIER, yylineno, programvar, var_s);
                                 /* if (currscope() == 0) {
-                                    SymTable_insert($IDENTIFIER, total_lines, programvar, var_s);
+                                    SymTable_insert($IDENTIFIER, yylineno, programvar, var_s);
                                 }
                                 else {
-                                    SymTable_insert($IDENTIFIER, total_lines, programvar, var_s);
+                                    SymTable_insert($IDENTIFIER, yylineno, programvar, var_s);
                                 } */
                             }
                         }
@@ -244,10 +244,10 @@ lvalue:     IDENTIFIER {
                 tmp_symbol = SymTable_lookup($IDENTIFIER, currscope(), "local");
                 if (tmp_symbol == NULL) {
                     if (func_flag) { //an eimaste mesa se synarthsh exw func local
-                        SymTable_insert($IDENTIFIER, total_lines, functionlocal, var_s);
+                        SymTable_insert($IDENTIFIER, yylineno, functionlocal, var_s);
                     }
                     else {
-                        SymTable_insert($IDENTIFIER, total_lines, programvar, var_s);
+                        SymTable_insert($IDENTIFIER, yylineno, programvar, var_s);
                     }
                 }
                 else {
@@ -264,7 +264,7 @@ lvalue:     IDENTIFIER {
                     fprintf(stdout, "Symbol %s successfully found in global scope, line %d.\n", $IDENTIFIER, getLine(tmp_symbol));
                 }
                 else {
-                    fprintf(stdout,"\033[0;31mERROR. Line %d: Symbol %s not global or undefined.\n\033[0m", total_lines, $IDENTIFIER);
+                    fprintf(stdout,"\033[0;31mERROR. Line %d: Symbol %s not global or undefined.\n\033[0m", yylineno, $IDENTIFIER);
                 }
             }
             |member {printf("Lvalue: member\n");}
@@ -334,10 +334,10 @@ block:      LEFT_BRACE {
 funcname:   IDENTIFIER /* edw apothikeush tou func name */ {
                 if (SymTable_lookup($IDENTIFIER, currscope(), "funcdef") == NULL) {
                     if (func_flag > 0) {
-                        SymTable_insert($IDENTIFIER, total_lines, programfunc_s, functionlocal);
+                        SymTable_insert($IDENTIFIER, yylineno, programfunc_s, functionlocal);
                     }
                     else {
-                        SymTable_insert($IDENTIFIER, total_lines, programfunc_s, programvar);
+                        SymTable_insert($IDENTIFIER, yylineno, programfunc_s, programvar);
                     }
                     func_flag++;
                     // functions++;
@@ -345,22 +345,26 @@ funcname:   IDENTIFIER /* edw apothikeush tou func name */ {
                     scope_flag = 0;
                 }
                 else {
-                    fprintf(stderr,"\033[0;31mERROR. Line %d: Function (%s) in scope %d cannot be defined\n\033[0m", total_lines, $IDENTIFIER, currscope());
+                    fprintf(stderr,"\033[0;31mERROR. Line %d: Function (%s) in scope %d cannot be defined\n\033[0m", yylineno, $IDENTIFIER, currscope());
                     yyerror("");
                 }
             }
             |  /* EDW NEWTEMP  */ {
                 sprintf(str, "%s%d%c","_f",func_counter+1,'\0');
                 if (SymTable_lookup(strdup(str), currscope(), "funcdef") == NULL) {
+                    if (func_flag > 0) {
+                        SymTable_insert(strdup(str), yylineno, programfunc_s, functionlocal);
+                    }
+                    else {
+                        SymTable_insert(strdup(str), yylineno, programfunc_s, programvar);
+                    }
+                    func_counter++; //auto einai gia ta funcnames
                     func_flag++;
-                    // functions++;
-                    func_counter++;
-                    SymTable_insert(strdup(str), currscope(), total_lines, 3);
                     currentscope++; 
                     scope_flag = 0; //scope flag = 0 gia na mhn auksithei to scope sto block
                 }
                 else {
-                    fprintf(stderr,"\033[0;31mERROR. Line %d: Function (%s) in scope %d cannot be defined\n\033[0m",total_lines, strdup(str),currscope());
+                    fprintf(stderr,"\033[0;31mERROR. Line %d: Function (%s) in scope %d cannot be defined\n\033[0m",yylineno, strdup(str),currscope());
                     yyerror("");
                 }
             }
@@ -405,10 +409,10 @@ idlist:     IDENTIFIER  {
                 symt *tmp_symbol = NULL;
                 tmp_symbol = SymTable_lookup($IDENTIFIER, currscope(), "formal");
                 if (tmp_symbol != NULL) {
-                    fprintf(stderr,"\033[0;31mERROR. Line %d: Symbol %s in scope %d cannot be defined\n\033[0m", total_lines, $IDENTIFIER,currscope());
+                    fprintf(stderr,"\033[0;31mERROR. Line %d: Symbol %s in scope %d cannot be defined\n\033[0m", yylineno, $IDENTIFIER,currscope());
                 }
                 else {
-                    SymTable_insert ($IDENTIFIER, currscope(), total_lines, 2);
+                    SymTable_insert ($IDENTIFIER, yylineno, formalarg, var_s);
                 }
             }
             | IDENTIFIER COMMA idlist {
@@ -416,10 +420,10 @@ idlist:     IDENTIFIER  {
                 symt *tmp_symbol = NULL;
                 tmp_symbol = SymTable_lookup($IDENTIFIER, currscope(), "formal");
                 if (tmp_symbol != NULL) {
-                    fprintf(stderr,"\033[0;31mERROR. Line %d: Symbol %s in scope %d cannot be defined\n\033[0m", total_lines, $IDENTIFIER,currscope());
+                    fprintf(stderr,"\033[0;31mERROR. Line %d: Symbol %s in scope %d cannot be defined\n\033[0m", yylineno, $IDENTIFIER,currscope());
                 }
                 else {
-                    SymTable_insert ($IDENTIFIER, currscope(), total_lines, 2);
+                    SymTable_insert ($IDENTIFIER, yylineno, formalarg, var_s);
                 }
             }
             |
@@ -452,7 +456,7 @@ returnstmt: RETURN SEMICOLON {
                     printf("Returnstmt: return;\n");
                 }
                 else {
-                    fprintf(stderr, "\033[0;31mERROR. Line %d: Keyword \"return\" can't be used without a function.\n\033[0m",total_lines);
+                    fprintf(stderr, "\033[0;31mERROR. Line %d: Keyword \"return\" can't be used without a function.\n\033[0m",yylineno);
                 }
             }
             |RETURN expr SEMICOLON {
@@ -460,7 +464,7 @@ returnstmt: RETURN SEMICOLON {
                     printf("Returnstmt: return;\n");
                 }
                 else {
-                    fprintf(stderr, "\033[0;31mERROR. Line %d: Keyword \"return\" can't be used without a function.\n\033[0m",total_lines);
+                    fprintf(stderr, "\033[0;31mERROR. Line %d: Keyword \"return\" can't be used without a function.\n\033[0m",yylineno);
                 }
             }
             ;
@@ -478,7 +482,7 @@ int lvalue_checker(const char *name) {
             if (tmp_symbol != NULL) {
                 if (tmp_symbol->type > 2) {
                     return 0;
-                    //fprintf(stdout, "\033[0;31mError. Line %d: Attempting to use function  %s as lvalue\n\033[0m",total_lines, ourVar);
+                    //fprintf(stdout, "\033[0;31mError. Line %d: Attempting to use function  %s as lvalue\n\033[0m",yylineno, ourVar);
                     found_flag = 1;
                     break;
                 }
@@ -497,7 +501,7 @@ int lvalue_checker(const char *name) {
         if (tmp_symbol != NULL) {
             if (tmp_symbol->type > 2) {
                 return 0;
-                //fprintf(stdout, "\033[0;31mError. Line %d: Attempting to use function  %s as lvalue\n\033[0m",total_lines, ourVar);
+                //fprintf(stdout, "\033[0;31mError. Line %d: Attempting to use function  %s as lvalue\n\033[0m",yylineno, ourVar);
                 found_flag = 1;
                 //break;
             }
@@ -582,7 +586,7 @@ void print_hash() {
 }
 
 int yyerror (char* yaccProvidedMessage) {
-    fprintf(stderr, "%s: at line %d, before token: %s\n", yaccProvidedMessage, total_lines, yytext);
+    fprintf(stderr, "%s: at line %d, before token: %s\n", yaccProvidedMessage, yylineno, yytext);
     fprintf(stderr, "INPUT NOT VALID\n");
     print_scopes();
     exit(0);

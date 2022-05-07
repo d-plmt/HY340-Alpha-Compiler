@@ -2,7 +2,6 @@
 
 int tempcounter = 0;
 int scopecounter = 0;
-int 
 
 /*expands quad table*/
 void expand (void){
@@ -45,7 +44,7 @@ expr* emit_iftableitem(expr* e){
     else{
         expr* result = newexpr (var_e);
         result->sym = newtemp();
-        emit(tablegetelem,e,e->index,result,currQuad,total_lines);
+        emit(tablegetelem,e,e->index,result,currQuad,yylineno);
         return result; 
     }
 }
@@ -79,7 +78,7 @@ symt *newtemp(void){
     char *name = newtempname();
     symt *sym = SymTable_lookup(name, currscope(), "local");    //EDW CHECK
     if (sym == NULL){
-        return newsymbol(name);
+        return SymTable_insert(name, yylineno, programvar, var_s); //edw logika theloume func_flag check
     }else{
         return sym;
     }
@@ -111,7 +110,7 @@ void patchlabel(unsigned quadNo, unsigned label){
     quads[quadNo].label = label;
 }
 
-expr* lvalue_expr (symbol* sym){
+expr* lvalue_expr (symt* sym){
     assert(sym);
     expr* e = (expr*)malloc(sizeof(expr));
     memset(e, 0, sizeof(expr));
@@ -131,13 +130,13 @@ expr* lvalue_expr (symbol* sym){
 expr* make_call(expr* lv, expr* reversed_elist){
     expr* func = emit_iftableitem(lv);
     while (reversed_elist) {
-        emit(param, reversed_elist, NULL, NULL, currQuad, total_lines); 
+        emit(param, reversed_elist, NULL, NULL, currQuad, yylineno); 
         reversed_elist = reversed_elist->next;
     }
-    emit(call, func, NULL, NULL, currQuad, total_lines); 
+    emit(call, func, NULL, NULL, currQuad, yylineno); 
     expr* result = newexpr(var_e);
     result->sym = newtemp();
-    emit(getretval, NULL,NULL, result, currQuad, total_lines); 
+    emit(getretval, NULL,NULL, result, currQuad, yylineno); 
     return result;
 }
 
@@ -153,7 +152,7 @@ expr* newexpr_constbool(unsigned int b){
     return e;
 }
 
-unsigned int istempname(char* s){
+unsigned int istempname(const char* s){
     return *s == '_';
 }
 
@@ -169,5 +168,5 @@ void check_arith(expr* e, const char* context){
         e->type == programfunc_e    ||
         e->type == libraryfunc_e    ||
         e->type == boolexpr_e)
-        fprintf(strerror, "Illegal expr used in %s!", context);
+        fprintf(stderr, "Illegal expr used in %s!", context);
 } 
