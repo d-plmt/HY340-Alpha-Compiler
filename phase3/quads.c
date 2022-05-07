@@ -1,6 +1,8 @@
 #include "quads.h"
 
 int tempcounter = 0;
+int scopecounter = 0;
+int 
 
 /*expands quad table*/
 void expand (void){
@@ -34,41 +36,7 @@ void emit (
     p -> line   = line;
 }
 
-scopespace_t currentscopespace(void){
-    if (scopeSpaceCounter == 1)
-        return programvar;
-    else if (scopeSpaceCounter % 2 == 0)
-        return formalarg;
-    else
-        return functionlocal;
-}
 
-unsigned currscopeoffset(void){
-    switch (currscopespace()){
-        case programvar     : return programVarOffset;
-        case functionlocal  : return functionLocalOffset;
-        case formalarg      : return formalArgOffset;
-        default             : assert(0);
-    }
-}
-
-void inccurrscopeoffset(void){
-    switch (currscopespace()){
-        case programvar     : return ++programVarOffset; break;
-        case functionlocal  : return ++functionLocalOffset; break;
-        case formalarg      : return ++formalArgOffset; break;
-        default             : assert(0);
-    }
-}
-
-void enterscopespace(void){
-    ++scopeSpaceCounter;
-}
-
-void exitscopespace(void){
-    assert(scopeSpaceCounter > 1);
-    --scopeSpaceCounter;
-} 
 
 /*function */
 expr* emit_iftableitem(expr* e){
@@ -113,7 +81,6 @@ symt *newtemp(void){
     if (sym == NULL){
         return newsymbol(name);
     }else{
-        sym->
         return sym;
     }
 }

@@ -6,7 +6,7 @@
 
     int yyerror (char* yaccProvidedMessage);
     int yylex(void);
-    int lvalue_checker(const char *name, unsigned int scope);
+    int lvalue_checker(const char *name);
 
     extern int total_lines;
     extern char* yytext;
@@ -15,7 +15,6 @@
     char *str;
     char *ourVar;
 
-    unsigned int scope = 0;
     int scope_flag = 1;
     int functions = 0;
     int func_counter = 0;
@@ -104,7 +103,7 @@ term:       LEFT_PAR expr RIGHT_PAR {printf("Term: (expr)\n");}
             |OP_MINUS expr  {printf("Term: -expr\n");}
             |NOT expr {printf("Term: not expr\n");}
             |OP_PLUS_PLUS lvalue {
-                if (lvalue_checker(ourVar, scope)) {
+                if (lvalue_checker(ourVar)) {
                     printf("Term: ++lvalue\n");
                 }
                 else {
@@ -112,7 +111,7 @@ term:       LEFT_PAR expr RIGHT_PAR {printf("Term: (expr)\n");}
                 }
             }
             |lvalue OP_PLUS_PLUS {
-                if (lvalue_checker(ourVar, scope)) {
+                if (lvalue_checker(ourVar)) {
                     printf("Term: lvalue++\n");
                 }
                 else {
@@ -120,7 +119,7 @@ term:       LEFT_PAR expr RIGHT_PAR {printf("Term: (expr)\n");}
                 }
             }
             |OP_MINUS_MINUS lvalue {
-                if (lvalue_checker(ourVar, scope)) {
+                if (lvalue_checker(ourVar)) {
                     printf("Term: --lvalue\n");
                 }
                 else {
@@ -128,7 +127,7 @@ term:       LEFT_PAR expr RIGHT_PAR {printf("Term: (expr)\n");}
                 }
             }
             |lvalue OP_MINUS_MINUS {                
-                if (lvalue_checker(ourVar, scope)) {
+                if (lvalue_checker(ourVar)) {
                     printf("Term: lvalue--\n");
                 }
                 else {
@@ -142,7 +141,7 @@ assignexpr: lvalue OP_EQUALS expr {
                 if (!local_flag)  {
                     symt *tmp_symbol = NULL;
                     int found_flag = 0;
-                    int tmp_scope = scope;
+                    int tmp_scope = currscope();
                     while (tmp_scope >= 0) { //psaxnw ta scopes apo mesa pros ta eksw
                         tmp_symbol = SymTable_lookup(ourVar, tmp_scope, "local");
                         if (tmp_symbol != NULL) {
@@ -179,33 +178,33 @@ primary:    lvalue  {printf("Primary: lvalue\n");}
             ;
     
 lvalue:     IDENTIFIER {   
-                    ourVar = (char *)malloc(sizeof($1));
-                    strcpy(ourVar, $1);               
+                    ourVar = (char *)malloc(sizeof($IDENTIFIER));
+                    strcpy(ourVar, $IDENTIFIER);               
                     printf("Lvalue: identifier\n");
                     symt *tmp_symbol = NULL;
-                    tmp_symbol = SymTable_lookup($1, scope, "local"); //psaxnw to diko mou scope
+                    tmp_symbol = SymTable_lookup($IDENTIFIER, currscope(), "local"); //psaxnw to diko mou scope
                     if (tmp_symbol == NULL) {
                         //an eimai se synarthsh
                         if (func_flag) {
                             int found_flag = 0;
-                            int tmp_scope = scope-1;
+                            int tmp_scope = currscope()-1;
                             while (tmp_scope >= 0) { //psaxnw parent scopes apo mesa pros ta eksw
-                                tmp_symbol = SymTable_lookup($1, tmp_scope, "local");
+                                tmp_symbol = SymTable_lookup($IDENTIFIER, tmp_scope, "local");
                                 if (tmp_symbol != NULL) {
                                     if (tmp_scope != 0) {
                                         if (tmp_symbol->type < 3) {
-                                            fprintf(stdout, "\033[0;31mError. Line %d: Cannot access variable %s in this scope\n\033[0m",total_lines, $1);
+                                            fprintf(stdout, "\033[0;31mError. Line %d: Cannot access variable %s in this scope\n\033[0m",total_lines, $IDENTIFIER);
                                             found_flag = 1;
                                             break;
                                         }
                                         else {
-                                            fprintf(stdout, "Calling symbol %s.\n",$1);
+                                            fprintf(stdout, "Calling symbol %s.\n",$IDENTIFIER);
                                             found_flag = 1;
                                             break;
                                         }
                                     }
                                     else {
-                                        fprintf(stdout, "Calling symbol %s.\n",$1);
+                                        fprintf(stdout, "Calling symbol %s.\n",$IDENTIFIER);
                                         found_flag = 1;
                                         break;
                                     }
@@ -213,21 +212,22 @@ lvalue:     IDENTIFIER {
                                 tmp_scope--;
                             }
                             if (!found_flag) {
-                                SymTable_insert($1, scope, total_lines, 1);
+                                SymTable_insert($IDENTIFIER, total_lines, functionlocal, var_s);
                             }
                         }
                         else { //den eimai se synarthsh
-                            tmp_symbol = SymTable_lookup($1, scope, "call_src"); //koitaw ola ta scopes
+                            tmp_symbol = SymTable_lookup($IDENTIFIER, currscope(), "call_src"); //koitaw ola ta scopes
                             if (tmp_symbol != NULL) { //an vrw kati ola good
                                 fprintf(stdout, "Calling symbol %s in parent scope.\n", $1);
                             }
                             else { //alliws kanw eisagwgh
-                                if (scope == 0) {
-                                    SymTable_insert($1, scope, total_lines, 0);
+                                SymTable_insert($IDENTIFIER, total_lines, programvar, var_s);
+                                /* if (currscope() == 0) {
+                                    SymTable_insert($IDENTIFIER, total_lines, programvar, var_s);
                                 }
                                 else {
-                                    SymTable_insert($1, scope, total_lines, 1);
-                                }
+                                    SymTable_insert($IDENTIFIER, total_lines, programvar, var_s);
+                                } */
                             }
                         }
 
@@ -236,28 +236,35 @@ lvalue:     IDENTIFIER {
 
             |LOCAL IDENTIFIER {
                 local_flag = 1;
-                ourVar = (char *)malloc(sizeof($1));
-                strcpy(ourVar, $2); 
-                symt *tmp_symbol = NULL;
+                ourVar = (char *)malloc(sizeof($IDENTIFIER));
+                strcpy(ourVar, $IDENTIFIER); 
                 printf("Lvalue: local identifier\n");
-                if ((tmp_symbol = SymTable_lookup($2, scope, "local")) == NULL) {
-                    SymTable_insert($2, scope, total_lines, 1);
+
+                symt *tmp_symbol = NULL;
+                tmp_symbol = SymTable_lookup($IDENTIFIER, currscope(), "local");
+                if (tmp_symbol == NULL) {
+                    if (func_flag) { //an eimaste mesa se synarthsh exw func local
+                        SymTable_insert($IDENTIFIER, total_lines, functionlocal, var_s);
+                    }
+                    else {
+                        SymTable_insert($IDENTIFIER, total_lines, programvar, var_s);
+                    }
                 }
                 else {
 
-                    fprintf(stdout, "Symbol %s successfully found in this scope (%d), line %d.\n", $2, scope, getLine(tmp_symbol));
+                    fprintf(stdout, "Symbol %s successfully found in this scope (%d), line %d.\n", $IDENTIFIER, currscope(), getLine(tmp_symbol));
                 }
             }
             |COL_COL IDENTIFIER {
-                ourVar = (char *)malloc(sizeof($1));
-                strcpy(ourVar, $2); 
+                ourVar = (char *)malloc(sizeof($IDENTIFIER));
+                strcpy(ourVar, $IDENTIFIER); 
                 symt *tmp_symbol = NULL;
                 printf("Lvalue: ::identifier\n");
-                if ((tmp_symbol = SymTable_lookup($2, scope, "global_src")) != NULL) {
-                    fprintf(stdout, "Symbol %s successfully found in global scope, line %d.\n", $2, getLine(tmp_symbol));
+                if ((tmp_symbol = SymTable_lookup($IDENTIFIER, currscope(), "global_src")) != NULL) {
+                    fprintf(stdout, "Symbol %s successfully found in global scope, line %d.\n", $IDENTIFIER, getLine(tmp_symbol));
                 }
                 else {
-                    fprintf(stdout,"\033[0;31mERROR. Line %d: Symbol %s not global or undefined.\n\033[0m", total_lines, $2);
+                    fprintf(stdout,"\033[0;31mERROR. Line %d: Symbol %s not global or undefined.\n\033[0m", total_lines, $IDENTIFIER);
                 }
             }
             |member {printf("Lvalue: member\n");}
@@ -305,77 +312,83 @@ func_stmt: stmt func_stmt {printf("Func_stmt: stmt,...,stmt\n");}
             ;
 
 block:      LEFT_BRACE {
-                    scope = scope + scope_flag;
+                    currentscope = currscope() + scope_flag;
                 } RIGHT_BRACE {
-                    scope = scope - scope_flag;
+                    currentscope = currscope() - scope_flag;
                     if (scope_flag == 1) {
-                        SymTable_hide(scope+1);
+                        SymTable_hide(currscope()+1);
                     }
                     {printf("Block: {}\n");}
                 }
             |LEFT_BRACE {
-                    scope = scope + scope_flag;
+                    currentscope = currscope() + scope_flag;
                 } func_stmt RIGHT_BRACE {
-                    scope = scope - scope_flag;
+                    currentscope = currscope() - scope_flag;
                     if (scope_flag == 1) {
-                        SymTable_hide(scope+1);
+                        SymTable_hide(currscope()+1);
                     }
                 }
                 {printf("Block: {func_stmt}\n");} 
             ;
-funcdef:    FUNCTION LEFT_PAR {
-                    sprintf(str, "%s%d%c","_f",func_counter+1,'\0');
-                    if (SymTable_lookup(strdup(str), scope, "funcdef") == NULL) {
-                        func_flag++;
-                        functions++;
-                        func_counter++;
-                        SymTable_insert(strdup(str), scope, total_lines, 3);
-                        scope++; 
-                        scope_flag = 0; //scope flag = 0 gia na mhn auksithei to scope sto block
-                        //SymTable_hide(scope-1);
+
+funcname:   IDENTIFIER /* edw apothikeush tou func name */ {
+                if (SymTable_lookup($IDENTIFIER, currscope(), "funcdef") == NULL) {
+                    if (func_flag > 0) {
+                        SymTable_insert($IDENTIFIER, total_lines, programfunc_s, functionlocal);
                     }
                     else {
-                        fprintf(stderr,"\033[0;31mERROR. Line %d: Function (%s) in scope %d cannot be defined\n\033[0m",total_lines, strdup(str),scope);
-                        yyerror("");
+                        SymTable_insert($IDENTIFIER, total_lines, programfunc_s, programvar);
                     }
-                } 
-                idlist RIGHT_PAR block {
-                    if (!(--functions)){  //kanw to scope flag 1
-                        scope_flag = 1; //vgainontas apo ta emfwleumena funcs
-                    } 
-                    func_flag--;
-                    scope--;
-                    SymTable_hide(scope+1);
-                    SymTable_reveal(scope);
-                    printf("Funcdef: function (idlist) {}\n");
+                    func_flag++;
+                    // functions++;
+                    currentscope++; 
+                    scope_flag = 0;
                 }
-            |FUNCTION 
-                IDENTIFIER {
+                else {
+                    fprintf(stderr,"\033[0;31mERROR. Line %d: Function (%s) in scope %d cannot be defined\n\033[0m", total_lines, $IDENTIFIER, currscope());
+                    yyerror("");
                 }
-                LEFT_PAR {
-                    if (SymTable_lookup($2, scope, "funcdef") == NULL) {
-                        SymTable_insert($2, scope, total_lines, 3);
-                        {func_flag++;}
-                        functions++;
-                        scope++; 
-                        scope_flag = 0;
-                        //SymTable_hide(scope-1);
-                    }
-                    else {
-                        fprintf(stderr,"\033[0;31mERROR. Line %d: Function (%s) in scope %d cannot be defined\n\033[0m", total_lines, $2, scope);
-                        yyerror("");
-                    }
-                } 
-                idlist RIGHT_PAR block {
-                    if (!(--functions)){
-                        scope_flag = 1;
-                    } 
-                    func_flag--;
-                    scope--;
-                    SymTable_hide(scope+1);
-                    SymTable_reveal(scope);
-                    printf("Funcdef: function identifier(idlist) {}\n");
+            }
+            |  /* EDW NEWTEMP  */ {
+                sprintf(str, "%s%d%c","_f",func_counter+1,'\0');
+                if (SymTable_lookup(strdup(str), currscope(), "funcdef") == NULL) {
+                    func_flag++;
+                    // functions++;
+                    func_counter++;
+                    SymTable_insert(strdup(str), currscope(), total_lines, 3);
+                    currentscope++; 
+                    scope_flag = 0; //scope flag = 0 gia na mhn auksithei to scope sto block
                 }
+                else {
+                    fprintf(stderr,"\033[0;31mERROR. Line %d: Function (%s) in scope %d cannot be defined\n\033[0m",total_lines, strdup(str),currscope());
+                    yyerror("");
+                }
+            }
+            ;
+
+funcprefix: FUNCTION funcname {
+                //TODO
+            }
+            ;
+
+funcargs:  LEFT_PAR idlist RIGHT_PAR /*TODO*/ {
+                enterscopespace();
+                printf("\nA\n");
+            }
+            ;
+
+funcbody:   block {
+                if (!(--func_flag)){ //an func_flag-1=0, vghka apo ola ta functions
+                    scope_flag = 1;
+                }
+                currentscope--;
+                SymTable_hide(currscope()+1);
+                SymTable_reveal(currscope());
+                printf("Funcdef: function identifier(idlist) {}\n");
+            }
+            ;
+
+funcdef:    funcprefix funcargs funcbody
             ;
 
 const:      INTEGER {printf("Const: integer\n");}
@@ -387,25 +400,26 @@ const:      INTEGER {printf("Const: integer\n");}
             ;
 
 idlist:     IDENTIFIER  {
+    printf("B\n");
                 printf("Idlist: identifier\n");
                 symt *tmp_symbol = NULL;
-                tmp_symbol = SymTable_lookup($1, scope, "formal");
+                tmp_symbol = SymTable_lookup($IDENTIFIER, currscope(), "formal");
                 if (tmp_symbol != NULL) {
-                    fprintf(stderr,"\033[0;31mERROR. Line %d: Symbol %s in scope %d cannot be defined\n\033[0m", total_lines, $1,scope);
+                    fprintf(stderr,"\033[0;31mERROR. Line %d: Symbol %s in scope %d cannot be defined\n\033[0m", total_lines, $IDENTIFIER,currscope());
                 }
                 else {
-                    SymTable_insert ($1, scope, total_lines, 2);
+                    SymTable_insert ($IDENTIFIER, currscope(), total_lines, 2);
                 }
             }
             | IDENTIFIER COMMA idlist {
                 printf("Idlist: identifier,...,identifier\n");
                 symt *tmp_symbol = NULL;
-                tmp_symbol = SymTable_lookup($1, scope, "formal");
+                tmp_symbol = SymTable_lookup($IDENTIFIER, currscope(), "formal");
                 if (tmp_symbol != NULL) {
-                    fprintf(stderr,"\033[0;31mERROR. Line %d: Symbol %s in scope %d cannot be defined\n\033[0m", total_lines, $1,scope);
+                    fprintf(stderr,"\033[0;31mERROR. Line %d: Symbol %s in scope %d cannot be defined\n\033[0m", total_lines, $IDENTIFIER,currscope());
                 }
                 else {
-                    SymTable_insert ($1, scope, total_lines, 2);
+                    SymTable_insert ($IDENTIFIER, currscope(), total_lines, 2);
                 }
             }
             |
@@ -454,10 +468,10 @@ returnstmt: RETURN SEMICOLON {
 
 %%
 
-int lvalue_checker(const char *name, unsigned int scope) {
+int lvalue_checker(const char *name) {
     symt *tmp_symbol = NULL;
         int found_flag = 0;
-        int tmp_scope = scope;
+        int tmp_scope = currscope();
     if (!local_flag)  {
         while (tmp_scope >= 0) { //psaxnw ta scopes apo mesa pros ta eksw
             tmp_symbol = SymTable_lookup(ourVar, tmp_scope, "local");
@@ -517,18 +531,18 @@ void initialize() {
     lista->scope_head = NULL;
     lista->next = NULL;
 
-    SymTable_insert("print", 0, 0, 4);
-    SymTable_insert("input", 0, 0, 4);
-    SymTable_insert("objectmemberkeys", 0, 0, 4);
-    SymTable_insert("objecttotalmembers", 0, 0, 4);
-    SymTable_insert("objectcopy", 0, 0, 4);
-    SymTable_insert("totalarguments", 0, 0, 4);
-    SymTable_insert("argument", 0, 0, 4);
-    SymTable_insert("typeof", 0, 0, 4);
-    SymTable_insert("strtonum", 0, 0, 4);
-    SymTable_insert("sqrt", 0, 0, 4);
-    SymTable_insert("cos", 0, 0, 4);
-    SymTable_insert("sin", 0, 0, 4);
+    SymTable_insert("print", 0, programvar, libraryfunc_s);
+    SymTable_insert("input", 0, programvar, libraryfunc_s);
+    SymTable_insert("objectmemberkeys", 0, programvar, libraryfunc_s);
+    SymTable_insert("objecttotalmembers", 0, programvar, libraryfunc_s);
+    SymTable_insert("objectcopy", 0, programvar, libraryfunc_s);
+    SymTable_insert("totalarguments", 0, programvar, libraryfunc_s);
+    SymTable_insert("argument", 0, programvar, libraryfunc_s);
+    SymTable_insert("typeof", 0, programvar, libraryfunc_s);
+    SymTable_insert("strtonum", 0, programvar, libraryfunc_s);
+    SymTable_insert("sqrt", 0, programvar, libraryfunc_s);
+    SymTable_insert("cos", 0, programvar, libraryfunc_s);
+    SymTable_insert("sin", 0, programvar, libraryfunc_s);
 }
 
 void print_scopes() {

@@ -1,4 +1,43 @@
 #include "symT.h"
+#include "quads.h"
+
+//scopespace shit
+scopespace_t currentscopespace(void){
+    if (scopeSpaceCounter == 1)
+        return programvar;
+    else if (scopeSpaceCounter % 2 == 0)
+        return formalarg;
+    else
+        return functionlocal;
+}
+
+unsigned currscopeoffset(void){
+    switch (currentscopespace()){
+        case programvar     : return programVarOffset;
+        case functionlocal  : return functionLocalOffset;
+        case formalarg      : return formalArgOffset;
+        default             : assert(0);
+    }
+}
+
+void inccurrscopeoffset(void){
+    switch (currentscopespace()){
+        case programvar     : ++programVarOffset; break;
+        case functionlocal  : ++functionLocalOffset; break;
+        case formalarg      : ++formalArgOffset; break;
+        default             : assert(0);
+    }
+}
+
+void enterscopespace(void){
+    ++scopeSpaceCounter;
+}
+
+void exitscopespace(void){
+    assert(scopeSpaceCounter > 1);
+    --scopeSpaceCounter;
+} 
+
 
 
 void SymTable_hide(unsigned int scope) {
@@ -63,7 +102,7 @@ void resize_pinaka(unsigned int scope) {
     }
 }
 
-int SymTable_insert(const char *name, unsigned int scope, unsigned int line, types type) {
+symt* SymTable_insert(const char *name, unsigned int line, scopespace_t space, symbol_t type) {
     symt *new_node, *temp;
     scope_link *temp2;
     unsigned int index = SymTable_hash(name) % 499;
@@ -80,22 +119,19 @@ int SymTable_insert(const char *name, unsigned int scope, unsigned int line, typ
     else {
         lera->head[index] = new_node;
     }
+
+    new_node->isActive = 1;
+    new_node->name = name;
+    new_node->scope = currscope();
+    new_node->line = line;
+    new_node->offset = currscopeoffset();
+    new_node->space = space;
+    new_node->type = type;
+    new_node->type = type;
     new_node->next = NULL;
     new_node->next_in_scope = NULL;
-    new_node->isActive = 1;
-    new_node->type = type;
-    if (type < 3) {
-        new_node->value.varVal = malloc(sizeof(var));
-        new_node->value.varVal->vname = name;
-        new_node->value.varVal->vscope = scope;
-        new_node->value.varVal->vline = line;
-    }
-    else {
-        new_node->value.funcVal = malloc(sizeof(func));
-        new_node->value.funcVal->fname = name;
-        new_node->value.funcVal->fscope = scope;
-        new_node->value.funcVal->fline = line;
-    }
+
+
     resize_pinaka(scope);
     temp2 = lista;
     while (temp2->scope_counter != scope) {
@@ -111,6 +147,7 @@ int SymTable_insert(const char *name, unsigned int scope, unsigned int line, typ
         }
         temp->next_in_scope = new_node;
     }
+    return temp;
 }
 
 symt* SymTable_lookup(const char *new_symbol_name, unsigned int scope, char *search_mode) {

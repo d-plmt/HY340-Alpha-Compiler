@@ -7,7 +7,6 @@
 unsigned programVarOffset       = 0;
 unsigned functionLocalOffset    = 0;
 unsigned formalArgOffset        = 0;
-unsigned scopeSpaceCounter      = 1;
 extern int total_lines;
 
 typedef enum iopcode {
@@ -60,40 +59,23 @@ quad*           quads = (quad*) 0;
 unsigned        total = 0;
 unsigned int    currQuad = 0;
 
-typedef enum symbol_t  {
-    var_s, 
-    programfunc_s, 
-    libraryfunc_s
-}symbol_t;
 
-typedef struct symbol {
-    enum symbol_t   type;
-    char*           name;
-    scopespace_t    space;
-    unsigned        offset;
-    unsigned        scope;
-    unsigned        line;
-}symbol;
 
-scopespace_t currentscopespace(void);
-unsigned currscopeoffset (void);
-void inccurrscopeoffset (void);
-void enterscopespace (void);
-void exitscopespace (void);
+
 void resetformalargsoffset(void); //midenizei to offset twn formal args
 void resetfunctionlocalsoffset(void); //midenizei to offset twn local functions
 void restorecurrscopeoffset(unsigned n);
 
 expr* emit_iftableitem(expr* e); //paragei tin entoli pou lamvanei ena stoixeio otan exoume lvalue.id kai to lvalue einai stoixeio pinaka
-expr* lvalue_expr (symbol* sym);
+expr* lvalue_expr (symt* sym);
 expr* make_call(expr* lv, expr* reversed_elist);
 expr* newexpr(expr_t t);
 expr* newexpr_conststring(char* s);
 expr* newexpr_constnum(double i);
 expr* newexpr_constbool(unsigned int b);
 
-int currscope(); //epistrefei to scope
-symt *newsymbol(const char *name);
+
+symt *newsymbol(const char *name); //auto de to xreiazomaste, exoume thn symtable_insert
 
 char *newtempname(void); //paragei kai epistrefei ena neo onoma gia mia proswrini metavliti xrisimopoiontas mia metavliti tempcounter
 symt *newtemp(void); //epistrefei mia nea krufi metavliti sto scope i mia diathesimi metavliti

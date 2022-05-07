@@ -10,42 +10,30 @@
 #define SIZE 499
 #define HASH_MULTIPLIER 65599
 
-/*Structure containing info about our variables*/
-typedef struct variable
-{
-    /* data */
-    const char *vname;
-    unsigned int vscope;
-    unsigned int vline;
-} var;
+unsigned int currentscope = 0;
+unsigned scopeSpaceCounter      = 1;
 
-/*Structure containing info about our functions*/
-typedef struct function
-{
-    /* data */
-    const char *fname;
-    unsigned int fscope;
-    unsigned int fline;
-} func;
+typedef enum symbol_t  {
+    var_s, 
+    programfunc_s, 
+    libraryfunc_s
+}symbol_t;
 
-typedef enum symt
-{
-    GLOBAL,
-    LOCAL_SYM,
-    FORMAL,
-    USERFUNC,
-    LIBFUNC
-} types;
+typedef enum scopespace_t{
+    programvar,
+    functionlocal,
+    formalarg
+} scopespace_t;
 
 typedef struct SymTableEntry
 {
     bool isActive;
-    union
-    {
-        var *varVal;
-        func *funcVal;
-    } value;
-    types type;
+    const char *name;
+    unsigned scope;
+    unsigned line;
+    unsigned offset;
+    scopespace_t space;
+    symbol_t type;
     struct SymTableEntry *next;
     struct SymTableEntry *next_in_scope;
 } symt;
@@ -62,21 +50,19 @@ typedef struct scope_link
     struct scope_link *next;
 } scope_link;
 
-typedef enum scopespace_t{
-    programvar,
-    functionlocal,
-    formalarg
-} scopespace_t;
-
 
 /*Hash Table functions*/
 unsigned int SymTable_hash(const char *key);
 
 void SymTable_new(void);
-int SymTable_insert(const char *name, unsigned int scope, unsigned int line, types type);
+
+symt* SymTable_insert(const char *name, unsigned int line, scopespace_t space, symbol_t type);
 symt* SymTable_lookup(const char *new_symbol_name, unsigned int scope, char *search_mode); 
 void SymTable_hide(unsigned int scope);
 void SymTable_reveal(unsigned int scope);
+
+int currscope(); //epistrefei to scope
+int currline();
 
 bool isLibraryFunc(const char *funct);
 void resize_pinaka(unsigned int scope);
@@ -84,8 +70,15 @@ void resize_pinaka(unsigned int scope);
 const char *getName(symt *input);
 unsigned int getScope(symt *input);
 unsigned int getLine(symt *input);
-char *getType(types type);
 scope_link *lista;
 SymTable *lera;
+
+//scopespace shit
+scopespace_t currentscopespace(void);
+
+unsigned currscopeoffset (void);
+void inccurrscopeoffset (void);
+void enterscopespace (void);
+void exitscopespace (void);
 
 #endif
