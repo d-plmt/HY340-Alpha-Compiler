@@ -1,4 +1,4 @@
-#include "symT.h"
+//#include "symT.h"
 
 //scopespace shit
 scopespace_t currentscopespace(void){

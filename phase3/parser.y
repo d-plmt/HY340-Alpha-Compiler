@@ -2,7 +2,6 @@
     #include <stdbool.h>
     #include <stdio.h>
     #include "quads.h" 
-    #include "symT.h"
     #include <stdlib.h>
 
     int yyerror (char* yaccProvidedMessage);
