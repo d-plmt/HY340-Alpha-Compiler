@@ -1,4 +1,4 @@
-#ifndef SYMT_H_INCLUDED
+#ifdef SYMT_H_INCLUDED
 #define SYMT_H_INCLUDED
 
 #include <stdio.h>

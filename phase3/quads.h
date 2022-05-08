@@ -1,4 +1,4 @@
-#ifndef QUADS_H_INCLUDED
+#ifdef QUADS_H_INCLUDED
 #define QUADS_H_INCLUDED
 
 #include "symT.h"
