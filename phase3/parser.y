@@ -21,6 +21,9 @@
     int call_flag = 0;
     int func_flag = 0;
     int local_flag = 0;
+
+    //
+
 %}
 
 %start program

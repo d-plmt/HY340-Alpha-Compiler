@@ -1,6 +1,14 @@
 #include "quads.h"
 
 ////////////SYM/////////////
+unsigned int currentscope = 0;
+unsigned int programVarOffset = 0;
+unsigned int functionLocalOffset = 0;
+unsigned int formalArgOffset = 0;
+unsigned int scopeSpaceCounter = 1;
+quad* quads = (quad*) 0;
+unsigned int total = 0;
+unsigned int currQuad = 0;
 
 //scopespace shit
 scopespace_t currentscopespace(void){

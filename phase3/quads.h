@@ -1,6 +1,3 @@
-#define QUADS_H_INCLUDED 1
-#ifdef QUADS_H_INCLUDED
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,11 +12,11 @@
 #define NEW_SIZE    (EXPAND_SIZE*sizeof(quad)+CURR_SIZE)
 
 extern int yylineno;
-unsigned int currentscope = 0;
-unsigned programVarOffset       = 0;
-unsigned functionLocalOffset    = 0;
-unsigned formalArgOffset        = 0;
-unsigned scopeSpaceCounter      = 1;
+extern unsigned int currentscope;
+extern unsigned int programVarOffset;
+extern unsigned int functionLocalOffset;
+extern unsigned int formalArgOffset;
+extern unsigned int scopeSpaceCounter;
 
 typedef enum symbol_t  {
     var_s, 
@@ -85,6 +82,29 @@ typedef struct scope_link
     struct scope_link *next;
 } scope_link;
 
+typedef struct expr {
+    expr_t          type;
+    symt*           sym;
+    struct expr*    index;
+    double          numConst;
+    char*           strConst;
+    unsigned char   boolConst;
+    struct expr*    next;
+} expr;
+
+typedef struct quad {
+    iopcode         op;
+    expr*           result;
+    expr*           arg1;
+    expr*           arg2;
+    unsigned        label;
+    unsigned        line;
+} quad;
+
+extern quad*           quads;
+extern unsigned        total;
+extern unsigned int    currQuad;
+
 /*Hash Table functions*/
 unsigned int SymTable_hash(const char *key);
 
@@ -117,31 +137,6 @@ void inccurrscopeoffset (void);
 void enterscopespace (void);
 void exitscopespace (void);
 
-typedef struct expr {
-    expr_t          type;
-    symt*           sym;
-    struct expr*    index;
-    double          numConst;
-    char*           strConst;
-    unsigned char   boolConst;
-    struct expr*    next;
-} expr;
-
-typedef struct quad {
-    iopcode         op;
-    expr*           result;
-    expr*           arg1;
-    expr*           arg2;
-    unsigned        label;
-    unsigned        line;
-} quad;
-
-quad*           quads = (quad*) 0;
-unsigned        total = 0;
-unsigned int    currQuad = 0;
-
-
-
 
 void resetformalargsoffset(void); //midenizei to offset twn formal args
 void resetfunctionlocalsoffset(void); //midenizei to offset twn local functions
@@ -169,5 +164,3 @@ void patchlabel(unsigned quadNo, unsigned label); //sumplirwnei ena arxika undef
 
 
 void check_arith(expr* e, const char* context); //sunartisi pou tsekarei an xrisimopoieitai swsta to expr se ariumhtiko 
-
-#endif
