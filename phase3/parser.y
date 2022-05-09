@@ -31,9 +31,9 @@
     int intVal; 
     double realVal; 
     char *strVal;
-    struct symt *symtVal;
+    struct SymTableEntry *symtVal;
     struct expr *exprVal;
-    }
+    };
 
 %token <intVal>     INTEGER
 %token <realVal>    REAL
@@ -45,8 +45,8 @@
 %type stmt expr term assignexpr primary member call callsuffix normcall methodcall elist objectdef indexed indexedelem block funcdef const idlist ifstmt whilestmt forstmt returnstmt
 
 %type <strVal> lvalue
-%type <strVal> funcname
-%type <strVal> funcprefix
+%type <symtVal> funcname
+%type <symtVal> funcprefix
 
 %right OP_EQUALS
 %left OR
@@ -222,7 +222,8 @@ lvalue:     IDENTIFIER {
                                 tmp_scope--;
                             }
                             if (!found_flag) {
-                                SymTable_insert($IDENTIFIER, yylineno, functionlocal, var_s);
+                                printf("AAAAAAAAAAAAAAAAAAAAAA\n");
+                                SymTable_insert($IDENTIFIER, yylineno, functionlocal, programfunc_s);
                             }
                         }
                         else { //den eimai se synarthsh
@@ -343,14 +344,17 @@ block:      LEFT_BRACE {
 
 funcname:   IDENTIFIER /* edw apothikeush tou func name */ {
                 if (SymTable_lookup($IDENTIFIER, currscope(), "funcdef") == NULL) {
+                    symt *temp = NULL;
                     if (func_flag > 0) {
-                        SymTable_insert($IDENTIFIER, yylineno, programfunc_s, functionlocal);
+                        temp = SymTable_insert($IDENTIFIER, yylineno, functionlocal, programfunc_s);
                     }
                     else {
-                        SymTable_insert($IDENTIFIER, yylineno, programfunc_s, programvar);
+                        temp = SymTable_insert($IDENTIFIER, yylineno, programvar, programfunc_s);
                     }
+                    
                     func_flag++;
                     // functions++;
+                    $$ = temp;
                     currentscope++; 
                     scope_flag = 0;
                 }
@@ -362,15 +366,17 @@ funcname:   IDENTIFIER /* edw apothikeush tou func name */ {
             |  /* EDW NEWTEMP  */ {
                 sprintf(str, "%s%d%c","_f",func_counter+1,'\0');
                 if (SymTable_lookup(strdup(str), currscope(), "funcdef") == NULL) {
+                    symt *temp = NULL;
                     if (func_flag > 0) {
-                        SymTable_insert(strdup(str), yylineno, programfunc_s, functionlocal);
+                        temp = SymTable_insert(strdup(str), yylineno, functionlocal, programfunc_s);
                     }
                     else {
-                        SymTable_insert(strdup(str), yylineno, programfunc_s, programvar);
+                        temp = SymTable_insert(strdup(str), yylineno, programvar, programfunc_s);
                     }
                     func_counter++; //auto einai gia ta funcnames
                     func_flag++;
                     currentscope++; 
+                    $$ = temp;
                     scope_flag = 0; //scope flag = 0 gia na mhn auksithei to scope sto block
                 }
                 else {
@@ -381,6 +387,7 @@ funcname:   IDENTIFIER /* edw apothikeush tou func name */ {
             ;
 
 funcprefix: FUNCTION funcname {
+                $$ = $2;
                 enterscopespace();
                 // if (func_flag > 0) {
                 //     $funcprefix = SymTable_insert($funcname, yylineno, programfunc_s, functionlocal);
@@ -394,7 +401,7 @@ funcprefix: FUNCTION funcname {
 funcargs:  LEFT_PAR idlist RIGHT_PAR /*TODO*/ {
                 enterscopespace(); //enter function locals space
                 resetfunctionlocalsoffset(); //start counting locals from zero
-                printf("\nA\n");
+                //printf("\nA\n");
             }
             ;
 
@@ -438,7 +445,7 @@ const:      INTEGER {printf("Const: integer\n");}
             ;
 
 idlist:     IDENTIFIER  {
-    printf("B\n");
+    //printf("B\n");
                 printf("Idlist: identifier\n");
                 symt *tmp_symbol = NULL;
                 tmp_symbol = SymTable_lookup($IDENTIFIER, currscope(), "formal");
