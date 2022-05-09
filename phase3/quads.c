@@ -158,6 +158,7 @@ symt* SymTable_insert(const char *name, unsigned int line, scopespace_t space, s
         }
         temp->next_in_scope = new_node;
     }
+    if (type != libraryfunc_s) inccurrscopeoffset();
     return temp;
 }
 

@@ -27,7 +27,13 @@
 %}
 
 %start program
-%union {int intVal; double realVal; char *strVal;}
+%union {
+    int intVal; 
+    double realVal; 
+    char *strVal;
+    struct symt *symtVal;
+    struct expr *exprVal;
+    }
 
 %token <intVal>     INTEGER
 %token <realVal>    REAL
@@ -39,6 +45,8 @@
 %type stmt expr term assignexpr primary member call callsuffix normcall methodcall elist objectdef indexed indexedelem block funcdef const idlist ifstmt whilestmt forstmt returnstmt
 
 %type <strVal> lvalue
+%type <strVal> funcname
+%type <strVal> funcprefix
 
 %right OP_EQUALS
 %left OR
@@ -187,7 +195,7 @@ lvalue:     IDENTIFIER {
                     tmp_symbol = SymTable_lookup($IDENTIFIER, currscope(), "local"); //psaxnw to diko mou scope
                     if (tmp_symbol == NULL) {
                         //an eimai se synarthsh
-                        if (func_flag) {
+                        if (func_flag > 0) {
                             int found_flag = 0;
                             int tmp_scope = currscope()-1;
                             while (tmp_scope >= 0) { //psaxnw parent scopes apo mesa pros ta eksw
@@ -245,7 +253,7 @@ lvalue:     IDENTIFIER {
                 symt *tmp_symbol = NULL;
                 tmp_symbol = SymTable_lookup($IDENTIFIER, currscope(), "local");
                 if (tmp_symbol == NULL) {
-                    if (func_flag) { //an eimaste mesa se synarthsh exw func local
+                    if (func_flag > 0) { //an eimaste mesa se synarthsh exw func local
                         SymTable_insert($IDENTIFIER, yylineno, functionlocal, var_s);
                     }
                     else {
@@ -373,7 +381,13 @@ funcname:   IDENTIFIER /* edw apothikeush tou func name */ {
             ;
 
 funcprefix: FUNCTION funcname {
-                $funcprefix = SymTable_insert($funcname, yylineno, programfunc_s, function_s);
+                enterscopespace();
+                // if (func_flag > 0) {
+                //     $funcprefix = SymTable_insert($funcname, yylineno, programfunc_s, functionlocal);
+                // }
+                // else {
+                //     $funcprefix = SymTable_insert($funcname, yylineno, programfunc_s, programvar);
+                // }
             }
             ;
 
@@ -389,6 +403,7 @@ funcbody:   block {
                     scope_flag = 1;
                 }
                 currentscope--;
+                exitscopespace();
                 SymTable_hide(currscope()+1);
                 SymTable_reveal(currscope());
                 printf("Funcdef: function identifier(idlist) {}\n");
@@ -398,7 +413,9 @@ funcbody:   block {
             }
             ;
 
-funcdef:    funcprefix funcargs funcbody
+funcdef:    funcprefix funcargs funcbody {
+                exitscopespace();
+            }
             /*{existscopespace();
             $funcprefix.totalLocals = $funcbody;
             int offset = pop_and_top(scopeoffsetStack);
