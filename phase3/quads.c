@@ -278,6 +278,35 @@ bool isLibraryFunc(const char * funct){
   }
 }
 
+//////////////STACK////////////////
+
+void pushOffsetStack(offsetStack *top, int offset) {
+    offsetStack *new_node = malloc(sizeof(offsetStack));
+    new_node -> offset = offset;
+    if (top == NULL) {
+        new_node->next = NULL;
+    }
+    else {
+        new_node->next = top;
+    }
+    top = new_node;
+}
+
+int popOffsetStack(offsetStack *top) {
+    if (top == NULL) {
+        return -1;
+    }
+    int to_return = top->offset;
+    if (top->next == NULL) {
+        free(top);
+    }
+    else {
+        offsetStack *temp = top;
+        top = top->next;
+        free(temp);
+    }
+    return to_return;
+}
 
 //////////////QUADS////////////////
 int tempcounter = 0;
@@ -296,17 +325,8 @@ void expand (void){
 }
 
 /*function produces a new instruction*/
-void emit (
-    iopcode     op,
-    expr*       arg1,
-    expr*       arg2,
-    expr*       result,
-    unsigned    label,
-    unsigned    line
-    ) {
-    if (currQuad == total)
-        expand();
-
+void emit (iopcode op, expr* arg1, expr* arg2, expr* result, unsigned label, unsigned line) {
+    if (currQuad == total) expand();
     quad* p     = quads + currQuad++;
     p -> arg1   = arg1;
     p -> arg2   = arg2;
@@ -346,7 +366,7 @@ expr* newexpr_conststring(char* s){
 tempcounter = eswteriki metavliti pou metraei 
 tis uparxouses krufes metavlites*/
 char *newtempname(void){
-    return "_t" + tempcounter + '\0';
+    return "_t" + tempcounter;
 }
 
 /*function pou midenizei ton tempcounter*/

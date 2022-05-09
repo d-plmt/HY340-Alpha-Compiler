@@ -42,11 +42,13 @@
 %token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT LINE_COMM
 
 
-%type stmt expr term assignexpr primary member call callsuffix normcall methodcall elist objectdef indexed indexedelem block funcdef const idlist ifstmt whilestmt forstmt returnstmt
+%type stmt expr term assignexpr primary member call callsuffix normcall methodcall elist objectdef indexed indexedelem block const idlist ifstmt whilestmt forstmt returnstmt
 
 %type <strVal> lvalue
 %type <symtVal> funcname
 %type <symtVal> funcprefix
+%type <symtVal> funcdef
+%type <intVal> funcbody //auto leei unsigned alla de kserw ti na valw
 
 %right OP_EQUALS
 %left OR
@@ -223,7 +225,7 @@ lvalue:     IDENTIFIER {
                             }
                             if (!found_flag) {
                                 printf("AAAAAAAAAAAAAAAAAAAAAA\n");
-                                SymTable_insert($IDENTIFIER, yylineno, functionlocal, programfunc_s);
+                                SymTable_insert($IDENTIFIER, yylineno, functionlocal, var_s);
                             }
                         }
                         else { //den eimai se synarthsh
@@ -233,12 +235,6 @@ lvalue:     IDENTIFIER {
                             }
                             else { //alliws kanw eisagwgh
                                 SymTable_insert($IDENTIFIER, yylineno, programvar, var_s);
-                                /* if (currscope() == 0) {
-                                    SymTable_insert($IDENTIFIER, yylineno, programvar, var_s);
-                                }
-                                else {
-                                    SymTable_insert($IDENTIFIER, yylineno, programvar, var_s);
-                                } */
                             }
                         }
 
@@ -387,14 +383,14 @@ funcname:   IDENTIFIER /* edw apothikeush tou func name */ {
             ;
 
 funcprefix: FUNCTION funcname {
-                $$ = $2;
+                
+                //edw thelei $$.iaddress = nextquadlabel();
+                $funcprefix = $funcname;
+                expr *temp = lvalue_expr($funcprefix);
+                emit(funcstart, NULL, NULL, temp, currQuad, yylineno);
+                pushOffsetStack(offsetTop, currscopeoffset());
                 enterscopespace();
-                // if (func_flag > 0) {
-                //     $funcprefix = SymTable_insert($funcname, yylineno, programfunc_s, functionlocal);
-                // }
-                // else {
-                //     $funcprefix = SymTable_insert($funcname, yylineno, programfunc_s, programvar);
-                // }
+                resetformalargsoffset();
             }
             ;
 
@@ -410,30 +406,25 @@ funcbody:   block {
                     scope_flag = 1;
                 }
                 currentscope--;
-                exitscopespace();
+                
                 SymTable_hide(currscope()+1);
                 SymTable_reveal(currscope());
                 printf("Funcdef: function identifier(idlist) {}\n");
-                /*autos stis dialekseis exei 
+                
                 $funcbody = currscopeoffset();
-                existscopespace();*/
+                exitscopespace();
             }
             ;
 
 funcdef:    funcprefix funcargs funcbody {
                 exitscopespace();
+                //$funcprefix.totalLocals = $funcbody; auto de doulevei
+                int offset = popOffsetStack(offsetTop);
+                restorecurrscopeoffset(offset);
+                $funcdef = $funcprefix;
+                expr *temp = lvalue_expr($funcprefix);
+                emit(funcend, NULL, NULL, temp, currQuad, yylineno);
             }
-            /*{existscopespace();
-            $funcprefix.totalLocals = $funcbody;
-            int offset = pop_and_top(scopeoffsetStack);
-            restorecurrscopeoffset(offset);
-            $funcdef = $funcprefix;
-            emit(funcend, $funcprefix, NULL, NULL,label, yylineno);
-            }
-            typeof<funcname>            :   char*
-            typeof<funcbody>            :   unsigned
-            typeof<funcprefix, funcdef> :   symbol*
-            */   
             ;
 
 const:      INTEGER {printf("Const: integer\n");}
@@ -575,6 +566,8 @@ void initialize() {
     lista->scope_counter = 0;
     lista->scope_head = NULL;
     lista->next = NULL;
+
+    offsetTop = NULL;
 
     SymTable_insert("print", 0, programvar, libraryfunc_s);
     SymTable_insert("input", 0, programvar, libraryfunc_s);

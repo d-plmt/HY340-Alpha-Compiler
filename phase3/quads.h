@@ -105,11 +105,20 @@ extern quad*           quads;
 extern unsigned        total;
 extern unsigned int    currQuad;
 
+/* Scope Offset Stack */
+typedef struct scopeOffsetStack {
+    int offset;
+    struct scopeOffsetStack *next;
+} offsetStack;
+
+void pushOffsetStack(offsetStack *top, int offset);
+int popOffsetStack(offsetStack *top);
+
+offsetStack *offsetTop;
+
 /*Hash Table functions*/
 unsigned int SymTable_hash(const char *key);
-
 void SymTable_new(void);
-
 symt* SymTable_insert(const char *name, unsigned int line, scopespace_t space, symbol_t type);
 symt* SymTable_lookup(const char *new_symbol_name, unsigned int scope, char *search_mode); 
 void SymTable_hide(unsigned int scope);
@@ -141,6 +150,8 @@ void exitscopespace (void);
 void resetformalargsoffset(void); //midenizei to offset twn formal args
 void resetfunctionlocalsoffset(void); //midenizei to offset twn local functions
 void restorecurrscopeoffset(unsigned n);
+
+void emit();
 
 expr* emit_iftableitem(expr* e); //paragei tin entoli pou lamvanei ena stoixeio otan exoume lvalue.id kai to lvalue einai stoixeio pinaka
 expr* lvalue_expr (symt* sym);
