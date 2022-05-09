@@ -373,12 +373,13 @@ funcname:   IDENTIFIER /* edw apothikeush tou func name */ {
             ;
 
 funcprefix: FUNCTION funcname {
-                //TODO
+                $funcprefix = SymTable_insert($funcname, yylineno, programfunc_s, function_s);
             }
             ;
 
 funcargs:  LEFT_PAR idlist RIGHT_PAR /*TODO*/ {
-                enterscopespace();
+                enterscopespace(); //enter function locals space
+                resetfunctionlocalsoffset(); //start counting locals from zero
                 printf("\nA\n");
             }
             ;
@@ -391,10 +392,24 @@ funcbody:   block {
                 SymTable_hide(currscope()+1);
                 SymTable_reveal(currscope());
                 printf("Funcdef: function identifier(idlist) {}\n");
+                /*autos stis dialekseis exei 
+                $funcbody = currscopeoffset();
+                existscopespace();*/
             }
             ;
 
 funcdef:    funcprefix funcargs funcbody
+            /*{existscopespace();
+            $funcprefix.totalLocals = $funcbody;
+            int offset = pop_and_top(scopeoffsetStack);
+            restorecurrscopeoffset(offset);
+            $funcdef = $funcprefix;
+            emit(funcend, $funcprefix, NULL, NULL,label, yylineno);
+            }
+            typeof<funcname>            :   char*
+            typeof<funcbody>            :   unsigned
+            typeof<funcprefix, funcdef> :   symbol*
+            */   
             ;
 
 const:      INTEGER {printf("Const: integer\n");}
