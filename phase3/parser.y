@@ -350,7 +350,7 @@ funcname:   IDENTIFIER /* edw apothikeush tou func name */ {
                     
                     func_flag++;
                     // functions++;
-                    $$ = temp;
+                    $$->name = $IDENTIFIER;
                     currentscope++; 
                     scope_flag = 0;
                 }
@@ -372,7 +372,7 @@ funcname:   IDENTIFIER /* edw apothikeush tou func name */ {
                     func_counter++; //auto einai gia ta funcnames
                     func_flag++;
                     currentscope++; 
-                    $$ = temp;
+                    $$->name = strdup(str);
                     scope_flag = 0; //scope flag = 0 gia na mhn auksithei to scope sto block
                 }
                 else {
@@ -386,6 +386,7 @@ funcprefix: FUNCTION funcname {
                 
                 //edw thelei $$.iaddress = nextquadlabel();
                 $funcprefix = $funcname;
+                $funcprefix->type = programfunc_s;
                 expr *temp = lvalue_expr($funcprefix);
                 emit(funcstart, NULL, NULL, temp, currQuad, yylineno);
                 pushOffsetStack(offsetTop, currscopeoffset());
