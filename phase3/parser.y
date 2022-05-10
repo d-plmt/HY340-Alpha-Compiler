@@ -29,6 +29,7 @@
 %start program
 %union {
     int intVal; 
+    unsigned uintVal;
     double realVal; 
     char *strVal;
     struct SymTableEntry *symtVal;
@@ -45,10 +46,10 @@
 %type stmt expr term assignexpr primary member call callsuffix normcall methodcall elist objectdef indexed indexedelem block const idlist ifstmt whilestmt forstmt returnstmt
 
 %type <strVal> lvalue
-%type <symtVal> funcname
+%type <strVal> funcname
 %type <symtVal> funcprefix
 %type <symtVal> funcdef
-%type <intVal> funcbody //auto leei unsigned alla de kserw ti na valw
+%type <uintVal> funcbody //auto leei unsigned alla de kserw ti na valw
 
 %right OP_EQUALS
 %left OR
@@ -224,7 +225,7 @@ lvalue:     IDENTIFIER {
                                 tmp_scope--;
                             }
                             if (!found_flag) {
-                                printf("AAAAAAAAAAAAAAAAAAAAAA\n");
+                                //printf("AAAAAAAAAAAAAAAAAAAAAA\n");
                                 SymTable_insert($IDENTIFIER, yylineno, functionlocal, var_s);
                             }
                         }
@@ -339,59 +340,79 @@ block:      LEFT_BRACE {
             ;
 
 funcname:   IDENTIFIER /* edw apothikeush tou func name */ {
-                if (SymTable_lookup($IDENTIFIER, currscope(), "funcdef") == NULL) {
-                    symt *temp = NULL;
-                    if (func_flag > 0) {
-                        temp = SymTable_insert($IDENTIFIER, yylineno, functionlocal, programfunc_s);
-                    }
-                    else {
-                        temp = SymTable_insert($IDENTIFIER, yylineno, programvar, programfunc_s);
-                    }
+                $$ = $IDENTIFIER;
+                // if (SymTable_lookup($IDENTIFIER, currscope(), "funcdef") == NULL) {
+                //     symt *temp = NULL;
+                //     if (func_flag > 0) {
+                //         temp = SymTable_insert($IDENTIFIER, yylineno, functionlocal, programfunc_s);
+                //     }
+                //     else {
+                //         temp = SymTable_insert($IDENTIFIER, yylineno, programvar, programfunc_s);
+                //     }
                     
-                    func_flag++;
-                    // functions++;
-                    $$->name = $IDENTIFIER;
-                    currentscope++; 
-                    scope_flag = 0;
-                }
-                else {
-                    fprintf(stderr,"\033[0;31mERROR. Line %d: Function (%s) in scope %d cannot be defined\n\033[0m", yylineno, $IDENTIFIER, currscope());
-                    yyerror("");
-                }
+                //     func_flag++;
+                //     // functions++;
+                //     currentscope++; 
+                //     scope_flag = 0;
+                // }
+                // else {
+                //     fprintf(stderr,"\033[0;31mERROR. Line %d: Function (%s) in scope %d cannot be defined\n\033[0m", yylineno, $IDENTIFIER, currscope());
+                //     yyerror("");
+                // }
             }
             |  /* EDW NEWTEMP  */ {
                 sprintf(str, "%s%d%c","_f",func_counter+1,'\0');
-                if (SymTable_lookup(strdup(str), currscope(), "funcdef") == NULL) {
-                    symt *temp = NULL;
-                    if (func_flag > 0) {
-                        temp = SymTable_insert(strdup(str), yylineno, functionlocal, programfunc_s);
-                    }
-                    else {
-                        temp = SymTable_insert(strdup(str), yylineno, programvar, programfunc_s);
-                    }
-                    func_counter++; //auto einai gia ta funcnames
-                    func_flag++;
-                    currentscope++; 
-                    $$->name = strdup(str);
-                    scope_flag = 0; //scope flag = 0 gia na mhn auksithei to scope sto block
-                }
-                else {
-                    fprintf(stderr,"\033[0;31mERROR. Line %d: Function (%s) in scope %d cannot be defined\n\033[0m",yylineno, strdup(str),currscope());
-                    yyerror("");
-                }
+                func_counter++;
+                $$ = strdup(str);
+                // if (SymTable_lookup(strdup(str), currscope(), "funcdef") == NULL) {
+                //     symt *temp = NULL;
+                //     if (func_flag > 0) {
+                //         temp = SymTable_insert(strdup(str), yylineno, functionlocal, programfunc_s);
+                //     }
+                //     else {
+                //         temp = SymTable_insert(strdup(str), yylineno, programvar, programfunc_s);
+                //     }
+                //     func_counter++; //auto einai gia ta funcnames
+                //     func_flag++;
+                //     currentscope++; 
+                //     scope_flag = 0; //scope flag = 0 gia na mhn auksithei to scope sto block
+                // }
+                // else {
+                //     fprintf(stderr,"\033[0;31mERROR. Line %d: Function (%s) in scope %d cannot be defined\n\033[0m",yylineno, strdup(str),currscope());
+                //     yyerror("");
+                // }
             }
             ;
 
 funcprefix: FUNCTION funcname {
+                symt *temp = NULL;
+                if (SymTable_lookup($funcname, currscope(), "funcdef") == NULL) {
+                    if (func_flag > 0) {
+                        temp = SymTable_insert($funcname, yylineno, functionlocal, programfunc_s);
+                    }
+                    else {
+                        temp = SymTable_insert($funcname, yylineno, programvar, programfunc_s);
+                    }
+                    func_flag++;
+                    currentscope++; 
+                    scope_flag = 0;
+
+                    $funcprefix = temp;
+                    //expr *tmp = lvalue_expr($funcprefix);
+                    //emit(funcstart, NULL, NULL, tmp, currQuad, yylineno);
+                    //pushOffsetStack(offsetTop, currscopeoffset());
+                    enterscopespace();
+                    resetformalargsoffset();
+                }
+                else {
+                    fprintf(stderr,"\033[0;31mERROR. Line %d: Function (%s) in scope %d cannot be defined\n\033[0m", yylineno, $funcname, currscope());
+                    yyerror("");
+                }
                 
+
+
                 //edw thelei $$.iaddress = nextquadlabel();
-                $funcprefix = $funcname;
-                $funcprefix->type = programfunc_s;
-                expr *temp = lvalue_expr($funcprefix);
-                emit(funcstart, NULL, NULL, temp, currQuad, yylineno);
-                pushOffsetStack(offsetTop, currscopeoffset());
-                enterscopespace();
-                resetformalargsoffset();
+  
             }
             ;
 
@@ -419,7 +440,7 @@ funcbody:   block {
 
 funcdef:    funcprefix funcargs funcbody {
                 exitscopespace();
-                //$funcprefix.totalLocals = $funcbody; auto de doulevei
+                $funcprefix->totalLocals = $funcbody; //auto de doulevei
                 int offset = popOffsetStack(offsetTop);
                 restorecurrscopeoffset(offset);
                 $funcdef = $funcprefix;
@@ -567,8 +588,6 @@ void initialize() {
     lista->scope_counter = 0;
     lista->scope_head = NULL;
     lista->next = NULL;
-
-    offsetTop = NULL;
 
     SymTable_insert("print", 0, programvar, libraryfunc_s);
     SymTable_insert("input", 0, programvar, libraryfunc_s);

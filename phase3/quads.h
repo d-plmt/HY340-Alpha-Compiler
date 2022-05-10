@@ -64,6 +64,8 @@ typedef struct SymTableEntry
     unsigned scope;
     unsigned line;
     unsigned offset;
+    unsigned iaddress;
+    unsigned totalLocals;
     scopespace_t space;
     symbol_t type;
     struct SymTableEntry *next;
@@ -111,10 +113,10 @@ typedef struct scopeOffsetStack {
     struct scopeOffsetStack *next;
 } offsetStack;
 
-void pushOffsetStack(offsetStack *top, int offset);
-int popOffsetStack(offsetStack *top);
+void pushOffsetStack(int offset);
+int popOffsetStack();
 
-offsetStack *offsetTop;
+extern offsetStack *offsetTop;
 
 /*Hash Table functions*/
 unsigned int SymTable_hash(const char *key);

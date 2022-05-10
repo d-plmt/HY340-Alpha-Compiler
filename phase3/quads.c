@@ -139,6 +139,8 @@ symt* SymTable_insert(const char *name, unsigned int line, scopespace_t space, s
     new_node->offset = currscopeoffset();
     new_node->space = space;
     new_node->type = type;
+    new_node->iaddress = nextquadlabel();
+    new_node->totalLocals = 0;
     new_node->next = NULL;
     new_node->next_in_scope = NULL;
 
@@ -280,33 +282,38 @@ bool isLibraryFunc(const char * funct){
 
 //////////////STACK////////////////
 
-void pushOffsetStack(offsetStack *top, int offset) {
+void pushOffsetStack(int offset) {
     offsetStack *new_node = malloc(sizeof(offsetStack));
     new_node -> offset = offset;
-    if (top == NULL) {
+    if (offsetTop == NULL) {
+        printf("top is null\n");
         new_node->next = NULL;
     }
     else {
-        new_node->next = top;
+        new_node->next = offsetTop;
     }
-    top = new_node;
+    offsetTop = new_node;
 }
 
-int popOffsetStack(offsetStack *top) {
-    if (top == NULL) {
+int popOffsetStack() {
+    if (offsetTop == NULL) {
+        printf("AAAAA");
         return -1;
     }
-    int to_return = top->offset;
-    if (top->next == NULL) {
-        free(top);
+    int to_return = offsetTop->offset;
+    if (offsetTop->next == NULL) {
+        free(offsetTop);
+        offsetTop = NULL;
     }
     else {
-        offsetStack *temp = top;
-        top = top->next;
+        offsetStack *temp = offsetTop;
+        offsetTop = offsetTop->next;
         free(temp);
     }
     return to_return;
 }
+
+offsetStack *offsetTop = NULL;
 
 //////////////QUADS////////////////
 int tempcounter = 0;
