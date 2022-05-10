@@ -139,7 +139,7 @@ symt* SymTable_insert(const char *name, unsigned int line, scopespace_t space, s
     new_node->offset = currscopeoffset();
     new_node->space = space;
     new_node->type = type;
-    new_node->iaddress = nextquadlabel();
+    new_node->iaddress = 0;
     new_node->totalLocals = 0;
     new_node->next = NULL;
     new_node->next_in_scope = NULL;
@@ -161,7 +161,7 @@ symt* SymTable_insert(const char *name, unsigned int line, scopespace_t space, s
         temp->next_in_scope = new_node;
     }
     if (type != libraryfunc_s) inccurrscopeoffset();
-    return temp;
+    return new_node;
 }
 
 symt* SymTable_lookup(const char *new_symbol_name, unsigned int scope, char *search_mode) {

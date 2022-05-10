@@ -43,13 +43,21 @@
 %token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT LINE_COMM
 
 
-%type stmt expr term assignexpr primary member call callsuffix normcall methodcall elist objectdef indexed indexedelem block const idlist ifstmt whilestmt forstmt returnstmt
+%type stmt expr callsuffix normcall methodcall elist indexed indexedelem block idlist ifstmt whilestmt forstmt returnstmt
 
-%type <strVal> lvalue
 %type <strVal> funcname
 %type <symtVal> funcprefix
 %type <symtVal> funcdef
 %type <uintVal> funcbody //auto leei unsigned alla de kserw ti na valw
+
+%type <exprVal> lvalue
+%type <exprVal> member
+%type <exprVal> primary
+%type <exprVal> assignexpr
+%type <exprVal> call
+%type <exprVal> term
+%type <exprVal> objectdef
+%type <exprVal> const
 
 %right OP_EQUALS
 %left OR
@@ -213,12 +221,14 @@ lvalue:     IDENTIFIER {
                                         else {
                                             fprintf(stdout, "Calling symbol %s.\n",$IDENTIFIER);
                                             found_flag = 1;
+                                            $lvalue = lvalue_expr(tmp_symbol);
                                             break;
                                         }
                                     }
                                     else {
                                         fprintf(stdout, "Calling symbol %s.\n",$IDENTIFIER);
                                         found_flag = 1;
+                                        $lvalue = lvalue_expr(tmp_symbol);
                                         break;
                                     }
                                 }
@@ -226,7 +236,8 @@ lvalue:     IDENTIFIER {
                             }
                             if (!found_flag) {
                                 //printf("AAAAAAAAAAAAAAAAAAAAAA\n");
-                                SymTable_insert($IDENTIFIER, yylineno, functionlocal, var_s);
+                                tmp_symbol = SymTable_insert($IDENTIFIER, yylineno, functionlocal, var_s);
+                                $lvalue = lvalue_expr(tmp_symbol);
                             }
                         }
                         else { //den eimai se synarthsh
@@ -235,8 +246,9 @@ lvalue:     IDENTIFIER {
                                 fprintf(stdout, "Calling symbol %s in parent scope.\n", $1);
                             }
                             else { //alliws kanw eisagwgh
-                                SymTable_insert($IDENTIFIER, yylineno, programvar, var_s);
+                                tmp_symbol = SymTable_insert($IDENTIFIER, yylineno, programvar, var_s);
                             }
+                            $lvalue = lvalue_expr(tmp_symbol);
                         }
 
                     }
@@ -340,51 +352,17 @@ block:      LEFT_BRACE {
             ;
 
 funcname:   IDENTIFIER /* edw apothikeush tou func name */ {
-                $$ = $IDENTIFIER;
-                // if (SymTable_lookup($IDENTIFIER, currscope(), "funcdef") == NULL) {
-                //     symt *temp = NULL;
-                //     if (func_flag > 0) {
-                //         temp = SymTable_insert($IDENTIFIER, yylineno, functionlocal, programfunc_s);
-                //     }
-                //     else {
-                //         temp = SymTable_insert($IDENTIFIER, yylineno, programvar, programfunc_s);
-                //     }
-                    
-                //     func_flag++;
-                //     // functions++;
-                //     currentscope++; 
-                //     scope_flag = 0;
-                // }
-                // else {
-                //     fprintf(stderr,"\033[0;31mERROR. Line %d: Function (%s) in scope %d cannot be defined\n\033[0m", yylineno, $IDENTIFIER, currscope());
-                //     yyerror("");
-                // }
+                $funcname = $IDENTIFIER;
             }
-            |  /* EDW NEWTEMP  */ {
+            | {
                 sprintf(str, "%s%d%c","_f",func_counter+1,'\0');
                 func_counter++;
-                $$ = strdup(str);
-                // if (SymTable_lookup(strdup(str), currscope(), "funcdef") == NULL) {
-                //     symt *temp = NULL;
-                //     if (func_flag > 0) {
-                //         temp = SymTable_insert(strdup(str), yylineno, functionlocal, programfunc_s);
-                //     }
-                //     else {
-                //         temp = SymTable_insert(strdup(str), yylineno, programvar, programfunc_s);
-                //     }
-                //     func_counter++; //auto einai gia ta funcnames
-                //     func_flag++;
-                //     currentscope++; 
-                //     scope_flag = 0; //scope flag = 0 gia na mhn auksithei to scope sto block
-                // }
-                // else {
-                //     fprintf(stderr,"\033[0;31mERROR. Line %d: Function (%s) in scope %d cannot be defined\n\033[0m",yylineno, strdup(str),currscope());
-                //     yyerror("");
-                // }
+                $funcname = strdup(str);
             }
             ;
 
 funcprefix: FUNCTION funcname {
+                printf("funcname: %s\n",$funcname);
                 symt *temp = NULL;
                 if (SymTable_lookup($funcname, currscope(), "funcdef") == NULL) {
                     if (func_flag > 0) {
@@ -396,11 +374,12 @@ funcprefix: FUNCTION funcname {
                     func_flag++;
                     currentscope++; 
                     scope_flag = 0;
-
+                    
                     $funcprefix = temp;
-                    //expr *tmp = lvalue_expr($funcprefix);
-                    //emit(funcstart, NULL, NULL, tmp, currQuad, yylineno);
-                    //pushOffsetStack(offsetTop, currscopeoffset());
+                    $funcprefix->iaddress = nextquadlabel();
+                    expr *tmp = lvalue_expr($funcprefix);
+                    emit(funcstart, NULL, NULL, tmp, currQuad, yylineno);
+                    pushOffsetStack(currscopeoffset());
                     enterscopespace();
                     resetformalargsoffset();
                 }
@@ -416,10 +395,9 @@ funcprefix: FUNCTION funcname {
             }
             ;
 
-funcargs:  LEFT_PAR idlist RIGHT_PAR /*TODO*/ {
+funcargs:  LEFT_PAR idlist RIGHT_PAR {
                 enterscopespace(); //enter function locals space
                 resetfunctionlocalsoffset(); //start counting locals from zero
-                //printf("\nA\n");
             }
             ;
 
@@ -440,8 +418,8 @@ funcbody:   block {
 
 funcdef:    funcprefix funcargs funcbody {
                 exitscopespace();
-                $funcprefix->totalLocals = $funcbody; //auto de doulevei
-                int offset = popOffsetStack(offsetTop);
+                $funcprefix->totalLocals = $funcbody;
+                int offset = popOffsetStack();
                 restorecurrscopeoffset(offset);
                 $funcdef = $funcprefix;
                 expr *temp = lvalue_expr($funcprefix);
@@ -660,3 +638,5 @@ int main(int argc, char** argv) {
     print_scopes();
     return 0;
 }
+
+
