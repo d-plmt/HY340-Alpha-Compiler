@@ -373,7 +373,9 @@ expr* newexpr_conststring(char* s){
 tempcounter = eswteriki metavliti pou metraei 
 tis uparxouses krufes metavlites*/
 char *newtempname(void){
-    return "_t" + tempcounter;
+    char *str = malloc(sizeof(1000));
+    sprintf(str, "%s%d%c", "_t", tempcounter++, '\0');
+    return (strdup(str));
 }
 
 /*function pou midenizei ton tempcounter*/
@@ -457,6 +459,14 @@ expr* newexpr_constbool(unsigned int b){
     expr* e = newexpr(constbool_e);
     e->boolConst = !!b; //etsi to exei alla den katalavainw ti ennoei
     return e;
+}
+
+expr* member_item(expr *lvalue, char *id) {
+    lvalue = emit_iftableitem(lvalue);
+    expr *ti = newexpr(tableitem_e);
+    ti->sym = lvalue->sym;
+    ti->index = newexpr_conststring(id);
+    return ti;
 }
 
 unsigned int istempname(const char* s){

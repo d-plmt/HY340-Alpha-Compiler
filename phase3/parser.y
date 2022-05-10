@@ -34,6 +34,7 @@
     char *strVal;
     struct SymTableEntry *symtVal;
     struct expr *exprVal;
+    struct callstruct *callVal;
     };
 
 %token <intVal>     INTEGER
@@ -43,13 +44,14 @@
 %token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT LINE_COMM
 
 
-%type stmt expr callsuffix normcall methodcall elist indexed indexedelem block idlist ifstmt whilestmt forstmt returnstmt
+%type stmt elist indexed indexedelem block idlist ifstmt whilestmt forstmt returnstmt
 
-%type <strVal> funcname
+%type <strVal>  funcname
 %type <symtVal> funcprefix
 %type <symtVal> funcdef
 %type <uintVal> funcbody //auto leei unsigned alla de kserw ti na valw
 
+%type <exprVal> expr
 %type <exprVal> lvalue
 %type <exprVal> member
 %type <exprVal> primary
@@ -58,6 +60,12 @@
 %type <exprVal> term
 %type <exprVal> objectdef
 %type <exprVal> const
+%type <exprVal> tableitem
+
+%type <callVal> normcall
+%type <callVal> callsuffix
+%type <callVal> methodcall
+
 
 %right OP_EQUALS
 %left OR
@@ -155,13 +163,15 @@ term:       LEFT_PAR expr RIGHT_PAR {printf("Term: (expr)\n");}
                     printf("\033[0;31mERROR. Line %d: Attempting to use function as lvalue\n\033[0m",yylineno);
                 }
             }
-            |primary {printf("Term: primary\n");}
+            |primary {
+                printf("Term: primary\n");}
             ;
 
 assignexpr: lvalue OP_EQUALS expr {
+                int found_flag = 0;
                 if (!local_flag)  {
                     symt *tmp_symbol = NULL;
-                    int found_flag = 0;
+                    
                     int tmp_scope = currscope();
                     while (tmp_scope >= 0) { //psaxnw ta scopes apo mesa pros ta eksw
                         tmp_symbol = SymTable_lookup(ourVar, tmp_scope, "local");
@@ -171,27 +181,36 @@ assignexpr: lvalue OP_EQUALS expr {
                                 found_flag = 1;
                                 break;
                             }
-                            else {
-                                fprintf(stdout, "Assign expression: lvalue = expr\n");
-                                found_flag = 1;
-                                break;
-                            }
                         }
                         tmp_scope--;
                     }
-                    if (!found_flag) {
-                        fprintf(stdout, "Assign expression: lvalue = expr\n");
-                    }
+                    fprintf(stdout, "Assign expression: lvalue = expr\n");
                 }
                 else {
                     printf("Assign expression: lvalue = expr\n");
                 }
-                
-                local_flag = 0;
+                if (!found_flag) {
+                    if ($lvalue->type = tableitem_e) { //lvalue[index] = expr
+                        printf("AAAAAAAAAAAAAA");
+                        emit(tablesetelem, $lvalue, $lvalue->index, $expr, currQuad, yylineno);
+                        $assignexpr = emit_iftableitem($lvalue);
+                        $assignexpr->type = assignexpr_e;
+                    }
+                    else { //lvalue = expr;
+                        emit(assign, $expr, NULL, $lvalue, currQuad, yylineno);
+                        $assignexpr = newexpr(assignexpr_e);
+                        $assignexpr->sym = newtemp();
+                        emit(assign, $lvalue, NULL, $assignexpr);
+                    }
+                }
+                 local_flag = 0;
             }
             ;
 
-primary:    lvalue  {printf("Primary: lvalue\n");}
+primary:    lvalue  {
+                $primary = emit_iftableitem($lvalue);
+                printf("Primary: lvalue\n");
+            }
             |call   {printf("Primary: call\n");}
             |objectdef {printf("Primary: objectdef\n");}
             |LEFT_PAR funcdef RIGHT_PAR {printf("Primary: (funcdef)\n");}
@@ -288,11 +307,24 @@ lvalue:     IDENTIFIER {
                 }
             }
             |member {printf("Lvalue: member\n");}
+            |tableitem {
+                $lvalue = $tableitem;
+            }
             ;
 
-member:     lvalue DOT IDENTIFIER {printf("Member: lvalue.identifier\n");}
-            |lvalue LEFT_BRACKET expr RIGHT_BRACKET {printf("Member: lvalue[identifier]\n");}
-            |call DOT IDENTIFIER {printf("Member: call.identifier\n");}
+tableitem:  lvalue DOT IDENTIFIER {
+                $tableitem = member_item($lvalue, $IDENTIFIER);
+                printf("Tableitem: lvalue.identifier\n");
+            }
+            | lvalue LEFT_BRACKET expr RIGHT_BRACKET {
+                $lvalue = emit_iftableitem($lvalue);
+                $tableitem = newexpr(tableitem_e);
+                $tableitem->sym = $lvalue->sym;
+                $tableitem->index = $expr;
+                printf("Tableitem: lvalue[identifier]\n");
+            }
+
+member:     call DOT IDENTIFIER {printf("Member: call.identifier\n");}
             |call LEFT_BRACKET expr RIGHT_BRACKET {printf("Member: call[identifier]\n");}
             ;
 
@@ -308,7 +340,12 @@ callsuffix: normcall {printf("Callsuffix: normcall\n");}
 normcall:   LEFT_PAR {call_flag = 1;} elist RIGHT_PAR {call_flag = 0; printf("Normcall: (elist)\n");}
             ;
 
-methodcall: DOT_DOT {call_flag = 1;} IDENTIFIER LEFT_PAR  elist RIGHT_PAR {call_flag = 0; printf("Methodcall: ..identifier(elist)\n");}
+methodcall: DOT_DOT {call_flag = 1;} IDENTIFIER LEFT_PAR  elist RIGHT_PAR {
+                call_flag = 0; 
+                $methodcall->elist = $elist;
+
+                printf("Methodcall: ..identifier(elist)\n");
+            }
             ;
 
 elist:      expr {printf("Elist: expr\n");}

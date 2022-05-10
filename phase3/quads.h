@@ -103,6 +103,12 @@ typedef struct quad {
     unsigned        line;
 } quad;
 
+typedef struct callstruct {
+    struct expr *elist;
+    unsigned char method;
+    char *name;
+} callstruct;
+
 extern quad*           quads;
 extern unsigned        total;
 extern unsigned int    currQuad;
@@ -162,6 +168,7 @@ expr* newexpr(expr_t t);
 expr* newexpr_conststring(char* s);
 expr* newexpr_constnum(double i);
 expr* newexpr_constbool(unsigned int b);
+expr* member_item(expr *lvalue, char *name);
 
 
 symt *newsymbol(const char *name); //auto de to xreiazomaste, exoume thn symtable_insert
