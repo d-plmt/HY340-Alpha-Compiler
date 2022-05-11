@@ -503,7 +503,7 @@ tablemake:  LEFT_BRACKET elist RIGHT_BRACKET  { //dhmiourgia pinakwn [elist]
                 printf("tablemake\n");
                 while ($elist != NULL) {
                     
-                    emit(tablesetelem, t, newexpr_constnum(i++), $elist);
+                    emit(tablesetelem, t, newexpr_constnum(i++), $elist, currQuad, yylineno);
                     $elist = $elist->next;
                 }
                 
@@ -648,8 +648,15 @@ funcdef:    funcprefix funcargs funcbody {
             ;
 
 const:      INTEGER {
-                printf("Const: integer\n");}
-            | REAL {printf("Const: real\n");}
+                printf("Const: integer\n");
+
+                $const = newexpr_constnum($INTEGER);
+            }
+            | REAL {
+                printf("Const: real\n");
+
+                $const = newexpr_constnum($INTEGER);
+            }
             | STRING {printf("Const: string\n");}
             | NIL {printf("Const: nil\n");}
             | TRUE {printf("Const: true\n");}
