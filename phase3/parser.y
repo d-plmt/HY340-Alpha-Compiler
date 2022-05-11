@@ -130,45 +130,123 @@ expr:       assignexpr      {printf("Assign expression\n");}
             |expr OP_NOT_EQ expr {printf("Expr: expr op_not_eq expr\n");}
             |expr AND expr {printf("Expr: expr and expr\n");}
             |expr OR expr {printf("Expr: expr or expr\n");}
-            |term   {printf("Term expression\n");}
+            |term   {
+                $expr = $term;
+                printf("Term expression\n");
+            }
             ;
 
-term:       LEFT_PAR expr RIGHT_PAR {printf("Term: (expr)\n");}
-            |OP_MINUS expr  {printf("Term: -expr\n");}
-            |NOT expr {printf("Term: not expr\n");}
+term:       LEFT_PAR expr RIGHT_PAR {
+                printf("Term: (expr)\n");
+                $term = $expr;
+            }
+            |OP_MINUS expr  {
+                printf("Term: -expr\n");
+
+                check_arith($expr, "-expr");
+                $term = newexpr(arithexpr_e);
+                $term->sym = newtemp();
+                emit(uminus, $expr, NULL, $term);
+            }
+            |NOT expr {
+                printf("Term: not expr\n");
+
+                $term = newexpr(boolexpr_e);
+                $term->sym = newtemp();
+                emit(not, $expr, NULL, $term);
+            }
             |OP_PLUS_PLUS lvalue {
                 if (lvalue_checker(ourVar)) {
                     printf("Term: ++lvalue\n");
+
+                    check_arith($lvalue, "++lvalue");
+                    if ($lvalue->type == tableitem_e) {
+                        $term = emit_iftableitem($lvalue);
+                        emit(add, $term, newexpr_constnum(1), $term, currQuad, yylineno);
+                        emit(tablesetelem, $lvalue, $lvalue->index, $term, currQuad, yylineno);
+                    }
+                    else {
+                        emit(add, $lvalue, newexpr_constnum(1), $lvalue, currQuad, yylineno);
+                        $term = newexpr(arithexpr_e);
+                        $term->sym = newtemp();
+                        emit(assign, $lvalue, NULL, $term, currQuad, yylineno);
+                    }
                 }
                 else {
                     printf("\033[0;31mERROR. Line %d: Attempting to use function as lvalue\n\033[0m",yylineno);
+                    $term = _errorexpr;
                 }
             }
             |lvalue OP_PLUS_PLUS {
                 if (lvalue_checker(ourVar)) {
                     printf("Term: lvalue++\n");
+
+                    check_arith($lvalue, "lvalue++");
+                    $term = newexpr(var_e);
+                    $term->sym = newtemp();
+                    if ($lvalue->type == tableitem_e) {
+                        expr *val = emit_iftableitem($lvalue);
+                        emit(assign, val, NULL, $term, currQuad, yylineno);
+                        emit(add, val, newexpr_constnum(1), val, currQuad, yylineno);
+                        emit(tablesetelem, $lvalue, $lvalue->index, val);
+                    }
+                    else {
+                        emit(assign, $lvalue, NULL, $term);
+                        emit(add, $lvalue, newexpr_constnum(1), $lvalue, currQuad, yylineno);
+                    }
                 }
                 else {
                     printf("\033[0;31mERROR. Line %d: Attempting to use function as lvalue\n\033[0m",yylineno);
+                    $term = _errorexpr;
                 }
             }
             |OP_MINUS_MINUS lvalue {
                 if (lvalue_checker(ourVar)) {
                     printf("Term: --lvalue\n");
+
+                    check_arith($lvalue, "++lvalue");
+                    if ($lvalue->type == tableitem_e) {
+                        $term = emit_iftableitem($lvalue);
+                        emit(add, $term, newexpr_constnum(-1), $term, currQuad, yylineno);
+                        emit(tablesetelem, $lvalue, $lvalue->index, $term, currQuad, yylineno);
+                    }
+                    else {
+                        emit(add, $lvalue, newexpr_constnum(-1), $lvalue, currQuad, yylineno);
+                        $term = newexpr(arithexpr_e);
+                        $term->sym = newtemp();
+                        emit(assign, $lvalue, NULL, $term, currQuad, yylineno);
+                    }
                 }
                 else {
                     printf("\033[0;31mERROR. Line %d: Attempting to use function as lvalue\n\033[0m",yylineno);
+                    $term = _errorexpr;
                 }
             }
             |lvalue OP_MINUS_MINUS {                
                 if (lvalue_checker(ourVar)) {
                     printf("Term: lvalue--\n");
+
+                    check_arith($lvalue, "lvalue--");
+                    $term = newexpr(var_e);
+                    $term->sym = newtemp();
+                    if ($lvalue->type == tableitem_e) {
+                        expr *val = emit_iftableitem($lvalue);
+                        emit(assign, val, NULL, $term, currQuad, yylineno);
+                        emit(add, val, newexpr_constnum(-1), val, currQuad, yylineno);
+                        emit(tablesetelem, $lvalue, $lvalue->index, val);
+                    }
+                    else {
+                        emit(assign, $lvalue, NULL, $term);
+                        emit(add, $lvalue, newexpr_constnum(-1), $lvalue, currQuad, yylineno);
+                    }
                 }
                 else {
                     printf("\033[0;31mERROR. Line %d: Attempting to use function as lvalue\n\033[0m",yylineno);
+                    $term = _errorexpr;
                 }
             }
             |primary {
+                $term = $primary;
                 printf("Term: primary\n");}
             ;
 
@@ -217,9 +295,17 @@ primary:    lvalue  {
                 printf("Primary: lvalue\n");
             }
             |call   {printf("Primary: call\n");}
-            |tablemake {printf("Primary: tableitem\n");}
-            |LEFT_PAR funcdef RIGHT_PAR {printf("Primary: (funcdef)\n");}
-            |const {printf("Primary: const\n");}
+            |tablemake {
+                $primary = $tablemake;
+                printf("Primary: tableitem\n");}
+            |LEFT_PAR funcdef RIGHT_PAR {
+                printf("Primary: (funcdef)\n");
+                $primary = newexpr(programfunc_e);
+                $primary->sym = $funcdef;
+            }
+            |const {
+                $primary = $const;
+                printf("Primary: const\n");}
             ;
     
 lvalue:     IDENTIFIER {   
@@ -227,30 +313,31 @@ lvalue:     IDENTIFIER {
                     strcpy(ourVar, $IDENTIFIER);               
                     printf("Lvalue: identifier\n");
                     symt *tmp_symbol = NULL;
-                    tmp_symbol = SymTable_lookup($IDENTIFIER, currscope(), "local"); //psaxnw to diko mou scope
+                    tmp_symbol = SymTable_lookup(ourVar, currscope(), "local"); //psaxnw to diko mou scope
                     if (tmp_symbol == NULL) {
                         //an eimai se synarthsh
                         if (func_flag > 0) {
                             int found_flag = 0;
                             int tmp_scope = currscope()-1;
                             while (tmp_scope >= 0) { //psaxnw parent scopes apo mesa pros ta eksw
-                                tmp_symbol = SymTable_lookup($IDENTIFIER, tmp_scope, "local");
+                                tmp_symbol = SymTable_lookup(ourVar, tmp_scope, "local");
                                 if (tmp_symbol != NULL) {
                                     if (tmp_scope != 0) {
                                         if (tmp_symbol->type < 3) {
                                             fprintf(stdout, "\033[0;31mError. Line %d: Cannot access variable %s in this scope\n\033[0m",yylineno, $IDENTIFIER);
                                             found_flag = 1;
+                                            $lvalue = _errorexpr;
                                             break;
                                         }
                                         else {
-                                            fprintf(stdout, "Calling symbol %s.\n",$IDENTIFIER);
+                                            fprintf(stdout, "Calling symbol %s.\n",ourVar);
                                             found_flag = 1;
                                             $lvalue = lvalue_expr(tmp_symbol);
                                             break;
                                         }
                                     }
                                     else {
-                                        fprintf(stdout, "Calling symbol %s.\n",$IDENTIFIER);
+                                        fprintf(stdout, "Calling symbol %s.\n",ourVar);
                                         found_flag = 1;
                                         $lvalue = lvalue_expr(tmp_symbol);
                                         break;
@@ -260,18 +347,18 @@ lvalue:     IDENTIFIER {
                             }
                             if (!found_flag) {
 
-                                printf("BBBBBBBBBBBBBBBBBBBBBBBb\n");
-                                tmp_symbol = SymTable_insert($IDENTIFIER, yylineno, functionlocal, var_s);
+                                
+                                tmp_symbol = SymTable_insert(ourVar, yylineno, functionlocal, var_s);
                                 $lvalue = lvalue_expr(tmp_symbol);
                             }
                         }
                         else { //den eimai se synarthsh
-                            tmp_symbol = SymTable_lookup($IDENTIFIER, currscope(), "call_src"); //koitaw ola ta scopes
+                            tmp_symbol = SymTable_lookup(ourVar, currscope(), "call_src"); //koitaw ola ta scopes
                             if (tmp_symbol != NULL) { //an vrw kati ola good
                                 fprintf(stdout, "Calling symbol %s in parent scope.\n", $1);
                             }
                             else { //alliws kanw eisagwgh
-                                tmp_symbol = SymTable_insert($IDENTIFIER, yylineno, programvar, var_s);
+                                tmp_symbol = SymTable_insert(ourVar, yylineno, programvar, var_s);
                             }
                             $lvalue = lvalue_expr(tmp_symbol);
                         }
@@ -287,18 +374,21 @@ lvalue:     IDENTIFIER {
 
                 symt *tmp_symbol = NULL;
                 tmp_symbol = SymTable_lookup($IDENTIFIER, currscope(), "local");
+                
                 if (tmp_symbol == NULL) {
                     if (func_flag > 0) { //an eimaste mesa se synarthsh exw func local
-                        SymTable_insert($IDENTIFIER, yylineno, functionlocal, var_s);
+                    
+                        tmp_symbol = SymTable_insert($IDENTIFIER, yylineno, functionlocal, var_s);
                     }
                     else {
-                        SymTable_insert($IDENTIFIER, yylineno, programvar, var_s);
+                        tmp_symbol = SymTable_insert($IDENTIFIER, yylineno, programvar, var_s);
                     }
                 }
                 else {
 
                     fprintf(stdout, "Symbol %s successfully found in this scope (%d), line %d.\n", $IDENTIFIER, currscope(), getLine(tmp_symbol));
                 }
+                $lvalue = lvalue_expr(tmp_symbol);
             }
             |COL_COL IDENTIFIER {
                 ourVar = (char *)malloc(sizeof($IDENTIFIER));
@@ -307,9 +397,11 @@ lvalue:     IDENTIFIER {
                 printf("Lvalue: ::identifier\n");
                 if ((tmp_symbol = SymTable_lookup($IDENTIFIER, currscope(), "global_src")) != NULL) {
                     fprintf(stdout, "Symbol %s successfully found in global scope, line %d.\n", $IDENTIFIER, getLine(tmp_symbol));
+                    $lvalue = lvalue_expr(tmp_symbol);
                 }
                 else {
                     fprintf(stdout,"\033[0;31mERROR. Line %d: Symbol %s not global or undefined.\n\033[0m", yylineno, $IDENTIFIER);
+                    $lvalue = _errorexpr;
                 }
             }
             |member {printf("Lvalue: member\n");}
@@ -386,27 +478,35 @@ methodcall: DOT_DOT {call_flag = 1;} IDENTIFIER LEFT_PAR  elist RIGHT_PAR {
             ;
 
 elist:      expr {
+                $expr->next = NULL;
                 $$ = $expr;
                 printf("Elist: expr\n");
             }
             |expr COMMA elist {
+
+                $1->next = $3;
                 $$ = $expr;
+                
                 printf("Elist: expr,...,expr\n");
             }
             |{
-
+                $elist = NULL;
             }
             ;
 
 tablemake:  LEFT_BRACKET elist RIGHT_BRACKET  { //dhmiourgia pinakwn [elist]
+                
                 expr *t = newexpr(newtable_e);
                 t->sym = newtemp();
                 emit(tablecreate, t, NULL, NULL, currQuad, yylineno);
                 int i = 0;
+                printf("tablemake\n");
                 while ($elist != NULL) {
+                    
                     emit(tablesetelem, t, newexpr_constnum(i++), $elist);
                     $elist = $elist->next;
                 }
+                
                 $tablemake = t;
 
                 printf("Tablemake: (elist)\n");
@@ -428,19 +528,22 @@ tablemake:  LEFT_BRACKET elist RIGHT_BRACKET  { //dhmiourgia pinakwn [elist]
 indexed:    indexedelem {
                 printf("Indexed: indexedelem\n");
                 $indexedelem->next = NULL;
+                $indexed = $indexedelem;
             }
             | indexedelem COMMA indexed {
                 printf("Indexed: indexedelem,...,indexedelem\n");
 
                 $indexedelem->next = $3;
+                $$ = $indexedelem;
             }
             ;
 
 indexedelem: LEFT_BRACE expr COLON expr RIGHT_BRACE {
                 printf("Indexedelem: [expr:expr]\n");
-
-                $indexedelem->key = $2;
-                $indexedelem->value = $4;
+                indexedpairs *temp = malloc(sizeof(indexedpairs));
+                temp->key = $2;
+                temp->value = $4;
+                $indexedelem = temp;
             }
             ;
 
@@ -489,7 +592,7 @@ funcprefix: FUNCTION funcname {
                         temp = SymTable_insert($funcname, yylineno, programvar, programfunc_s);
                     }
                     func_flag++;
-                    currentscope++; 
+                    currentscope++;   
                     scope_flag = 0;
                     
                     $funcprefix = temp;
@@ -544,7 +647,8 @@ funcdef:    funcprefix funcargs funcbody {
             }
             ;
 
-const:      INTEGER {printf("Const: integer\n");}
+const:      INTEGER {
+                printf("Const: integer\n");}
             | REAL {printf("Const: real\n");}
             | STRING {printf("Const: string\n");}
             | NIL {printf("Const: nil\n");}
@@ -683,6 +787,8 @@ void initialize() {
     lista->scope_counter = 0;
     lista->scope_head = NULL;
     lista->next = NULL;
+
+    _errorexpr = malloc(sizeof(expr));
 
     SymTable_insert("print", 0, programvar, libraryfunc_s);
     SymTable_insert("input", 0, programvar, libraryfunc_s);

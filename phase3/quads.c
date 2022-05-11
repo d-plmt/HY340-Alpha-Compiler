@@ -9,6 +9,9 @@ unsigned int scopeSpaceCounter = 1;
 quad* quads = (quad*) 0;
 unsigned int total = 0;
 unsigned int currQuad = 0;
+scope_link *lista;
+SymTable *lera;
+expr *_errorexpr;
 
 //scopespace shit
 scopespace_t currentscopespace(void){

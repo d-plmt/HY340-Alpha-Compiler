@@ -118,6 +118,7 @@ typedef struct indexedpairs {
 extern quad*           quads;
 extern unsigned        total;
 extern unsigned int    currQuad;
+extern expr *_errorexpr;
 
 /* Scope Offset Stack */
 typedef struct scopeOffsetStack {
@@ -149,8 +150,8 @@ unsigned int getScope(symt *input);
 unsigned int getLine(symt *input);
 char *getType(symbol_t type);
 
-scope_link *lista;
-SymTable *lera;
+extern scope_link *lista;
+extern SymTable *lera;
 
 //scopespace shit
 scopespace_t currentscopespace(void);
