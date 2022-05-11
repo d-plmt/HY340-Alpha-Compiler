@@ -414,7 +414,12 @@ tablemake:  LEFT_BRACKET elist RIGHT_BRACKET  { //dhmiourgia pinakwn [elist]
                 expr *t = newexpr(newtable_e);
                 t->sym = newtemp();
                 emit(tablecreate, t, NULL, NULL, currQuad, yylineno);
-                
+                indexedpairs *temp = $indexed;
+                while (temp != NULL) {
+                    emit(tablesetelem, t, temp->key, temp->value, currQuad, yylineno);
+                    temp = temp->next;
+                }
+                $tablemake = t;
                 printf("Tablemake: (indexed)\n");
             }
             ;
