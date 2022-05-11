@@ -259,7 +259,8 @@ lvalue:     IDENTIFIER {
                                 tmp_scope--;
                             }
                             if (!found_flag) {
-                                //printf("AAAAAAAAAAAAAAAAAAAAAA\n");
+
+                                printf("BBBBBBBBBBBBBBBBBBBBBBBb\n");
                                 tmp_symbol = SymTable_insert($IDENTIFIER, yylineno, functionlocal, var_s);
                                 $lvalue = lvalue_expr(tmp_symbol);
                             }
