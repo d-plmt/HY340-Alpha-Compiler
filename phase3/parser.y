@@ -44,7 +44,7 @@
 %token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT LINE_COMM
 
 
-%type stmt elist indexed indexedelem block idlist ifstmt whilestmt forstmt returnstmt
+%type stmt indexed indexedelem block idlist ifstmt whilestmt forstmt returnstmt
 
 %type <strVal>  funcname
 %type <symtVal> funcprefix
@@ -61,6 +61,7 @@
 %type <exprVal> objectdef
 %type <exprVal> const
 %type <exprVal> tableitem
+%type <exprVal> elist
 
 %type <callVal> normcall
 %type <callVal> callsuffix
@@ -328,29 +329,60 @@ member:     call DOT IDENTIFIER {printf("Member: call.identifier\n");}
             |call LEFT_BRACKET expr RIGHT_BRACKET {printf("Member: call[identifier]\n");}
             ;
 
-call:       call {call_flag = 1;}LEFT_PAR elist RIGHT_PAR {call_flag = 0; printf("Call: call(elist)\n");}
-            | lvalue {call_flag=1;}callsuffix { printf("Call: lvalue callsuffix\n");}
-            |LEFT_PAR funcdef RIGHT_PAR {call_flag = 1;} LEFT_PAR elist RIGHT_PAR {call_flag = 0; printf("Call: (funcdef)(elist)\n");}
+call:       call {call_flag = 1;}LEFT_PAR elist RIGHT_PAR {
+                call_flag = 0;
+                $$ = make_call($$, $elist);
+                printf("Call: call(elist)\n");
+             }
+            |lvalue {call_flag=1;}callsuffix {
+                $lvalue = emit_iftableitem($lvalue); //se periptwsi pou itan table item
+                if ($callsuffix->method){
+                    expr *t = $lvalue;
+                    $lvalue = emit_iftableitem(member_item(t, $callsuffix.name));
+                    $callsuffix->elist->next = t; //insert san prwto argument antestrameno ara teleutaio
+                }
+                $$ = make_call($lvalue, $elist); 
+                printf("Call: lvalue callsuffix\n");}
+            |LEFT_PAR funcdef RIGHT_PAR {call_flag = 1;} LEFT_PAR elist RIGHT_PAR {
+                call_flag = 0; 
+                expr *func = newexpr(programfunc_e);
+                func->sym = $funcdef;
+                $$ = make_call(func, $elist);
+                printf("Call: (funcdef)(elist)\n");
+            }
             ;
         
-callsuffix: normcall {printf("Callsuffix: normcall\n");}
-            |methodcall {printf("Callsuffix: method\n");}
+callsuffix: normcall {
+                $callsuffix = $normcall;
+                printf("Callsuffix: normcall\n");
+            }
+            |methodcall {
+                $callsuffix = $methodcall;
+                printf("Callsuffix: method\n");
+            }
             ;
 
-normcall:   LEFT_PAR {call_flag = 1;} elist RIGHT_PAR {call_flag = 0; printf("Normcall: (elist)\n");}
+normcall:   LEFT_PAR {call_flag = 1;} elist RIGHT_PAR {
+                call_flag = 0; 
+                $normcall->elist     = $elist;
+                $normcall->method    = 0;
+                $normcall->name      = NULL; 
+                printf("Normcall: (elist)\n");}
             ;
 
 methodcall: DOT_DOT {call_flag = 1;} IDENTIFIER LEFT_PAR  elist RIGHT_PAR {
                 call_flag = 0; 
-                $methodcall->elist = $elist;
+                $methodcall->elist    = $elist;
+                $methodcall->method   = 1;
+                $methodcall->elist    = $IDENTIFIER->val;
 
-                printf("Methodcall: ..identifier(elist)\n");
+                printf("Methodcall: ..identifier(elist) in line %u\n", yylineno);
             }
             ;
 
 elist:      expr {printf("Elist: expr\n");}
-            | expr COMMA elist {printf("Elist: expr,...,expr\n");}
-            |
+            |expr COMMA elist {printf("Elist: expr,...,expr\n");}
+            |{}
             ;
 
 objectdef:  LEFT_BRACKET elist RIGHT_BRACKET  {printf("Objectdef: (elist)\n");}
