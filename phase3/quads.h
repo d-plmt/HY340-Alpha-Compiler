@@ -109,6 +109,12 @@ typedef struct callstruct {
     char *name;
 } callstruct;
 
+typedef struct indexedpairs {
+    struct expr *key;
+    struct expr *value;
+    struct indexedpairs *next;
+} indexedpairs;
+
 extern quad*           quads;
 extern unsigned        total;
 extern unsigned int    currQuad;

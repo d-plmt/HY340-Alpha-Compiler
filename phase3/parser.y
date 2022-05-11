@@ -35,6 +35,7 @@
     struct SymTableEntry *symtVal;
     struct expr *exprVal;
     struct callstruct *callVal;
+    struct indexedpairs *indexedVal;
     };
 
 %token <intVal>     INTEGER
@@ -44,7 +45,7 @@
 %token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT LINE_COMM
 
 
-%type stmt indexed indexedelem block idlist ifstmt whilestmt forstmt returnstmt
+%type stmt block idlist ifstmt whilestmt forstmt returnstmt
 
 %type <strVal>  funcname
 %type <symtVal> funcprefix
@@ -58,14 +59,17 @@
 %type <exprVal> assignexpr
 %type <exprVal> call
 %type <exprVal> term
-%type <exprVal> objectdef
 %type <exprVal> const
 %type <exprVal> tableitem
+%type <exprVal> tablemake
 %type <exprVal> elist
 
 %type <callVal> normcall
 %type <callVal> callsuffix
 %type <callVal> methodcall
+
+%type <indexedVal> indexedelem
+%type <indexedVal> indexed
 
 
 %right OP_EQUALS
@@ -213,7 +217,7 @@ primary:    lvalue  {
                 printf("Primary: lvalue\n");
             }
             |call   {printf("Primary: call\n");}
-            |objectdef {printf("Primary: objectdef\n");}
+            |tablemake {printf("Primary: tableitem\n");}
             |LEFT_PAR funcdef RIGHT_PAR {printf("Primary: (funcdef)\n");}
             |const {printf("Primary: const\n");}
             ;
@@ -331,17 +335,17 @@ member:     call DOT IDENTIFIER {printf("Member: call.identifier\n");}
 
 call:       call {call_flag = 1;}LEFT_PAR elist RIGHT_PAR {
                 call_flag = 0;
-                $$ = make_call($$, $elist);
+                $$ = make_call($1, $elist);
                 printf("Call: call(elist)\n");
              }
             |lvalue {call_flag=1;}callsuffix {
                 $lvalue = emit_iftableitem($lvalue); //se periptwsi pou itan table item
                 if ($callsuffix->method){
                     expr *t = $lvalue;
-                    $lvalue = emit_iftableitem(member_item(t, $callsuffix.name));
+                    $lvalue = emit_iftableitem(member_item(t, $callsuffix->name));
                     $callsuffix->elist->next = t; //insert san prwto argument antestrameno ara teleutaio
                 }
-                $$ = make_call($lvalue, $elist); 
+                $$ = make_call($lvalue, $callsuffix->elist); 
                 printf("Call: lvalue callsuffix\n");}
             |LEFT_PAR funcdef RIGHT_PAR {call_flag = 1;} LEFT_PAR elist RIGHT_PAR {
                 call_flag = 0; 
@@ -374,26 +378,64 @@ methodcall: DOT_DOT {call_flag = 1;} IDENTIFIER LEFT_PAR  elist RIGHT_PAR {
                 call_flag = 0; 
                 $methodcall->elist    = $elist;
                 $methodcall->method   = 1;
-                $methodcall->elist    = $IDENTIFIER->val;
+                $methodcall->name     = $IDENTIFIER;
 
                 printf("Methodcall: ..identifier(elist) in line %u\n", yylineno);
             }
             ;
 
-elist:      expr {printf("Elist: expr\n");}
-            |expr COMMA elist {printf("Elist: expr,...,expr\n");}
-            |{}
+elist:      expr {
+                $$ = $expr;
+                printf("Elist: expr\n");
+            }
+            |expr COMMA elist {
+                $$ = $expr;
+                printf("Elist: expr,...,expr\n");
+            }
+            |{
+
+            }
             ;
 
-objectdef:  LEFT_BRACKET elist RIGHT_BRACKET  {printf("Objectdef: (elist)\n");}
-            |LEFT_BRACKET indexed RIGHT_BRACKET {printf("Objectdef: (indexed)\n");}
+tablemake:  LEFT_BRACKET elist RIGHT_BRACKET  { //dhmiourgia pinakwn [elist]
+                expr *t = newexpr(newtable_e);
+                t->sym = newtemp();
+                emit(tablecreate, t, NULL, NULL, currQuad, yylineno);
+                int i = 0;
+                while ($elist != NULL) {
+                    emit(tablesetelem, t, newexpr_constnum(i++), $elist);
+                    $elist = $elist->next;
+                }
+                $tablemake = t;
+
+                printf("Tablemake: (elist)\n");
+            }
+            |LEFT_BRACKET indexed RIGHT_BRACKET { //dhmiourgia pinakwn [{x:y}, ...]
+                expr *t = newexpr(newtable_e);
+                t->sym = newtemp();
+                emit(tablecreate, t, NULL, NULL, currQuad, yylineno);
+                
+                printf("Tablemake: (indexed)\n");
+            }
             ;
 
-indexed:    indexedelem {printf("Indexed: indexedelem\n");}
-            | indexedelem COMMA indexed {printf("Indexed: indexedelem,...,indexedelem\n");}
+indexed:    indexedelem {
+                printf("Indexed: indexedelem\n");
+                $indexedelem->next = NULL;
+            }
+            | indexedelem COMMA indexed {
+                printf("Indexed: indexedelem,...,indexedelem\n");
+
+                $indexedelem->next = $3;
+            }
             ;
 
-indexedelem: LEFT_BRACE expr COLON expr RIGHT_BRACE {printf("Indexedelem: [expr:expr]\n");}
+indexedelem: LEFT_BRACE expr COLON expr RIGHT_BRACE {
+                printf("Indexedelem: [expr:expr]\n");
+
+                $indexedelem->key = $2;
+                $indexedelem->value = $4;
+            }
             ;
 
 func_stmt: stmt func_stmt {printf("Func_stmt: stmt,...,stmt\n");}
