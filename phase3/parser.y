@@ -45,14 +45,20 @@
 %token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT LINE_COMM
 
 
-%type stmt block idlist whilestmt forstmt returnstmt if_stmt
+%type stmt block idlist while for_stmt returnstmt if_stmt
 
 %type <strVal>  funcname
 %type <symtVal> funcprefix
 %type <symtVal> funcdef
 %type <uintVal> funcbody //auto leei unsigned alla de kserw ti na valw
+
 %type <intVal>  ifprefix
 %type <intVal>  elseprefix
+%type <intVal>  whilestart
+%type <intVal>  whilecond
+%type <intVal>  N
+%type <intVal>  M
+%type <intVal>  forprefix
 
 
 %type <exprVal> expr
@@ -95,8 +101,8 @@ program:    stmt {resettemp();} program
 
 stmt:       expr SEMICOLON  {printf("Stmt: expr;\n");}
             |if_stmt     {printf("\tif statement\n");}
-            |whilestmt  {printf("\twhile statement\n");}
-            |forstmt    {printf("\tfor statement\n");}
+            |while  {printf("\twhile statement\n");}
+            |for_stmt    {printf("\tfor statement\n");}
             |returnstmt {printf("\treturn statement\n");}
             |BREAK SEMICOLON    {
                 if (loop_scope < 1) {
@@ -950,23 +956,41 @@ if_stmt:    ifprefix stmt {
                 patchlabel($elseprefix, nextquadlabel());
             }
 
-whilestmt:  WHILE LEFT_PAR expr RIGHT_PAR {
-                loop_scope++;
+whilestart: WHILE {
+                $whilestart = nextquadlabel();
             }
-            stmt {
-                loop_scope--;
-                printf("Whilestmt: while (expr) stmt\n");
-            }
-            ;
 
-forstmt:    FOR LEFT_PAR elist SEMICOLON expr SEMICOLON elist RIGHT_PAR {
-                loop_scope++;
+whilecond:  LEFT_PAR expr RIGHT_PAR {
+                emit(if_eq, $expr, newexpr_constbool(1), NULL, nextquadlabel()+2, yylineno);
+                $whilecond = nextquadlabel();
+                emit(jump, NULL, NULL, NULL, 0, yylineno);
             }
-            stmt {
-                loop_scope--;
-                printf("Forstmt: for (elist;expr;elist) stmt\n");
+
+while:      whilestart whilecond stmt {
+                emit(jump, NULL, NULL, NULL, $whilestart, yylineno);
+                patchlabel($whilecond, nextquadlabel());
+                patchlist($stmt->breaklist, nextquadlabel());
+                patchlist($stmt->contlist, $whilestart);
             }
-            ;
+
+N:          {
+                $N = nextquadlabel();
+                emit(jump, NULL, NULL, NULL, nextquadlabel(), yylineno);
+            }
+
+M:          {
+                $M = nextquadlabel();
+            }
+
+forprefix:  FOR LEFT_PAR elist SEMICOLON M expr SEMICOLON {
+                $forprefix->test = $M;
+                $forprefix->enter = nextquadlabel();
+                emit(if_eq, $expr, newexpr_constbool(1), NULL, nextquadlabel(), yylineno);
+            }
+
+for_stmt:   forprefix N elist RIGHT_PAR N stmt N {
+
+            }
 
 returnstmt: RETURN SEMICOLON {
                 if (func_flag > 0) {
