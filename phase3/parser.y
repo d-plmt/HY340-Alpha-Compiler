@@ -86,7 +86,7 @@
 
 %%
 
-program:    stmt program    
+program:    stmt {resettemp();} program    
             |   {printf("\nProgram stopped\n\n");}
             ;
 
@@ -116,20 +116,125 @@ stmt:       expr SEMICOLON  {printf("Stmt: expr;\n");}
             |SEMICOLON
             ;
 
+
 expr:       assignexpr      {printf("Assign expression\n");}
-            |expr OP_PLUS expr  {printf("Expr: expr op_plus expr\n");}
-            |expr OP_MINUS expr {printf("Expr: expr op_minus expr\n");}
-            |expr OP_ASTERISK expr  {printf("Expr: expr op_asterisk expr\n");}
-            |expr OP_SLASH expr {printf("Expr: expr op_slash expr\n");}
-            |expr OP_PERCENTAGE expr {printf("Expr: expr op_percentage expr\n");}
-            |expr OP_GREATER expr {printf("Expr: expr op_greater expr\n");}
-            |expr OP_GREATER_EQ expr {printf("Expr: expr op_greater_eq expr\n");}
-            |expr OP_LESSER expr {printf("Expr: expr op_lesser expr\n");}
-            |expr OP_LESSER_EQ expr {printf("Expr: expr op_lesser_eq expr\n");}
-            |expr OP_EQ_EQ expr {printf("Expr: expr op_eq_eq expr\n");}
-            |expr OP_NOT_EQ expr {printf("Expr: expr op_not_eq expr\n");}
-            |expr AND expr {printf("Expr: expr and expr\n");}
-            |expr OR expr {printf("Expr: expr or expr\n");}
+            |expr OP_PLUS expr  {
+                printf("Expr: expr op_plus expr\n");
+
+                $$ = newexpr(arithexpr_e);
+                $$->sym = newtemp();
+                emit(add, $1, $3, $$, nextquadlabel(), yylineno);
+            }
+            |expr OP_MINUS expr {
+                printf("Expr: expr op_minus expr\n");
+
+                $$ = newexpr(arithexpr_e);
+                $$->sym = newtemp();
+                emit(sub, $1, $3, $$, nextquadlabel(), yylineno);
+            }
+            |expr OP_ASTERISK expr  {
+                printf("Expr: expr op_asterisk expr\n");
+
+                $$ = newexpr(arithexpr_e);
+                $$->sym = newtemp();
+                emit(mul, $1, $3, $$, nextquadlabel(), yylineno);
+            }
+            |expr OP_SLASH expr {
+                printf("Expr: expr op_slash expr\n");
+
+                $$ = newexpr(arithexpr_e);
+                $$->sym = newtemp();
+                emit(div_iop, $1, $3, $$, nextquadlabel(), yylineno);
+            }
+            |expr OP_PERCENTAGE expr {
+                printf("Expr: expr op_percentage expr\n");
+
+                $$ = newexpr(arithexpr_e);
+                $$->sym = newtemp();
+                emit(mod, $1, $3, $$, nextquadlabel(), yylineno);
+            }
+            |expr OP_GREATER expr {
+                printf("Expr: expr op_greater expr\n");
+
+                $$ = newexpr(boolexpr_e);
+                $$->sym = newtemp();
+
+                emit(if_greater, $1, $3, $$, nextquadlabel()+3, yylineno);
+                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
+                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+            }
+            |expr OP_GREATER_EQ expr {
+                printf("Expr: expr op_greater_eq expr\n");
+
+                $$ = newexpr(boolexpr_e);
+                $$->sym = newtemp();
+
+                emit(if_greatereq, $1, $3, $$, nextquadlabel()+3, yylineno);
+                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
+                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+            }
+            |expr OP_LESSER expr {
+                printf("Expr: expr op_lesser expr\n");
+
+                $$ = newexpr(boolexpr_e);
+                $$->sym = newtemp();
+
+                emit(if_less, $1, $3, $$, nextquadlabel()+3, yylineno);
+                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
+                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+            }
+            |expr OP_LESSER_EQ expr {
+                printf("Expr: expr op_lesser_eq expr\n");
+
+                $$ = newexpr(boolexpr_e);
+                $$->sym = newtemp();
+
+                emit(if_lesseq, $1, $3, $$, nextquadlabel()+3, yylineno);
+                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
+                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+            }
+            |expr OP_EQ_EQ expr {
+                printf("Expr: expr op_eq_eq expr\n");
+
+                $$ = newexpr(boolexpr_e);
+                $$->sym = newtemp();
+
+                emit(if_eq, $1, $3, $$, nextquadlabel()+3, yylineno);
+                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
+                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+            }
+            |expr OP_NOT_EQ expr {
+                printf("Expr: expr op_not_eq expr\n");
+
+                $$ = newexpr(boolexpr_e);
+                $$->sym = newtemp();
+
+                emit(if_noteq, $1, $3, $$, nextquadlabel()+3, yylineno);
+                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
+                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+            }
+            |expr AND expr {
+                printf("Expr: expr and expr\n");
+
+                $$ = newexpr(boolexpr_e);
+                $$->sym = newtemp();
+
+                emit(and, $1, $3, $$, nextquadlabel(), yylineno);
+            }
+            |expr OR expr {
+                printf("Expr: expr or expr\n");
+
+                $$ = newexpr(boolexpr_e);
+                $$->sym = newtemp();
+
+                emit(or, $1, $3, $$, nextquadlabel(), yylineno);
+            }
             |term   {
                 $expr = $term;
                 printf("Term expression\n");
@@ -145,14 +250,17 @@ term:       LEFT_PAR expr RIGHT_PAR {
 
                 check_arith($expr, "-expr");
                 $term = newexpr(arithexpr_e);
-                $term->sym = newtemp();
+                //$term->sym = newtemp();
+                $term->sym = istempexpr($expr) ? $expr->sym : newtemp();
+
                 emit(uminus, $expr, NULL, $term);
             }
             |NOT expr {
                 printf("Term: not expr\n");
 
                 $term = newexpr(boolexpr_e);
-                $term->sym = newtemp();
+                //$term->sym = newtemp();
+                $term->sym = istempexpr($expr) ? $expr->sym : newtemp();
                 emit(not, $expr, NULL, $term);
             }
             |OP_PLUS_PLUS lvalue {
@@ -168,7 +276,8 @@ term:       LEFT_PAR expr RIGHT_PAR {
                     else {
                         emit(add, $lvalue, newexpr_constnum(1), $lvalue, currQuad, yylineno);
                         $term = newexpr(arithexpr_e);
-                        $term->sym = newtemp();
+                        //$term->sym = newtemp();
+                        $term->sym = istempexpr($lvalue) ? $lvalue->sym : newtemp();
                         emit(assign, $lvalue, NULL, $term, currQuad, yylineno);
                     }
                 }
@@ -183,7 +292,8 @@ term:       LEFT_PAR expr RIGHT_PAR {
 
                     check_arith($lvalue, "lvalue++");
                     $term = newexpr(var_e);
-                    $term->sym = newtemp();
+                    //$term->sym = newtemp();
+                    $term->sym = istempexpr($lvalue) ? $lvalue->sym : newtemp();
                     if ($lvalue->type == tableitem_e) {
                         expr *val = emit_iftableitem($lvalue);
                         emit(assign, val, NULL, $term, currQuad, yylineno);
@@ -213,7 +323,8 @@ term:       LEFT_PAR expr RIGHT_PAR {
                     else {
                         emit(add, $lvalue, newexpr_constnum(-1), $lvalue, currQuad, yylineno);
                         $term = newexpr(arithexpr_e);
-                        $term->sym = newtemp();
+                        //$term->sym = newtemp();
+                        $term->sym = istempexpr($lvalue) ? $lvalue->sym : newtemp();
                         emit(assign, $lvalue, NULL, $term, currQuad, yylineno);
                     }
                 }
@@ -228,7 +339,8 @@ term:       LEFT_PAR expr RIGHT_PAR {
 
                     check_arith($lvalue, "lvalue--");
                     $term = newexpr(var_e);
-                    $term->sym = newtemp();
+                    //$term->sym = newtemp();
+                    $term->sym = istempexpr($lvalue) ? $lvalue->sym : newtemp();
                     if ($lvalue->type == tableitem_e) {
                         expr *val = emit_iftableitem($lvalue);
                         emit(assign, val, NULL, $term, currQuad, yylineno);
@@ -274,7 +386,7 @@ assignexpr: lvalue OP_EQUALS expr {
                 }
                 if (!found_flag) {
                     if ($lvalue->type = tableitem_e) { //lvalue[index] = expr
-                        printf("AAAAAAAAAAAAAA");
+                        //printf("AAAAAAAAAAAAAA");
                         emit(tablesetelem, $lvalue, $lvalue->index, $expr, currQuad, yylineno);
                         $assignexpr = emit_iftableitem($lvalue);
                         $assignexpr->type = assignexpr_e;
@@ -283,6 +395,7 @@ assignexpr: lvalue OP_EQUALS expr {
                         emit(assign, $expr, NULL, $lvalue, currQuad, yylineno);
                         $assignexpr = newexpr(assignexpr_e);
                         $assignexpr->sym = newtemp();
+                        //$assignexpr->sym = istempexpr($lvalue) ? $lvalue->sym : newtemp();
                         emit(assign, $lvalue, NULL, $assignexpr);
                     }
                 }
@@ -497,7 +610,8 @@ elist:      expr {
 tablemake:  LEFT_BRACKET elist RIGHT_BRACKET  { //dhmiourgia pinakwn [elist]
                 
                 expr *t = newexpr(newtable_e);
-                t->sym = newtemp();
+                //t->sym = newtemp();
+                t->sym = istempexpr($elist) ? $elist->sym : newtemp();
                 emit(tablecreate, t, NULL, NULL, currQuad, yylineno);
                 int i = 0;
                 printf("tablemake\n");
@@ -655,11 +769,15 @@ const:      INTEGER {
             | REAL {
                 printf("Const: real\n");
 
-                $const = newexpr_constnum($INTEGER);
+                $const = newexpr_constnum($REAL);
             }
             | STRING {printf("Const: string\n");}
             | NIL {printf("Const: nil\n");}
-            | TRUE {printf("Const: true\n");}
+            | TRUE {
+                printf("Const: true\n");
+
+                $const = newexpr_constbool(1);
+            }
             | FALSE {printf("Const: false\n");}
             ;
 
@@ -785,6 +903,7 @@ void initialize() {
     memset(str, '\0', strlen("_f")+11);
 
     SymTable_new();
+
 
     for (i=0; i < 499; i++) {
         lera->head[i] = NULL;

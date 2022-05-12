@@ -12,6 +12,7 @@ unsigned int currQuad = 0;
 scope_link *lista;
 SymTable *lera;
 expr *_errorexpr;
+iopcode iopenum;
 
 //scopespace shit
 scopespace_t currentscopespace(void){
@@ -338,6 +339,7 @@ void expand (void){
 void emit (iopcode op, expr* arg1, expr* arg2, expr* result, unsigned label, unsigned line) {
     if (currQuad == total) expand();
     quad* p     = quads + currQuad++;
+    p -> op       = op;
     p -> arg1   = arg1;
     p -> arg2   = arg2;
     p -> result = result;
@@ -460,7 +462,7 @@ expr* newexpr_constnum(double i){
 
 expr* newexpr_constbool(unsigned int b){
     expr* e = newexpr(constbool_e);
-    e->boolConst = !!b; //etsi to exei alla den katalavainw ti ennoei
+    e->boolConst = !!b; //estw oti b=5. (!b)= 0. (!!b) = 1. gi auto xrhsimopoiei !!.
     return e;
 }
 
@@ -473,11 +475,14 @@ expr* member_item(expr *lvalue, char *id) {
 }
 
 unsigned int istempname(const char* s){
-    return *s == '_';
+    char *dest = malloc(sizeof(2));
+    strncpy(dest, s, 2);
+    return (!strcmp("_t",dest));        //exoume _f gia temp functions kai _t gia temp variables
+                                        //opote tsekaroume an _t anti gia sketo _
 }
 
 unsigned int istempexpr(expr* e){
-    return e->sym && istempname(e->sym->name); //prepei na vroume pws tha pairnei to fname i to vname
+    return e->sym && istempname(e->sym->name);
 }
 
 void check_arith(expr* e, const char* context){
