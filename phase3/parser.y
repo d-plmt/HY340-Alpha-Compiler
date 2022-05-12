@@ -45,12 +45,15 @@
 %token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT LINE_COMM
 
 
-%type stmt block idlist ifstmt whilestmt forstmt returnstmt
+%type stmt block idlist whilestmt forstmt returnstmt if_stmt
 
 %type <strVal>  funcname
 %type <symtVal> funcprefix
 %type <symtVal> funcdef
 %type <uintVal> funcbody //auto leei unsigned alla de kserw ti na valw
+%type <intVal>  ifprefix
+%type <intVal>  elseprefix
+
 
 %type <exprVal> expr
 %type <exprVal> lvalue
@@ -91,7 +94,7 @@ program:    stmt {resettemp();} program
             ;
 
 stmt:       expr SEMICOLON  {printf("Stmt: expr;\n");}
-            |ifstmt     {printf("\tif statement\n");}
+            |if_stmt     {printf("\tif statement\n");}
             |whilestmt  {printf("\twhile statement\n");}
             |forstmt    {printf("\tfor statement\n");}
             |returnstmt {printf("\treturn statement\n");}
@@ -117,47 +120,93 @@ stmt:       expr SEMICOLON  {printf("Stmt: expr;\n");}
             ;
 
 
-expr:       assignexpr      {printf("Assign expression\n");}
+expr:       assignexpr      {
+                printf("Assign expression\n");
+
+                $$ = $1;
+            }
             |expr OP_PLUS expr  {
                 printf("Expr: expr op_plus expr\n");
 
                 $$ = newexpr(arithexpr_e);
-                $$->sym = newtemp();
+
+                if (istempexpr($1)) {
+                    $$->sym = $1->sym;
+                } else if (istempexpr($3)) {
+                    $$->sym = $3->sym;
+                } else {
+                    $$->sym = newtemp();
+                }
                 emit(add, $1, $3, $$, nextquadlabel(), yylineno);
             }
             |expr OP_MINUS expr {
                 printf("Expr: expr op_minus expr\n");
 
                 $$ = newexpr(arithexpr_e);
-                $$->sym = newtemp();
+
+                if (istempexpr($1)) {
+                    $$->sym = $1->sym;
+                } else if (istempexpr($3)) {
+                    $$->sym = $3->sym;
+                } else {
+                    $$->sym = newtemp();
+                }
                 emit(sub, $1, $3, $$, nextquadlabel(), yylineno);
             }
             |expr OP_ASTERISK expr  {
                 printf("Expr: expr op_asterisk expr\n");
 
                 $$ = newexpr(arithexpr_e);
-                $$->sym = newtemp();
+
+                if (istempexpr($1)) {
+                    $$->sym = $1->sym;
+                } else if (istempexpr($3)) {
+                    $$->sym = $3->sym;
+                } else {
+                    $$->sym = newtemp();
+                }
                 emit(mul, $1, $3, $$, nextquadlabel(), yylineno);
             }
             |expr OP_SLASH expr {
                 printf("Expr: expr op_slash expr\n");
 
                 $$ = newexpr(arithexpr_e);
-                $$->sym = newtemp();
+
+                if (istempexpr($1)) {
+                    $$->sym = $1->sym;
+                } else if (istempexpr($3)) {
+                    $$->sym = $3->sym;
+                } else {
+                    $$->sym = newtemp();
+                }
                 emit(div_iop, $1, $3, $$, nextquadlabel(), yylineno);
             }
             |expr OP_PERCENTAGE expr {
                 printf("Expr: expr op_percentage expr\n");
 
                 $$ = newexpr(arithexpr_e);
-                $$->sym = newtemp();
+
+                if (istempexpr($1)) {
+                    $$->sym = $1->sym;
+                } else if (istempexpr($3)) {
+                    $$->sym = $3->sym;
+                } else {
+                    $$->sym = newtemp();
+                }
                 emit(mod, $1, $3, $$, nextquadlabel(), yylineno);
             }
             |expr OP_GREATER expr {
                 printf("Expr: expr op_greater expr\n");
 
                 $$ = newexpr(boolexpr_e);
-                $$->sym = newtemp();
+                
+                if (istempexpr($1)) {
+                    $$->sym = $1->sym;
+                } else if (istempexpr($3)) {
+                    $$->sym = $3->sym;
+                } else {
+                    $$->sym = newtemp();
+                }
 
                 emit(if_greater, $1, $3, $$, nextquadlabel()+3, yylineno);
                 emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
@@ -168,7 +217,14 @@ expr:       assignexpr      {printf("Assign expression\n");}
                 printf("Expr: expr op_greater_eq expr\n");
 
                 $$ = newexpr(boolexpr_e);
-                $$->sym = newtemp();
+                
+                if (istempexpr($1)) {
+                    $$->sym = $1->sym;
+                } else if (istempexpr($3)) {
+                    $$->sym = $3->sym;
+                } else {
+                    $$->sym = newtemp();
+                }
 
                 emit(if_greatereq, $1, $3, $$, nextquadlabel()+3, yylineno);
                 emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
@@ -179,7 +235,14 @@ expr:       assignexpr      {printf("Assign expression\n");}
                 printf("Expr: expr op_lesser expr\n");
 
                 $$ = newexpr(boolexpr_e);
-                $$->sym = newtemp();
+                
+                if (istempexpr($1)) {
+                    $$->sym = $1->sym;
+                } else if (istempexpr($3)) {
+                    $$->sym = $3->sym;
+                } else {
+                    $$->sym = newtemp();
+                }
 
                 emit(if_less, $1, $3, $$, nextquadlabel()+3, yylineno);
                 emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
@@ -190,7 +253,14 @@ expr:       assignexpr      {printf("Assign expression\n");}
                 printf("Expr: expr op_lesser_eq expr\n");
 
                 $$ = newexpr(boolexpr_e);
-                $$->sym = newtemp();
+                
+                if (istempexpr($1)) {
+                    $$->sym = $1->sym;
+                } else if (istempexpr($3)) {
+                    $$->sym = $3->sym;
+                } else {
+                    $$->sym = newtemp();
+                }
 
                 emit(if_lesseq, $1, $3, $$, nextquadlabel()+3, yylineno);
                 emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
@@ -201,7 +271,14 @@ expr:       assignexpr      {printf("Assign expression\n");}
                 printf("Expr: expr op_eq_eq expr\n");
 
                 $$ = newexpr(boolexpr_e);
-                $$->sym = newtemp();
+                
+                if (istempexpr($1)) {
+                    $$->sym = $1->sym;
+                } else if (istempexpr($3)) {
+                    $$->sym = $3->sym;
+                } else {
+                    $$->sym = newtemp();
+                }
 
                 emit(if_eq, $1, $3, $$, nextquadlabel()+3, yylineno);
                 emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
@@ -212,7 +289,14 @@ expr:       assignexpr      {printf("Assign expression\n");}
                 printf("Expr: expr op_not_eq expr\n");
 
                 $$ = newexpr(boolexpr_e);
-                $$->sym = newtemp();
+                
+                if (istempexpr($1)) {
+                    $$->sym = $1->sym;
+                } else if (istempexpr($3)) {
+                    $$->sym = $3->sym;
+                } else {
+                    $$->sym = newtemp();
+                }
 
                 emit(if_noteq, $1, $3, $$, nextquadlabel()+3, yylineno);
                 emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
@@ -223,7 +307,14 @@ expr:       assignexpr      {printf("Assign expression\n");}
                 printf("Expr: expr and expr\n");
 
                 $$ = newexpr(boolexpr_e);
-                $$->sym = newtemp();
+                
+                if (istempexpr($1)) {
+                    $$->sym = $1->sym;
+                } else if (istempexpr($3)) {
+                    $$->sym = $3->sym;
+                } else {
+                    $$->sym = newtemp();
+                }
 
                 emit(and, $1, $3, $$, nextquadlabel(), yylineno);
             }
@@ -231,7 +322,14 @@ expr:       assignexpr      {printf("Assign expression\n");}
                 printf("Expr: expr or expr\n");
 
                 $$ = newexpr(boolexpr_e);
-                $$->sym = newtemp();
+
+                if (istempexpr($1)) {
+                    $$->sym = $1->sym;
+                } else if (istempexpr($3)) {
+                    $$->sym = $3->sym;
+                } else {
+                    $$->sym = newtemp();
+                }
 
                 emit(or, $1, $3, $$, nextquadlabel(), yylineno);
             }
@@ -250,8 +348,12 @@ term:       LEFT_PAR expr RIGHT_PAR {
 
                 check_arith($expr, "-expr");
                 $term = newexpr(arithexpr_e);
-                //$term->sym = newtemp();
-                $term->sym = istempexpr($expr) ? $expr->sym : newtemp();
+
+                if (istempexpr($2)) {
+                    $$->sym = $2->sym;
+                } else {
+                    $$->sym = newtemp();
+                }
 
                 emit(uminus, $expr, NULL, $term);
             }
@@ -259,8 +361,12 @@ term:       LEFT_PAR expr RIGHT_PAR {
                 printf("Term: not expr\n");
 
                 $term = newexpr(boolexpr_e);
-                //$term->sym = newtemp();
-                $term->sym = istempexpr($expr) ? $expr->sym : newtemp();
+
+                if (istempexpr($2)) {
+                    $$->sym = $2->sym;
+                } else {
+                    $$->sym = newtemp();
+                }
                 emit(not, $expr, NULL, $term);
             }
             |OP_PLUS_PLUS lvalue {
@@ -276,8 +382,12 @@ term:       LEFT_PAR expr RIGHT_PAR {
                     else {
                         emit(add, $lvalue, newexpr_constnum(1), $lvalue, currQuad, yylineno);
                         $term = newexpr(arithexpr_e);
-                        //$term->sym = newtemp();
-                        $term->sym = istempexpr($lvalue) ? $lvalue->sym : newtemp();
+
+                        if (istempexpr($2)) {
+                            $$->sym = $2->sym;
+                        } else {
+                            $$->sym = newtemp();
+                        }
                         emit(assign, $lvalue, NULL, $term, currQuad, yylineno);
                     }
                 }
@@ -292,8 +402,13 @@ term:       LEFT_PAR expr RIGHT_PAR {
 
                     check_arith($lvalue, "lvalue++");
                     $term = newexpr(var_e);
-                    //$term->sym = newtemp();
-                    $term->sym = istempexpr($lvalue) ? $lvalue->sym : newtemp();
+
+                    if (istempexpr($1)) {
+                        $$->sym = $1->sym;
+                    } else {
+                        $$->sym = newtemp();
+                    }
+
                     if ($lvalue->type == tableitem_e) {
                         expr *val = emit_iftableitem($lvalue);
                         emit(assign, val, NULL, $term, currQuad, yylineno);
@@ -317,14 +432,19 @@ term:       LEFT_PAR expr RIGHT_PAR {
                     check_arith($lvalue, "++lvalue");
                     if ($lvalue->type == tableitem_e) {
                         $term = emit_iftableitem($lvalue);
-                        emit(add, $term, newexpr_constnum(-1), $term, currQuad, yylineno);
+                        emit(sub, $term, newexpr_constnum(1), $term, currQuad, yylineno);
                         emit(tablesetelem, $lvalue, $lvalue->index, $term, currQuad, yylineno);
                     }
                     else {
-                        emit(add, $lvalue, newexpr_constnum(-1), $lvalue, currQuad, yylineno);
+                        emit(sub, $lvalue, newexpr_constnum(1), $lvalue, currQuad, yylineno);
                         $term = newexpr(arithexpr_e);
-                        //$term->sym = newtemp();
-                        $term->sym = istempexpr($lvalue) ? $lvalue->sym : newtemp();
+
+                        if (istempexpr($2)) {
+                            $$->sym = $2->sym;
+                        } else {
+                            $$->sym = newtemp();
+                        }
+                        
                         emit(assign, $lvalue, NULL, $term, currQuad, yylineno);
                     }
                 }
@@ -340,16 +460,20 @@ term:       LEFT_PAR expr RIGHT_PAR {
                     check_arith($lvalue, "lvalue--");
                     $term = newexpr(var_e);
                     //$term->sym = newtemp();
-                    $term->sym = istempexpr($lvalue) ? $lvalue->sym : newtemp();
+                    if (istempexpr($1)) {
+                        $$->sym = $1->sym;
+                    } else {
+                        $$->sym = newtemp();
+                    }
                     if ($lvalue->type == tableitem_e) {
                         expr *val = emit_iftableitem($lvalue);
                         emit(assign, val, NULL, $term, currQuad, yylineno);
-                        emit(add, val, newexpr_constnum(-1), val, currQuad, yylineno);
+                        emit(sub, val, newexpr_constnum(1), val, currQuad, yylineno);
                         emit(tablesetelem, $lvalue, $lvalue->index, val);
                     }
                     else {
                         emit(assign, $lvalue, NULL, $term);
-                        emit(add, $lvalue, newexpr_constnum(-1), $lvalue, currQuad, yylineno);
+                        emit(sub, $lvalue, newexpr_constnum(1), $lvalue, currQuad, yylineno);
                     }
                 }
                 else {
@@ -395,7 +519,6 @@ assignexpr: lvalue OP_EQUALS expr {
                         emit(assign, $expr, NULL, $lvalue, currQuad, yylineno);
                         $assignexpr = newexpr(assignexpr_e);
                         $assignexpr->sym = newtemp();
-                        //$assignexpr->sym = istempexpr($lvalue) ? $lvalue->sym : newtemp();
                         emit(assign, $lvalue, NULL, $assignexpr);
                     }
                 }
@@ -610,15 +733,16 @@ elist:      expr {
 tablemake:  LEFT_BRACKET elist RIGHT_BRACKET  { //dhmiourgia pinakwn [elist]
                 
                 expr *t = newexpr(newtable_e);
-                //t->sym = newtemp();
-                t->sym = istempexpr($elist) ? $elist->sym : newtemp();
+                t->sym = newtemp();
+
                 emit(tablecreate, t, NULL, NULL, currQuad, yylineno);
                 int i = 0;
                 printf("tablemake\n");
-                while ($elist != NULL) {
-                    
-                    emit(tablesetelem, t, newexpr_constnum(i++), $elist, currQuad, yylineno);
-                    $elist = $elist->next;
+
+                expr *temp = $elist;
+                while (temp != NULL) {
+                    emit(tablesetelem, t, newexpr_constnum(i++), temp, currQuad, yylineno);
+                    temp = temp->next;
                 }
                 
                 $tablemake = t;
@@ -807,9 +931,24 @@ idlist:     IDENTIFIER  {
             |
             ;
 
-ifstmt:     IF LEFT_PAR expr RIGHT_PAR stmt {printf("Ifstmt: if (expr) stmt\n");}
-            |IF LEFT_PAR expr RIGHT_PAR stmt ELSE stmt {printf("Ifstmt: if (expr) stmt else stmt\n");}
-            ;
+ifprefix:   IF LEFT_PAR expr RIGHT_PAR {
+                emit(if_eq, $expr, newexpr_constbool(1), NULL, nextquadlabel()+2, yylineno);
+                $ifprefix = nextquadlabel();
+                emit(jump, NULL, NULL, NULL, 0, yylineno);
+            }
+
+elseprefix: ELSE {
+                $elseprefix = nextquadlabel();
+                emit(jump, NULL, NULL, NULL, 0, yylineno);
+            }
+
+if_stmt:    ifprefix stmt {
+                patchlabel($ifprefix, nextquadlabel());
+            }
+            | ifprefix stmt elseprefix stmt {
+                patchlabel($ifprefix, $elseprefix+1);
+                patchlabel($elseprefix, nextquadlabel());
+            }
 
 whilestmt:  WHILE LEFT_PAR expr RIGHT_PAR {
                 loop_scope++;
