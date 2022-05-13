@@ -942,11 +942,13 @@ ifprefix:   IF LEFT_PAR expr RIGHT_PAR {
                 $ifprefix = nextquadlabel();
                 emit(jump, NULL, NULL, NULL, 0, yylineno);
             }
+            ;
 
 elseprefix: ELSE {
                 $elseprefix = nextquadlabel();
                 emit(jump, NULL, NULL, NULL, 0, yylineno);
             }
+            ;
 
 if_stmt:    ifprefix stmt {
                 patchlabel($ifprefix, nextquadlabel());
@@ -955,16 +957,19 @@ if_stmt:    ifprefix stmt {
                 patchlabel($ifprefix, $elseprefix+1);
                 patchlabel($elseprefix, nextquadlabel());
             }
+            ;
 
 whilestart: WHILE {
                 $whilestart = nextquadlabel();
             }
+            ;
 
 whilecond:  LEFT_PAR expr RIGHT_PAR {
                 emit(if_eq, $expr, newexpr_constbool(1), NULL, nextquadlabel()+2, yylineno);
                 $whilecond = nextquadlabel();
                 emit(jump, NULL, NULL, NULL, 0, yylineno);
             }
+            ;
 
 while:      whilestart whilecond stmt {
                 emit(jump, NULL, NULL, NULL, $whilestart, yylineno);
@@ -972,26 +977,37 @@ while:      whilestart whilecond stmt {
                 patchlist($stmt->breaklist, nextquadlabel());
                 patchlist($stmt->contlist, $whilestart);
             }
+            ;
+
+while_stmt:  while LEFT_PAR expr RIGHT_PAR loopstmt
+            ;
 
 N:          {
                 $N = nextquadlabel();
                 emit(jump, NULL, NULL, NULL, nextquadlabel(), yylineno);
             }
-
+            ;
 M:          {
                 $M = nextquadlabel();
             }
-
+            ;
 forprefix:  FOR LEFT_PAR elist SEMICOLON M expr SEMICOLON {
                 $forprefix->test = $M;
                 $forprefix->enter = nextquadlabel();
                 emit(if_eq, $expr, newexpr_constbool(1), NULL, nextquadlabel(), yylineno);
             }
-
+            ;
 for_stmt:   forprefix N elist RIGHT_PAR N stmt N {
+                patchlabel(&1->enter, $5 + 1);
+                patchlabel($2, currQuad);
+                patchlabel($5, $1->test);
+                patchlabel($8, $2 + 1);
 
+                patchlist($stmt->breaklist, nextQuadlabel());
+                patchlist($stmt->contlist, $2 + 1);
+                
             }
-
+            ;
 returnstmt: RETURN SEMICOLON {
                 if (func_flag > 0) {
                     printf("Returnstmt: return;\n");
@@ -1009,7 +1025,14 @@ returnstmt: RETURN SEMICOLON {
                 }
             }
             ;
-
+loopstart:   {++loopcounter;}
+            ;
+loopend:     {--loopcounter;}
+            ;
+loopstmt:   loopstart stmt loopend {
+                $$ = $2;
+}
+            ;
 
 %%
 

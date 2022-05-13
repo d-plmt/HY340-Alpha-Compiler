@@ -126,6 +126,12 @@ typedef struct scopeOffsetStack {
     struct scopeOffsetStack *next;
 } offsetStack;
 
+typedef struct stmt_t{
+    int breakList;
+    int contList
+}stmt_t;
+
+
 void pushOffsetStack(int offset);
 int popOffsetStack();
 
@@ -189,5 +195,9 @@ unsigned int istempexpr(expr* e); //
 unsigned nextquadlabel(void);
 void patchlabel(unsigned quadNo, unsigned label); //sumplirwnei ena arxika undefined label enos quad
 
-
 void check_arith(expr* e, const char* context); //sunartisi pou tsekarei an xrisimopoieitai swsta to expr se ariumhtiko 
+
+void make_stmt(stmt_t* s);
+int newlist(int i);
+int mergelist(int l1, int l2);
+void patchlist(int list, int label);

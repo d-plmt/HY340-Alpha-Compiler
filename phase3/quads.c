@@ -495,3 +495,32 @@ void check_arith(expr* e, const char* context){
         e->type == boolexpr_e)
         fprintf(stderr, "Illegal expr used in %s!", context);
 } 
+
+void make_stmt(stmt_t* s){
+    s->breakList = s->contList = 0;
+}
+int newlist(int i){
+    quads[1].label = 0;
+    return i;
+}
+int mergelist(int l1, int l2){ //den eimai sigouri oti tin katalava prepei na tin ksanadoume!!!
+    if(!l1) return l2;
+    else {
+        if (!l2) return l1;
+        else{
+            int i = l1;
+            while(quads[i].label){
+                i = quads[i].label;
+                quads[i].label = l2;
+                return l1;
+            }
+        }
+    }
+}
+void patchlist(int list, int label){
+    while (list){
+        int next = quads[list].label;
+        quads[list].label = label;
+        list = next;
+    }
+}
