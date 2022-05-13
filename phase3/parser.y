@@ -1019,7 +1019,6 @@ for_stmt:   forprefix N elist RIGHT_PAR N stmt N {
                 patchlist($stmt->contlist, $2 + 1);
                 
             }
-            |FOR LEFT_PAR elist SEMICOLON expr SEMICOLON elist RIGHT_PAR loopstmt
             ;
 returnstmt: RETURN SEMICOLON {
                 if (func_flag > 0) {
