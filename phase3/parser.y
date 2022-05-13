@@ -889,6 +889,18 @@ funcdef:    funcprefix funcargs funcbody {
                 expr *temp = lvalue_expr($funcprefix);
                 emit(funcend, NULL, NULL, temp, currQuad, yylineno);
             }
+            |FUNCTION LEFT_BRACE IDENTIFIER RIGHT_BRACE LEFT_PAR idlist RIGHT_PAR funcblockstart block funcblockend 
+            ;
+
+funcblockstart: {
+                pushOffsetStack(loopcounterstack->loopcounter);
+                loopcounter = 0;    
+            }
+            ;
+
+funcblockend:   {
+                loopcounter = popOffsetStack(loopcounterstack);
+            }
             ;
 
 const:      INTEGER {
@@ -1007,6 +1019,7 @@ for_stmt:   forprefix N elist RIGHT_PAR N stmt N {
                 patchlist($stmt->contlist, $2 + 1);
                 
             }
+            |FOR LEFT_PAR elist SEMICOLON expr SEMICOLON elist RIGHT_PAR loopstmt
             ;
 returnstmt: RETURN SEMICOLON {
                 if (func_flag > 0) {
