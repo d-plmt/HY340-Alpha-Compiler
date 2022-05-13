@@ -125,6 +125,12 @@ stmt:       expr SEMICOLON  {printf("Stmt: expr;\n");}
             |SEMICOLON
             ;
 
+stmts:      stmt {$stmts = $stmt;}
+            |stmts stmt {
+                $stmts->breaklist = mergelist($1->breaklist, $2->breaklist);
+                $stmts->contlist = mergelist($1->contlist, $2->contlist);
+            }
+            ;
 
 expr:       assignexpr      {
                 printf("Assign expression\n");
@@ -1042,10 +1048,23 @@ loopstart:   {++loopcounter;}
 loopend:     {--loopcounter;}
             ;
 loopstmt:   loopstart stmt loopend {
-                $$ = $2;
-}
+                $loopstmt = $2;
+            }
             ;
 
+break:      BREAK SEMICOLON {
+                make_stmt(& $break);
+                $break->breaklist = newlist(nextQuadlabel());
+                emit(jump, NULL, NULL, 0, nextQuadlabel(), yylineno);
+            }
+            ;
+
+continue:   CONTINUE SEMICOLON {
+                make_stmt(& $continue);
+                $continue->contlist = newlist(nextQuadlabel());
+                emit(jump, NULL, NULL, 0, nextQuadlabel(), yylineno);
+            }
+            ;    
 %%
 
 int lvalue_checker(const char *name) {
