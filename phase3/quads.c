@@ -551,3 +551,77 @@ void patchlist(int list, int label){
         list = next;
     }
 }
+
+
+/////////////////PRINT/////////////////////
+
+char *iop_to_str(int iop) {
+    if (iop == 0) return "assign";
+    if (iop == 1) return "add";
+    if (iop == 2) return "sub";
+    if (iop == 3) return "mul";
+    if (iop == 4) return "div_iop";
+    if (iop == 5) return "mod";
+    if (iop == 6) return "uminus";
+    if (iop == 7) return "and";
+    if (iop == 8) return "or";
+    if (iop == 9) return "not";
+    if (iop == 10) return "if_eq";
+    if (iop == 11) return "if_noteq";
+    if (iop == 12) return "if_lesseq";
+    if (iop == 13) return "if_greatereq";
+    if (iop == 14) return "if_less";
+    if (iop == 15) return "if_greater";
+    if (iop == 16) return "jump";
+    if (iop == 17) return "call";
+    if (iop == 18) return "param";
+    if (iop == 19) return "ret";
+    if (iop == 20) return "getretval";
+    if (iop == 21) return "funcstart";
+    if (iop == 22) return "funcend";
+    if (iop == 23) return "tablecreate";
+    if (iop == 24) return "tablegetelem";
+    if (iop == 25) return "tablesetelem";
+}
+
+void printargstuff(expr *arg) {
+    if (arg == NULL) {
+        printf("            ");
+    }
+    else if (arg->sym != NULL) {
+        printf("%8s    ",arg->sym->name);
+    }
+    else if (arg->type == constnum_e) {
+        printf("%8.3f    ",arg->numConst);
+    }
+    else if (arg->type == constbool_e) {
+        printf("%8c    ",arg->boolConst);
+    }
+    else if (arg->type == conststring_e) {
+        printf("%8s    ",arg->strConst);
+    }
+    else {
+        printf("%c(null)    ",' ');
+    }
+ }
+ 
+
+void printquads() {
+    int i = 0;
+    printf("-----------------------------------------------------------\n");
+    while (i < currQuad) {
+
+        printf("quad: %d\t  ",i);
+        printf("op: %s\t",iop_to_str(quads[i].op));
+        printf("arg1: ");
+        printargstuff(quads[i].arg1);
+        printf("arg2: ");
+        printargstuff(quads[i].arg2);
+        printf("result: ");
+        printargstuff(quads[i].result);
+        printf("line: ");
+        printf("%d\n",quads[i].line);
+        i++;
+    }
+    printf("-----------------------------------------------------------\n");
+}

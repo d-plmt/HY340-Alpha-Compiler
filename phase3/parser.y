@@ -524,7 +524,7 @@ assignexpr: lvalue OP_EQUALS expr {
                     printf("Assign expression: lvalue = expr\n");
                 }
                 if (!found_flag) {
-                    if ($lvalue->type = tableitem_e) { //lvalue[index] = expr
+                    if ($lvalue->type == tableitem_e) { //lvalue[index] = expr
                         //printf("AAAAAAAAAAAAAA");
                         emit(tablesetelem, $lvalue, $lvalue->index, $expr, currQuad, yylineno);
                         $assignexpr = emit_iftableitem($lvalue);
@@ -534,7 +534,7 @@ assignexpr: lvalue OP_EQUALS expr {
                         emit(assign, $expr, NULL, $lvalue, currQuad, yylineno);
                         $assignexpr = newexpr(assignexpr_e);
                         $assignexpr->sym = newtemp();
-                        emit(assign, $lvalue, NULL, $assignexpr);
+                        emit(assign, $lvalue, NULL, $assignexpr, currQuad, yylineno);
                     }
                 }
                  local_flag = 0;
@@ -1141,7 +1141,6 @@ void initialize() {
 
     SymTable_new();
 
-
     for (i=0; i < 499; i++) {
         lera->head[i] = NULL;
     }
@@ -1207,6 +1206,7 @@ int yyerror (char* yaccProvidedMessage) {
     fprintf(stderr, "%s: at line %d, before token: %s\n", yaccProvidedMessage, yylineno, yytext);
     fprintf(stderr, "INPUT NOT VALID\n");
     print_scopes();
+    printquads();
     exit(0);
 }
 
@@ -1222,6 +1222,7 @@ int main(int argc, char** argv) {
     yyparse();
     //print_hash();
     print_scopes();
+    printquads();
     return 0;
 }
 
