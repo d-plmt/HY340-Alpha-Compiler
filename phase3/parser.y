@@ -733,7 +733,7 @@ elist:      expr {
                 $$ = $expr;
                 printf("Elist: expr\n");
             }
-            |expr COMMA elist {
+            |elist COMMA expr {
 
                 $1->next = $3;
                 $$ = $expr;
@@ -783,7 +783,7 @@ indexed:    indexedelem {
                 $indexedelem->next = NULL;
                 $indexed = $indexedelem;
             }
-            | indexedelem COMMA indexed {
+            | indexed COMMA indexedelem {
                 printf("Indexed: indexedelem,...,indexedelem\n");
 
                 $indexedelem->next = $3;
@@ -878,11 +878,13 @@ funcbody:   funcblockstart block funcblockend{
                 currentscope--;
                 
                 SymTable_hide(currscope()+1);
+                
                 SymTable_reveal(currscope());
                 printf("Funcdef: function identifier(idlist) {}\n");
                 
                 $funcbody = currscopeoffset();
                 exitscopespace();
+                
             }
             ;
 
@@ -898,8 +900,9 @@ funcdef:    funcprefix funcargs funcbody {
             ;
 
 funcblockstart: {
-                pushLoopStack(loopCounterTop->loopCounter);
-                loopCounterTop->loopCounter = 0;    
+    printf("AAAAAAAAAAAAAAAA\n");
+                pushLoopStack(loopcounter);
+                loopcounter = 0;   
             }
             ;
 
@@ -942,7 +945,7 @@ idlist:     IDENTIFIER  {
                     $$ = lvalue_expr(tmp);
                 }
             }
-            | IDENTIFIER COMMA idlist {
+            | idlist COMMA IDENTIFIER {
                 printf("Idlist: identifier,...,identifier\n");
                 symt *tmp_symbol = NULL;
                 tmp_symbol = SymTable_lookup($IDENTIFIER, currscope(), "formal");

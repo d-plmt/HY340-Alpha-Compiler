@@ -291,7 +291,6 @@ void pushOffsetStack(int offset) {
     offsetStack *new_node = malloc(sizeof(offsetStack));
     new_node -> offset = offset;
     if (offsetTop == NULL) {
-        printf("top is null\n");
         new_node->next = NULL;
     }
     else {
@@ -302,7 +301,6 @@ void pushOffsetStack(int offset) {
 
 int popOffsetStack() {
     if (offsetTop == NULL) {
-        printf("AAAAA");
         return -1;
     }
     int to_return = offsetTop->offset;
@@ -322,7 +320,6 @@ void pushLoopStack(int loopCounter){
     loopStack *temp_node = malloc(sizeof(loopStack));
     temp_node->loopCounter = loopCounter;
     if(loopCounterTop == NULL){
-        printf("loopStack top is NULL\n");
         temp_node->next = NULL;
     }else{
         temp_node->next = loopCounterTop;
@@ -332,7 +329,6 @@ void pushLoopStack(int loopCounter){
 
 int popLoopStack(){
     if(loopCounterTop == NULL) {
-        printf("loopCounterTop is NULL\n");
         return -1;
     }
     int to_return = loopCounterTop->loopCounter;
