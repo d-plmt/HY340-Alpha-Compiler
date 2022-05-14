@@ -70,7 +70,7 @@ void SymTable_hide(unsigned int scope) {
         entry_temp = scope_temp->scope_head;
         while (entry_temp != NULL) {
             if (entry_temp->isActive) {
-                printf("\033[0;33mHiding %s  type: %s\n\033[0m",getName(entry_temp),getType(entry_temp->type));
+                //printf("\033[0;33mHiding %s  type: %s\n\033[0m",getName(entry_temp),getType(entry_temp->type));
                 entry_temp->isActive = 0;
             }
             entry_temp = entry_temp->next_in_scope;
@@ -91,7 +91,7 @@ void SymTable_reveal(unsigned int scope) {
         entry_temp = scope_temp->scope_head;
         while (entry_temp != NULL) {
                 if (!entry_temp->isActive) {
-                    printf("\033[0;33mRevealing %s  type: %s\n\033[0m",getName(entry_temp),getType(entry_temp->type));
+                    //printf("\033[0;33mRevealing %s  type: %s\n\033[0m",getName(entry_temp),getType(entry_temp->type));
                     entry_temp->isActive = 1;
                 }
             entry_temp = entry_temp->next_in_scope;
@@ -619,8 +619,8 @@ void printquads() {
         printargstuff(quads[i].arg2);
         printf("result: ");
         printargstuff(quads[i].result);
-        printf("line: ");
-        printf("%d\n",quads[i].line);
+        printf("label: ");
+        printf("%d\n",quads[i].label);
         i++;
     }
     printf("-----------------------------------------------------------\n");
