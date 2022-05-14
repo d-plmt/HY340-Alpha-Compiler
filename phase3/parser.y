@@ -17,7 +17,6 @@
     int scope_flag = 1;
     int functions = 0;
     int func_counter = 0;
-    int loop_scope = 0;
     int call_flag = 0;
     int func_flag = 0;
     int local_flag = 0;
@@ -47,9 +46,10 @@
 %token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT LINE_COMM
 
 
-%type block idlist while for_stmt returnstmt if_stmt
+%type block while for_stmt returnstmt if_stmt
 
 %type <strVal>  funcname
+%type <exprVal> funcargs
 %type <symtVal> funcprefix
 %type <symtVal> funcdef
 %type <uintVal> funcbody //auto leei unsigned alla de kserw ti na valw
@@ -72,6 +72,7 @@
 %type <exprVal> tableitem
 %type <exprVal> tablemake
 %type <exprVal> elist
+%type <exprVal> idlist
 
 %type <callVal> normcall
 %type <callVal> callsuffix
@@ -103,7 +104,7 @@
 
 %%
 
-program:    stmt {resettemp();} program    
+program:    stmts    
             |   {printf("\nProgram stopped\n\n");}
             ;
 
@@ -112,32 +113,26 @@ stmt:       expr SEMICOLON  {printf("Stmt: expr;\n");}
             |while  {printf("\twhile statement\n");}
             |for_stmt    {printf("\tfor statement\n");}
             |returnstmt {printf("\treturn statement\n");}
-            |BREAK SEMICOLON    {
-                if (loop_scope < 1) {
-                    fprintf(stderr, "\033[0;31mERROR. Line %d: Keyword \"break\" can't be used without a loop.\n\033[0m", yylineno);
-                }
-                else {
-                    printf("\tkeyword \"break\"\n");
-                }
+            |break    {
             }
-            |CONTINUE SEMICOLON {
-                if (loop_scope < 1) {
-                    fprintf(stderr, "\033[0;31mERROR. Line %d: Keyword \"continue\" can't be used without a loop.\n\033[0m", yylineno);
-                }
-                else {
-                    printf("\tkeyword \"continue\"\n");
-                }
+            |continue {
+
             }
             |block      {printf("\tBlock\n");}
             |funcdef    {printf("\tFunction definition\n");}
-            |SEMICOLON
+            |SEMICOLON  {}
             ;
 
-stmts:      stmt {$stmts = $stmt;}
-            |stmts stmt {
+stmts:      stmts stmt {
+                resettemp();
                 $$->breaklist = mergelist($1->breaklist, $2->breaklist);
                 $$->contlist = mergelist($1->contlist, $2->contlist);
             }
+            |stmt {
+                $stmts = $stmt;
+                resettemp();
+                }
+            
             ;
 
 expr:       assignexpr      {
@@ -805,10 +800,6 @@ indexedelem: LEFT_BRACE expr COLON expr RIGHT_BRACE {
             }
             ;
 
-func_stmt: stmt func_stmt {printf("Func_stmt: stmt,...,stmt\n");}
-            | stmt {printf("Func_stmt: stmt\n");}
-            ;
-
 block:      LEFT_BRACE {
                     currentscope = currscope() + scope_flag;
                 } RIGHT_BRACE {
@@ -820,7 +811,7 @@ block:      LEFT_BRACE {
                 }
             |LEFT_BRACE {
                     currentscope = currscope() + scope_flag;
-                } func_stmt RIGHT_BRACE {
+                } stmts RIGHT_BRACE {
                     currentscope = currscope() - scope_flag;
                     if (scope_flag == 1) {
                         SymTable_hide(currscope()+1);
@@ -876,10 +867,11 @@ funcprefix: FUNCTION funcname {
 funcargs:  LEFT_PAR idlist RIGHT_PAR {
                 enterscopespace(); //enter function locals space
                 resetfunctionlocalsoffset(); //start counting locals from zero
+                $$ = $2;
             }
             ;
 
-funcbody:   block {
+funcbody:   funcblockstart block funcblockend{
                 if (!(--func_flag)){ //an func_flag-1=0, vghka apo ola ta functions
                     scope_flag = 1;
                 }
@@ -903,7 +895,6 @@ funcdef:    funcprefix funcargs funcbody {
                 expr *temp = lvalue_expr($funcprefix);
                 emit(funcend, NULL, NULL, temp, currQuad, yylineno);
             }
-            |FUNCTION LEFT_BRACE IDENTIFIER RIGHT_BRACE LEFT_PAR idlist RIGHT_PAR funcblockstart block funcblockend 
             ;
 
 funcblockstart: {
@@ -913,7 +904,7 @@ funcblockstart: {
             ;
 
 funcblockend:   {
-                loopCounterTop->loopCounter = popLoopStack();
+                loopcounter = popLoopStack();
             }
             ;
 
@@ -944,9 +935,11 @@ idlist:     IDENTIFIER  {
                 tmp_symbol = SymTable_lookup($IDENTIFIER, currscope(), "formal");
                 if (tmp_symbol != NULL) {
                     fprintf(stderr,"\033[0;31mERROR. Line %d: Symbol %s in scope %d cannot be defined\n\033[0m", yylineno, $IDENTIFIER,currscope());
+                    $$ = _errorexpr;
                 }
                 else {
-                    SymTable_insert ($IDENTIFIER, yylineno, formalarg, var_s);
+                    symt *tmp = SymTable_insert ($IDENTIFIER, yylineno, formalarg, var_s);
+                    $$ = lvalue_expr(tmp);
                 }
             }
             | IDENTIFIER COMMA idlist {
@@ -955,12 +948,14 @@ idlist:     IDENTIFIER  {
                 tmp_symbol = SymTable_lookup($IDENTIFIER, currscope(), "formal");
                 if (tmp_symbol != NULL) {
                     fprintf(stderr,"\033[0;31mERROR. Line %d: Symbol %s in scope %d cannot be defined\n\033[0m", yylineno, $IDENTIFIER,currscope());
+                    $$ = _errorexpr;
                 }
                 else {
-                    SymTable_insert ($IDENTIFIER, yylineno, formalarg, var_s);
+                    symt *tmp = SymTable_insert ($IDENTIFIER, yylineno, formalarg, var_s);
+                    $$ = lvalue_expr(tmp);
                 }
             }
-            |
+            | {$$ = NULL;}
             ;
 
 ifprefix:   IF LEFT_PAR expr RIGHT_PAR {
@@ -997,16 +992,14 @@ whilecond:  LEFT_PAR expr RIGHT_PAR {
             }
             ;
 
-while:      whilestart whilecond stmt {
+while:      whilestart whilecond loopstmt {
                 emit(jump, NULL, NULL, NULL, $whilestart, yylineno);
                 patchlabel($whilecond, nextquadlabel());
-                patchlist($stmt->breaklist, nextquadlabel());
-                patchlist($stmt->contlist, $whilestart);
+                patchlist($loopstmt->breaklist, nextquadlabel());
+                patchlist($loopstmt->contlist, $whilestart);
             }
             ;
 
-while_stmt:  while LEFT_PAR expr RIGHT_PAR loopstmt
-            ;
 
 N:          {
                 $N = nextquadlabel();
@@ -1023,14 +1016,14 @@ forprefix:  FOR LEFT_PAR elist SEMICOLON M expr SEMICOLON {
                 emit(if_eq, $expr, newexpr_constbool(1), NULL, nextquadlabel(), yylineno);
             }
             ;
-for_stmt:   forprefix N elist RIGHT_PAR N stmt N {
+for_stmt:   forprefix N elist RIGHT_PAR N loopstmt N {
                 patchlabel($1->enter, $5 + 1);
                 patchlabel($2, nextquadlabel());
                 patchlabel($5, $1->test);
                 patchlabel($7, $2 + 1);
 
-                patchlist($stmt->breaklist, nextquadlabel());
-                patchlist($stmt->contlist, $2 + 1);
+                patchlist($loopstmt->breaklist, nextquadlabel());
+                patchlist($loopstmt->contlist, $2 + 1);
                 
             }
             ;
@@ -1063,16 +1056,30 @@ loopstmt:   loopstart stmt loopend {
             ;
 
 break:      BREAK SEMICOLON {
-                make_stmt(& $break);
-                $break->breaklist = newlist(nextquadlabel());
-                emit(jump, NULL, NULL, 0, nextquadlabel(), yylineno);
+                if (loopcounter < 1) {
+                    fprintf(stderr, "\033[0;31mERROR. Line %d: Keyword \"break\" can't be used without a loop.\n\033[0m", yylineno);
+                    $$ = NULL;
+                }
+                else {
+                    printf("\tkeyword \"break\"\n");
+                    make_stmt($break);
+                    $break->breaklist = newlist(nextquadlabel());
+                    emit(jump, NULL, NULL, 0, nextquadlabel(), yylineno);
+                }
             }
             ;
 
 continue:   CONTINUE SEMICOLON {
-                make_stmt(& $continue);
-                $continue->contlist = newlist(nextquadlabel());
-                emit(jump, NULL, NULL, 0, nextquadlabel(), yylineno);
+                if (loopcounter < 1) {
+                    fprintf(stderr, "\033[0;31mERROR. Line %d: Keyword \"continue\" can't be used without a loop.\n\033[0m", yylineno);
+                    $$ = NULL;
+                }
+                else {
+                    printf("\tkeyword \"continue\"\n");
+                    make_stmt($continue);
+                    $continue->contlist = newlist(nextquadlabel());
+                    emit(jump, NULL, NULL, 0, nextquadlabel(), yylineno);
+                }
             }
             ;    
 %%
