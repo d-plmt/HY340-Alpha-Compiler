@@ -2757,11 +2757,11 @@ yyreduce:
 #line 1026 "parser.y"
                                                  {
                 patchlabel((yyvsp[-6].forprefixVal)->enter, (yyvsp[-2].intVal) + 1);
-                patchlabel((yyvsp[-5].intVal), nextQuadlabel());
+                patchlabel((yyvsp[-5].intVal), nextquadlabel());
                 patchlabel((yyvsp[-2].intVal), (yyvsp[-6].forprefixVal)->test);
                 patchlabel((yyvsp[0].intVal), (yyvsp[-5].intVal) + 1);
 
-                patchlist((yyvsp[-1].stmtVal)->breaklist, nextQuadlabel());
+                patchlist((yyvsp[-1].stmtVal)->breaklist, nextquadlabel());
                 patchlist((yyvsp[-1].stmtVal)->contlist, (yyvsp[-5].intVal) + 1);
                 
             }
@@ -2772,7 +2772,7 @@ yyreduce:
 #line 1037 "parser.y"
                              {
                 if (func_flag > 0) {
-                    emit(ret, NULL, NULL, NULL, nextQuadlabel(), yylineno);
+                    emit(ret, NULL, NULL, NULL, nextquadlabel(), yylineno);
                     printf("Returnstmt: return;\n");
                 }
                 else {
@@ -2786,7 +2786,7 @@ yyreduce:
 #line 1046 "parser.y"
                                    {
                 if (func_flag > 0) {
-                    emit(ret, NULL, NULL, (yyvsp[-1].exprVal), nextQuadlabel(), yylineno);
+                    emit(ret, NULL, NULL, (yyvsp[-1].exprVal), nextquadlabel(), yylineno);
                     printf("Returnstmt: return;\n");
                 }
                 else {

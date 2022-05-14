@@ -1025,18 +1025,18 @@ forprefix:  FOR LEFT_PAR elist SEMICOLON M expr SEMICOLON {
             ;
 for_stmt:   forprefix N elist RIGHT_PAR N stmt N {
                 patchlabel($1->enter, $5 + 1);
-                patchlabel($2, nextQuadlabel());
+                patchlabel($2, nextquadlabel());
                 patchlabel($5, $1->test);
                 patchlabel($7, $2 + 1);
 
-                patchlist($stmt->breaklist, nextQuadlabel());
+                patchlist($stmt->breaklist, nextquadlabel());
                 patchlist($stmt->contlist, $2 + 1);
                 
             }
             ;
 returnstmt: RETURN SEMICOLON {
                 if (func_flag > 0) {
-                    emit(ret, NULL, NULL, NULL, nextQuadlabel(), yylineno);
+                    emit(ret, NULL, NULL, NULL, nextquadlabel(), yylineno);
                     printf("Returnstmt: return;\n");
                 }
                 else {
@@ -1045,7 +1045,7 @@ returnstmt: RETURN SEMICOLON {
             }
             |RETURN expr SEMICOLON {
                 if (func_flag > 0) {
-                    emit(ret, NULL, NULL, $expr, nextQuadlabel(), yylineno);
+                    emit(ret, NULL, NULL, $expr, nextquadlabel(), yylineno);
                     printf("Returnstmt: return;\n");
                 }
                 else {
@@ -1064,15 +1064,15 @@ loopstmt:   loopstart stmt loopend {
 
 break:      BREAK SEMICOLON {
                 make_stmt(& $break);
-                $break->breaklist = newlist(nextQuadlabel());
-                emit(jump, NULL, NULL, 0, nextQuadlabel(), yylineno);
+                $break->breaklist = newlist(nextquadlabel());
+                emit(jump, NULL, NULL, 0, nextquadlabel(), yylineno);
             }
             ;
 
 continue:   CONTINUE SEMICOLON {
                 make_stmt(& $continue);
-                $continue->contlist = newlist(nextQuadlabel());
-                emit(jump, NULL, NULL, 0, nextQuadlabel(), yylineno);
+                $continue->contlist = newlist(nextquadlabel());
+                emit(jump, NULL, NULL, 0, nextquadlabel(), yylineno);
             }
             ;    
 %%
