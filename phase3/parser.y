@@ -907,13 +907,13 @@ funcdef:    funcprefix funcargs funcbody {
             ;
 
 funcblockstart: {
-                pushLoopStack(loopstack->loopCounter);
-                loopstack->loopCounter = 0;    
+                pushLoopStack(loopCounterTop->loopCounter);
+                loopCounterTop->loopCounter = 0;    
             }
             ;
 
 funcblockend:   {
-                loopstack->loopCounter = popLoopStack();
+                loopCounterTop->loopCounter = popLoopStack();
             }
             ;
 

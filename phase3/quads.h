@@ -139,7 +139,7 @@ typedef struct scopeOffsetStack {
 typedef struct loopCounterStack {
     int loopCounter;
     struct loopCounterStack *next;
-}loopstack;
+}loopStack;
 
 void pushOffsetStack(int offset);
 int popOffsetStack();
@@ -147,7 +147,7 @@ void pushLoopStack(int loopCounter);
 int popLoopStack();
 
 extern offsetStack *offsetTop;
-extern offsetStack *loopCounterTop;
+extern loopStack *loopCounterTop;
 
 /*Hash Table functions*/
 unsigned int SymTable_hash(const char *key);

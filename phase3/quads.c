@@ -318,7 +318,7 @@ int popOffsetStack() {
 }
 
 void pushLoopStack(int loopCounter){
-    loopstack *temp_node = malloc(sizeof(loopstack));
+    loopStack *temp_node = malloc(sizeof(loopStack));
     temp_node->loopCounter = loopCounter;
     if(loopCounterTop == NULL){
         printf("loopStack top is NULL\n");
@@ -339,7 +339,7 @@ int popLoopStack(){
         free(loopCounterTop);
         loopCounterTop = NULL;
     }else{
-        loopstack *temp = loopCounterTop;
+        loopStack *temp = loopCounterTop;
         loopCounterTop = loopCounterTop->next;
         free(temp);
     }
@@ -347,7 +347,7 @@ int popLoopStack(){
 }
 
 offsetStack *offsetTop = NULL;
-loopstack *loopCounterTop = NULL;
+loopStack *loopCounterTop = NULL;
 
 //////////////QUADS////////////////
 int tempcounter = 0;
