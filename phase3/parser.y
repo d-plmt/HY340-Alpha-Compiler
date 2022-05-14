@@ -36,6 +36,8 @@
     struct expr *exprVal;
     struct callstruct *callVal;
     struct indexedpairs *indexedVal;
+    struct stmt_t *stmtVal;
+    struct forprefix *forprefixVal;
     };
 
 %token <intVal>     INTEGER
@@ -45,7 +47,7 @@
 %token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT LINE_COMM
 
 
-%type stmt block idlist while for_stmt returnstmt if_stmt
+%type block idlist while for_stmt returnstmt if_stmt
 
 %type <strVal>  funcname
 %type <symtVal> funcprefix
@@ -58,8 +60,6 @@
 %type <intVal>  whilecond
 %type <intVal>  N
 %type <intVal>  M
-%type <intVal>  forprefix
-
 
 %type <exprVal> expr
 %type <exprVal> lvalue
@@ -79,6 +79,14 @@
 
 %type <indexedVal> indexedelem
 %type <indexedVal> indexed
+
+%type <stmtVal> stmts
+%type <stmtVal> stmt
+%type <stmtVal> loopstmt
+%type <stmtVal> break
+%type <stmtVal> continue
+
+%type <forprefixVal> forprefix
 
 
 %right OP_EQUALS
@@ -127,8 +135,8 @@ stmt:       expr SEMICOLON  {printf("Stmt: expr;\n");}
 
 stmts:      stmt {$stmts = $stmt;}
             |stmts stmt {
-                $stmts->breaklist = mergelist($1->breaklist, $2->breaklist);
-                $stmts->contlist = mergelist($1->contlist, $2->contlist);
+                $$->breaklist = mergelist($1->breaklist, $2->breaklist);
+                $$->contlist = mergelist($1->contlist, $2->contlist);
             }
             ;
 
@@ -899,13 +907,13 @@ funcdef:    funcprefix funcargs funcbody {
             ;
 
 funcblockstart: {
-                pushOffsetStack(loopcounterstack->loopcounter);
-                loopcounter = 0;    
+                pushLoopStack(loopstack->loopCounter);
+                loopstack->loopCounter = 0;    
             }
             ;
 
 funcblockend:   {
-                loopcounter = popOffsetStack(loopcounterstack);
+                loopstack->loopCounter = popLoopStack();
             }
             ;
 
@@ -1016,10 +1024,10 @@ forprefix:  FOR LEFT_PAR elist SEMICOLON M expr SEMICOLON {
             }
             ;
 for_stmt:   forprefix N elist RIGHT_PAR N stmt N {
-                patchlabel(&1->enter, $5 + 1);
-                patchlabel($2, currQuad);
+                patchlabel($1->enter, $5 + 1);
+                patchlabel($2, nextQuadlabel());
                 patchlabel($5, $1->test);
-                patchlabel($8, $2 + 1);
+                patchlabel($7, $2 + 1);
 
                 patchlist($stmt->breaklist, nextQuadlabel());
                 patchlist($stmt->contlist, $2 + 1);
@@ -1028,7 +1036,7 @@ for_stmt:   forprefix N elist RIGHT_PAR N stmt N {
             ;
 returnstmt: RETURN SEMICOLON {
                 if (func_flag > 0) {
-                    emit(return, NULL, NULL, NULL, nextQuadlabel(), yylineno);
+                    emit(ret, NULL, NULL, NULL, nextQuadlabel(), yylineno);
                     printf("Returnstmt: return;\n");
                 }
                 else {
@@ -1037,7 +1045,7 @@ returnstmt: RETURN SEMICOLON {
             }
             |RETURN expr SEMICOLON {
                 if (func_flag > 0) {
-                    emit(return, NULL, NULL, $expr, nextQuadlabel(), yylineno);
+                    emit(ret, NULL, NULL, $expr, nextQuadlabel(), yylineno);
                     printf("Returnstmt: return;\n");
                 }
                 else {

@@ -115,6 +115,16 @@ typedef struct indexedpairs {
     struct indexedpairs *next;
 } indexedpairs;
 
+typedef struct stmt_t{
+    int breaklist;
+    int contlist;
+}stmt_t;
+
+typedef struct forprefix{
+    int enter;
+    int test;
+}forprefix;
+
 extern quad*           quads;
 extern unsigned        total;
 extern unsigned int    currQuad;
@@ -126,16 +136,18 @@ typedef struct scopeOffsetStack {
     struct scopeOffsetStack *next;
 } offsetStack;
 
-typedef struct stmt_t{
-    int breakList;
-    int contList
-}stmt_t;
-
+typedef struct loopCounterStack {
+    int loopCounter;
+    struct loopCounterStack *next;
+}loopstack;
 
 void pushOffsetStack(int offset);
 int popOffsetStack();
+void pushLoopStack(int loopCounter);
+int popLoopStack();
 
 extern offsetStack *offsetTop;
+extern offsetStack *loopCounterTop;
 
 /*Hash Table functions*/
 unsigned int SymTable_hash(const char *key);

@@ -317,7 +317,37 @@ int popOffsetStack() {
     return to_return;
 }
 
+void pushLoopStack(int loopCounter){
+    loopstack *temp_node = malloc(sizeof(loopstack));
+    temp_node->loopCounter = loopCounter;
+    if(loopCounterTop == NULL){
+        printf("loopStack top is NULL\n");
+        temp_node->next = NULL;
+    }else{
+        temp_node->next = loopCounterTop;
+    }
+    loopCounterTop = temp_node;
+}
+
+int popLoopStack(){
+    if(loopCounterTop == NULL) {
+        printf("loopCounterTop is NULL\n");
+        return -1;
+    }
+    int to_return = loopCounterTop->loopCounter;
+    if(loopCounterTop->next == NULL) {
+        free(loopCounterTop);
+        loopCounterTop = NULL;
+    }else{
+        loopstack *temp = loopCounterTop;
+        loopCounterTop = loopCounterTop->next;
+        free(temp);
+    }
+    return to_return;
+}
+
 offsetStack *offsetTop = NULL;
+loopstack *loopCounterTop = NULL;
 
 //////////////QUADS////////////////
 int tempcounter = 0;
@@ -497,7 +527,7 @@ void check_arith(expr* e, const char* context){
 } 
 
 void make_stmt(stmt_t* s){
-    s->breakList = s->contList = 0;
+    s->breaklist = s->contlist = 0;
 }
 int newlist(int i){
     quads[1].label = 0;
