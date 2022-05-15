@@ -45,8 +45,6 @@
 %token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT LINE_COMM
 
 
-%type returnstmt if_stmt
-
 %type <strVal>  funcname
 %type <exprVal> funcargs
 %type <symtVal> funcprefix
@@ -89,6 +87,8 @@
 %type <stmtVal> for_stmt
 %type <stmtVal> while_stmt
 %type <stmtVal> block
+%type <stmtVal> returnstmt
+%type <stmtVal> if_stmt
 
 
 %right OP_EQUALS
@@ -117,21 +117,27 @@ stmt:
             }
             |if_stmt     {
                  printf("\tif statement\n");
+                 $$ = $1;
             }
             |while_stmt  {
                  printf("\twhile statement\n");
+                 $$ = $1;
             }
             |for_stmt    {
                 printf("\tfor statement\n");
+                $$ = $1;
                 }
             |returnstmt {
                 printf("\treturn statement\n");
+                $$ = $1;
             }
             |break    {
                 printf("\tbreak stmt\n");
+                $$ = $1;
             }
             |continue {
                 printf("\tcontinue stmt\n");
+                $$ = $1;
 
             }
             |block      {
@@ -243,9 +249,9 @@ expr:       assignexpr      {
                 }
                 
                 emit(if_greater, $1, $3, $$, nextquadlabel()+3, yylineno);
-                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
-                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
                 emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
             }
             |expr OP_GREATER_EQ expr {
                 //printf("Expr: expr op_greater_eq expr\n");
@@ -389,7 +395,7 @@ term:       LEFT_PAR expr RIGHT_PAR {
                     $$->sym = newtemp();
                 }
 
-                emit(uminus, $expr, NULL, $term);
+                emit(uminus, $expr, NULL, $term, currQuad, yylineno);
             }
             |NOT expr {
                 //printf("Term: not expr\n");
@@ -401,7 +407,7 @@ term:       LEFT_PAR expr RIGHT_PAR {
                 } else {
                     $$->sym = newtemp();
                 }
-                emit(not, $expr, NULL, $term);
+                emit(not, $expr, NULL, $term, currQuad, yylineno);
             }
             |OP_PLUS_PLUS lvalue {
                 if (lvalue_checker(ourVar)) {
@@ -447,10 +453,10 @@ term:       LEFT_PAR expr RIGHT_PAR {
                         expr *val = emit_iftableitem($lvalue);
                         emit(assign, val, NULL, $term, currQuad, yylineno);
                         emit(add, val, newexpr_constnum(1), val, currQuad, yylineno);
-                        emit(tablesetelem, $lvalue, $lvalue->index, val);
+                        emit(tablesetelem, $lvalue, $lvalue->index, val, currQuad, yylineno);
                     }
                     else {
-                        emit(assign, $lvalue, NULL, $term);
+                        emit(assign, $lvalue, NULL, $term, currQuad, yylineno);
                         emit(add, $lvalue, newexpr_constnum(1), $lvalue, currQuad, yylineno);
                     }
                 }
@@ -503,10 +509,10 @@ term:       LEFT_PAR expr RIGHT_PAR {
                         expr *val = emit_iftableitem($lvalue);
                         emit(assign, val, NULL, $term, currQuad, yylineno);
                         emit(sub, val, newexpr_constnum(1), val, currQuad, yylineno);
-                        emit(tablesetelem, $lvalue, $lvalue->index, val);
+                        emit(tablesetelem, $lvalue, $lvalue->index, val, currQuad, yylineno);
                     }
                     else {
-                        emit(assign, $lvalue, NULL, $term);
+                        emit(assign, $lvalue, NULL, $term, currQuad, yylineno);
                         emit(sub, $lvalue, newexpr_constnum(1), $lvalue, currQuad, yylineno);
                     }
                 }
@@ -685,6 +691,7 @@ lvalue:     IDENTIFIER {
             }
             |member {
                 //printf("Lvalue: member\n");
+                $lvalue = $member;
                 }
             |tableitem {
                 $lvalue = $tableitem;
@@ -705,9 +712,14 @@ tableitem:  lvalue DOT IDENTIFIER {
 
 member:     call DOT IDENTIFIER {
                 //printf("Member: call.identifier\n");
+                $member = member_item($call, $IDENTIFIER);
             }
-            |call LEFT_BRACKET expr RIGHT_BRACKET {
+            |call LEFT_BRACKET expr RIGHT_BRACKET { 
                 //printf("Member: call[identifier]\n");
+                $call = emit_iftableitem($call);
+                $member = newexpr(tableitem_e);
+                $member->sym = $call->sym;
+                $member->index = $expr;
             }
             ;
 
@@ -765,11 +777,13 @@ methodcall: DOT_DOT {call_flag = 1;} IDENTIFIER LEFT_PAR  elist RIGHT_PAR {
             ;
 //f(1,2,3);
 elist:      expr {
+                printf("elist expr: %s\n",$expr->sym->name);
                 $expr->next = NULL;
                 $$ = $expr;
                 //printf("Elist: expr\n");
             }
             |elist COMMA expr {
+                printf("elist: %s\n",$expr->sym->name);
                 $expr->next = $1;
                 $$ = $expr;
                 //printf("Elist: expr,...,expr\n");
@@ -1020,10 +1034,12 @@ elseprefix: ELSE {
 
 if_stmt:    ifprefix stmt {
                 patchlabel($ifprefix, nextquadlabel());
+                $$ = $2;
             }
             | ifprefix stmt elseprefix stmt {
                 patchlabel($ifprefix, $elseprefix+1);
                 patchlabel($elseprefix, nextquadlabel());
+                $$ = $2;
             }
             ;
 
