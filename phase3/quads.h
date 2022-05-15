@@ -92,6 +92,9 @@ typedef struct expr {
     double          numConst;
     char*           strConst;
     unsigned char   boolConst;
+
+    unsigned int enter;
+    unsigned int test;
     struct expr*    next;
 } expr;
 
@@ -122,8 +125,7 @@ typedef struct stmt_t{
 }stmt_t;
 
 typedef struct forprefix{
-    int enter;
-    int test;
+    
 }forprefix;
 
 extern quad*           quads;

@@ -36,7 +36,6 @@
     struct callstruct *callVal;
     struct indexedpairs *indexedVal;
     struct stmt_t *stmtVal;
-    struct forprefix *forprefixVal;
     };
 
 %token <intVal>     INTEGER
@@ -46,7 +45,7 @@
 %token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT LINE_COMM
 
 
-%type block while for_stmt returnstmt if_stmt
+%type block while returnstmt if_stmt
 
 %type <strVal>  funcname
 %type <exprVal> funcargs
@@ -73,6 +72,8 @@
 %type <exprVal> tablemake
 %type <exprVal> elist
 %type <exprVal> idlist
+%type <exprVal> forprefix
+
 
 %type <callVal> normcall
 %type <callVal> callsuffix
@@ -86,8 +87,7 @@
 %type <stmtVal> loopstmt
 %type <stmtVal> break
 %type <stmtVal> continue
-
-%type <forprefixVal> forprefix
+%type <stmtVal> for_stmt
 
 
 %right OP_EQUALS
@@ -1054,9 +1054,7 @@ M:          {
             ;
 forprefix:  FOR LEFT_PAR elist SEMICOLON M expr SEMICOLON {
                 $forprefix = $expr;
-                printf("M: %d",$M);
                 $forprefix->test = $M;
-                printf("for prefix ok\n");
                 $forprefix->enter = nextquadlabel();
                 
                 emit(if_eq, $expr, newexpr_constbool(1), NULL, nextquadlabel(), yylineno);
@@ -1073,6 +1071,7 @@ for_stmt:   forprefix N elist RIGHT_PAR N loopstmt N {
                 patchlist($loopstmt->breaklist, nextquadlabel());
                 patchlist($loopstmt->contlist, $2 + 1);
                 
+                $for_stmt = $loopstmt;
             }
             ;
 returnstmt: RETURN SEMICOLON {
@@ -1099,7 +1098,6 @@ loopstart:   {++loopcounter;}
 loopend:     {--loopcounter;}
             ;
 loopstmt:   loopstart stmt loopend {
-    printf("loopstmt");
                 $loopstmt = $2;
             }
             ;
