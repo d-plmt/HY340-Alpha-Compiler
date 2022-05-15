@@ -238,7 +238,7 @@ expr:       assignexpr      {
                 } else {
                     $$->sym = newtemp();
                 }
-
+                
                 emit(if_greater, $1, $3, $$, nextquadlabel()+3, yylineno);
                 emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
                 emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
@@ -590,7 +590,6 @@ lvalue:     IDENTIFIER {
                     if (tmp_symbol == NULL) {
                         //an eimai se synarthsh
                         if (func_flag > 0) {
-                            printf("%s",ourVar);
                             int found_flag = 0;
                             int tmp_scope = currscope()-1;
                             while (tmp_scope >= 0) { //psaxnw parent scopes apo mesa pros ta eksw
@@ -620,8 +619,6 @@ lvalue:     IDENTIFIER {
                                 tmp_scope--;
                             }
                             if (!found_flag) {
-
-                                
                                 tmp_symbol = SymTable_insert(ourVar, yylineno, functionlocal, var_s);
                                 $lvalue = lvalue_expr(tmp_symbol);
                             }
@@ -629,7 +626,7 @@ lvalue:     IDENTIFIER {
                         else { //den eimai se synarthsh
                             tmp_symbol = SymTable_lookup(ourVar, currscope(), "call_src"); //koitaw ola ta scopes
                             if (tmp_symbol != NULL) { //an vrw kati ola good
-                                fprintf(stdout, "Calling symbol %s in parent scope.\n", $1);
+                                //fprintf(stdout, "Calling symbol %s in parent scope.\n", $1);
                             }
                             else { //alliws kanw eisagwgh
                                 tmp_symbol = SymTable_insert(ourVar, yylineno, programvar, var_s);
@@ -761,17 +758,15 @@ methodcall: DOT_DOT {call_flag = 1;} IDENTIFIER LEFT_PAR  elist RIGHT_PAR {
                 //printf("Methodcall: ..identifier(elist) in line %u\n", yylineno);
             }
             ;
-
+//f(1,2,3);
 elist:      expr {
                 $expr->next = NULL;
                 $$ = $expr;
                 //printf("Elist: expr\n");
             }
             |elist COMMA expr {
-
-                $1->next = $3;
+                $expr->next = $1;
                 $$ = $expr;
-                
                 //printf("Elist: expr,...,expr\n");
             }
             |{
@@ -957,9 +952,11 @@ const:      INTEGER {
             }
             | STRING {
                 //printf("Const: string\n");
+                $const = newexpr_conststring($STRING);
                 }
             | NIL {
                 //printf("Const: nil\n");
+                $const = newexpr(nil_e);
                 }
             | TRUE {
                 //printf("Const: true\n");
@@ -968,7 +965,8 @@ const:      INTEGER {
             }
             | FALSE {
                 //printf("Const: false\n");
-                }
+                $const = newexpr_constbool(0);
+            }
             ;
 
 idlist:     IDENTIFIER  {
@@ -1036,6 +1034,7 @@ whilecond:  LEFT_PAR expr RIGHT_PAR {
             ;
 
 while:      whilestart whilecond loopstmt {
+    
                 emit(jump, NULL, NULL, NULL, $whilestart, yylineno);
                 patchlabel($whilecond, nextquadlabel());
                 patchlist($loopstmt->breaklist, nextquadlabel());
@@ -1050,16 +1049,22 @@ N:          {
             }
             ;
 M:          {
-                $M = nextquadlabel();
+                $$ = nextquadlabel();
             }
             ;
 forprefix:  FOR LEFT_PAR elist SEMICOLON M expr SEMICOLON {
+                $forprefix = $expr;
+                printf("M: %d",$M);
                 $forprefix->test = $M;
+                printf("for prefix ok\n");
                 $forprefix->enter = nextquadlabel();
+                
                 emit(if_eq, $expr, newexpr_constbool(1), NULL, nextquadlabel(), yylineno);
+                
             }
             ;
 for_stmt:   forprefix N elist RIGHT_PAR N loopstmt N {
+                
                 patchlabel($1->enter, $5 + 1);
                 patchlabel($2, nextquadlabel());
                 patchlabel($5, $1->test);
@@ -1094,6 +1099,7 @@ loopstart:   {++loopcounter;}
 loopend:     {--loopcounter;}
             ;
 loopstmt:   loopstart stmt loopend {
+    printf("loopstmt");
                 $loopstmt = $2;
             }
             ;

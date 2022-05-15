@@ -595,7 +595,13 @@ void printargstuff(expr *arg) {
         printf("%8.3f    ",arg->numConst);
     }
     else if (arg->type == constbool_e) {
-        printf("%8c    ",arg->boolConst);
+        //printf("%8c    ",arg->boolConst);
+        if (arg->boolConst) {
+            printf("'true'  ");
+        }
+        else {
+            printf("'false'   ");
+        }
     }
     else if (arg->type == conststring_e) {
         printf("%8s    ",arg->strConst);
@@ -611,7 +617,7 @@ void printquads() {
     printf("-----------------------------------------------------------\n");
     while (i < currQuad) {
 
-        printf("quad: %d\t  ",i);
+        printf("quad: %d  \t  ",i);
         printf("op: %s\t",iop_to_str(quads[i].op));
         printf("arg1: ");
         printargstuff(quads[i].arg1);
