@@ -573,6 +573,7 @@ primary:    lvalue  {
                 //printf("Primary: (funcdef)\n");
                 $primary = newexpr(programfunc_e);
                 $primary->sym = $funcdef;
+                printf("primary->sym: %s", $primary->sym->name);
             }
             |const {
                 $primary = $const;
@@ -589,6 +590,7 @@ lvalue:     IDENTIFIER {
                     if (tmp_symbol == NULL) {
                         //an eimai se synarthsh
                         if (func_flag > 0) {
+                            printf("%s",ourVar);
                             int found_flag = 0;
                             int tmp_scope = currscope()-1;
                             while (tmp_scope >= 0) { //psaxnw parent scopes apo mesa pros ta eksw
@@ -627,7 +629,7 @@ lvalue:     IDENTIFIER {
                         else { //den eimai se synarthsh
                             tmp_symbol = SymTable_lookup(ourVar, currscope(), "call_src"); //koitaw ola ta scopes
                             if (tmp_symbol != NULL) { //an vrw kati ola good
-                                //fprintf(stdout, "Calling symbol %s in parent scope.\n", $1);
+                                fprintf(stdout, "Calling symbol %s in parent scope.\n", $1);
                             }
                             else { //alliws kanw eisagwgh
                                 tmp_symbol = SymTable_insert(ourVar, yylineno, programvar, var_s);
@@ -635,6 +637,9 @@ lvalue:     IDENTIFIER {
                             $lvalue = lvalue_expr(tmp_symbol);
                         }
 
+                    }
+                    else {
+                        $lvalue = lvalue_expr(tmp_symbol);
                     }
             }
 
