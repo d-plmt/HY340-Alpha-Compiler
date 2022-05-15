@@ -45,7 +45,7 @@
 %token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT LINE_COMM
 
 
-%type block while returnstmt if_stmt
+%type block returnstmt if_stmt
 
 %type <strVal>  funcname
 %type <exprVal> funcargs
@@ -88,6 +88,7 @@
 %type <stmtVal> break
 %type <stmtVal> continue
 %type <stmtVal> for_stmt
+%type <stmtVal> while_stmt
 
 
 %right OP_EQUALS
@@ -116,7 +117,7 @@ stmt:       expr SEMICOLON  {
             |if_stmt     {
                 // printf("\tif statement\n");
             }
-            |while  {
+            |while_stmt  {
                 // printf("\twhile statement\n");
             }
             |for_stmt    {
@@ -1033,12 +1034,13 @@ whilecond:  LEFT_PAR expr RIGHT_PAR {
             }
             ;
 
-while:      whilestart whilecond loopstmt {
-    
+while_stmt:      whilestart whilecond loopstmt {
+                
                 emit(jump, NULL, NULL, NULL, $whilestart, yylineno);
                 patchlabel($whilecond, nextquadlabel());
                 patchlist($loopstmt->breaklist, nextquadlabel());
                 patchlist($loopstmt->contlist, $whilestart);
+                $while_stmt = $loopstmt;
             }
             ;
 
