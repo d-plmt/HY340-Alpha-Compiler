@@ -159,7 +159,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 30 "parser.y"
+#line 29 "parser.y"
 
     int intVal; 
     unsigned uintVal;
@@ -170,10 +170,9 @@ union YYSTYPE
     struct callstruct *callVal;
     struct indexedpairs *indexedVal;
     struct stmt_t *stmtVal;
-    struct forprefix *forprefixVal;
     
 
-#line 177 "parser.h"
+#line 176 "parser.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

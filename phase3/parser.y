@@ -45,7 +45,7 @@
 %token <strVal>     IF ELSE WHILE FOR FUNCTION RETURN BREAK CONTINUE AND NOT OR LOCAL TRUE FALSE NIL OP_EQUALS OP_PLUS OP_MINUS OP_ASTERISK OP_SLASH OP_PERCENTAGE OP_EQ_EQ OP_NOT_EQ OP_PLUS_PLUS OP_MINUS_MINUS OP_GREATER OP_LESSER OP_GREATER_EQ OP_LESSER_EQ LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET LEFT_PAR RIGHT_PAR SEMICOLON COMMA COLON COL_COL DOT DOT_DOT LINE_COMM
 
 
-%type block returnstmt if_stmt
+%type returnstmt if_stmt
 
 %type <strVal>  funcname
 %type <exprVal> funcargs
@@ -74,7 +74,6 @@
 %type <exprVal> idlist
 %type <exprVal> forprefix
 
-
 %type <callVal> normcall
 %type <callVal> callsuffix
 %type <callVal> methodcall
@@ -89,6 +88,7 @@
 %type <stmtVal> continue
 %type <stmtVal> for_stmt
 %type <stmtVal> while_stmt
+%type <stmtVal> block
 
 
 %right OP_EQUALS
@@ -111,31 +111,35 @@ program:    stmts
             }
             ;
 
-stmt:       expr SEMICOLON  {
-                // printf("Stmt: expr;\n");
+stmt:       
+            expr SEMICOLON  {
+                 printf("Stmt: expr;\n");
             }
             |if_stmt     {
-                // printf("\tif statement\n");
+                 printf("\tif statement\n");
             }
             |while_stmt  {
-                // printf("\twhile statement\n");
+                 printf("\twhile statement\n");
             }
             |for_stmt    {
-                //printf("\tfor statement\n");
+                printf("\tfor statement\n");
                 }
             |returnstmt {
-                //printf("\treturn statement\n");
+                printf("\treturn statement\n");
             }
             |break    {
+                printf("\tbreak stmt\n");
             }
             |continue {
+                printf("\tcontinue stmt\n");
 
             }
             |block      {
-                //printf("\tBlock\n");
+                printf("\tBlock %p\n", $$);
+                $$=$1;
             }
             |funcdef    {
-                //printf("\tFunction definition\n");
+                printf("\tFunction definition\n");
                 }
             |SEMICOLON  {}
             ;
@@ -153,8 +157,6 @@ stmts:      stmts stmt {
             ;
 
 expr:       assignexpr      {
-                //printf("Assign expression\n");
-
                 $$ = $1;
             }
             |expr OP_PLUS expr  {
@@ -366,8 +368,8 @@ expr:       assignexpr      {
                 emit(or, $1, $3, $$, nextquadlabel(), yylineno);
             }
             |term   {
-                $expr = $term;
-                //printf("Term expression\n");
+                $$ = $term;
+                printf("Term expression %p %f\n",$expr, $expr->numConst);
             }
             ;
 
@@ -515,7 +517,7 @@ term:       LEFT_PAR expr RIGHT_PAR {
             }
             |primary {
                 $term = $primary;
-                //printf("Term: primary\n");
+                printf("Term: primary %p %f\n", $term, $term->numConst);
                 }
             ;
 
@@ -561,6 +563,7 @@ assignexpr: lvalue OP_EQUALS expr {
 
 primary:    lvalue  {
                 $primary = emit_iftableitem($lvalue);
+
                 //printf("Primary: lvalue\n");
             }
             |call   {
@@ -578,6 +581,7 @@ primary:    lvalue  {
             }
             |const {
                 $primary = $const;
+                printf("Primary = %p %f\n", $primary, $primary->numConst);
                 //printf("Primary: const\n");
                 }
             ;
@@ -837,7 +841,7 @@ block:      LEFT_BRACE {
                     if (scope_flag == 1) {
                         SymTable_hide(currscope()+1);
                     }
-                    
+                    $block = calloc(1, sizeof(struct stmt_t));
                 }
             |LEFT_BRACE {
                     currentscope = currscope() + scope_flag;
@@ -846,6 +850,7 @@ block:      LEFT_BRACE {
                     if (scope_flag == 1) {
                         SymTable_hide(currscope()+1);
                     }
+                $block = $stmts;
                 }
                 
             ;
@@ -1024,23 +1029,25 @@ if_stmt:    ifprefix stmt {
 
 whilestart: WHILE {
                 $whilestart = nextquadlabel();
+                printf("Quad: %d\n", $whilestart);
             }
             ;
 
 whilecond:  LEFT_PAR expr RIGHT_PAR {
-                emit(if_eq, $expr, newexpr_constbool(1), NULL, nextquadlabel()+2, yylineno);
-                $whilecond = nextquadlabel();
+                emit(if_eq, $2, newexpr_constbool(1), NULL, nextquadlabel()+2, yylineno);
+                $$ = nextquadlabel();
                 emit(jump, NULL, NULL, NULL, 0, yylineno);
             }
             ;
 
 while_stmt:      whilestart whilecond loopstmt {
                 
-                emit(jump, NULL, NULL, NULL, $whilestart, yylineno);
-                patchlabel($whilecond, nextquadlabel());
-                patchlist($loopstmt->breaklist, nextquadlabel());
-                patchlist($loopstmt->contlist, $whilestart);
-                $while_stmt = $loopstmt;
+                emit(jump, NULL, NULL, NULL, $1, yylineno);
+                patchlabel($2, nextquadlabel());
+                printf("--------->%d\n", $2);
+                    patchlist($3->breaklist, nextquadlabel());
+                    patchlist($3->contlist, $1);
+                    $$ = $3;
             }
             ;
 
@@ -1097,10 +1104,11 @@ returnstmt: RETURN SEMICOLON {
             ;
 loopstart:   {++loopcounter;}
             ;
-loopend:     {--loopcounter;}
+loopend:     {loopcounter--;}
             ;
 loopstmt:   loopstart stmt loopend {
                 $loopstmt = $2;
+                printf("loopstmt %p\n", $stmt);
             }
             ;
 
