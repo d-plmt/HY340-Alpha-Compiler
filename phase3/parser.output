@@ -343,7 +343,7 @@ Nonterminals, with rules where they appear
     elseprefix <intVal> (86)
         on left: 95
         on right: 97
-    if_stmt (87)
+    if_stmt <stmtVal> (87)
         on left: 96 97
         on right: 4
     whilestart <intVal> (88)
@@ -367,7 +367,7 @@ Nonterminals, with rules where they appear
     for_stmt <stmtVal> (94)
         on left: 104
         on right: 6
-    returnstmt (95)
+    returnstmt <stmtVal> (95)
         on left: 105 106
         on right: 7
     loopstart (96)

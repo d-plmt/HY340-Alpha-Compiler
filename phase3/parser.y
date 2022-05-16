@@ -380,7 +380,7 @@ expr:       assignexpr      {
             ;
 
 term:       LEFT_PAR expr RIGHT_PAR {
-                //printf("Term: (expr)\n");
+                printf("Term: (expr)\n");
                 $term = $expr;
             }
             |OP_MINUS expr  {
@@ -573,7 +573,7 @@ primary:    lvalue  {
                 //printf("Primary: lvalue\n");
             }
             |call   {
-                //printf("Primary: call\n");
+                printf("Primary: call\n");
                 }
             |tablemake {
                 $primary = $tablemake;
@@ -777,7 +777,7 @@ methodcall: DOT_DOT {call_flag = 1;} IDENTIFIER LEFT_PAR  elist RIGHT_PAR {
             ;
 //f(1,2,3);
 elist:      expr {
-                printf("elist expr: %s\n",$expr->sym->name);
+                //printf("elist expr: %s\n",$expr->sym->name);
                 $expr->next = NULL;
                 $$ = $expr;
                 //printf("Elist: expr\n");
