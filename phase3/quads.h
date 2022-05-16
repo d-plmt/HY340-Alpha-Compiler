@@ -213,7 +213,7 @@ void patchlabel(unsigned quadNo, unsigned label); //sumplirwnei ena arxika undef
 
 void check_arith(expr* e, const char* context); //sunartisi pou tsekarei an xrisimopoieitai swsta to expr se ariumhtiko 
 
-void make_stmt(stmt_t* s);
+stmt_t *make_stmt(stmt_t* s);
 int newlist(int i);
 int mergelist(int l1, int l2);
 void patchlist(int list, int label);

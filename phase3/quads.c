@@ -534,11 +534,13 @@ void check_arith(expr* e, const char* context){
         fprintf(stderr, "Illegal expr used in %s!", context);
 } 
 
-void make_stmt(stmt_t* s){
+stmt_t *make_stmt(stmt_t* s){
+    s = malloc(sizeof(stmt_t));
     s->breaklist = s->contlist = 0;
+    return s;
 }
 int newlist(int i){
-    quads[1].label = 0;
+    quads[i].label = 0;
     return i;
 }
 int mergelist(int l1, int l2){ //den eimai sigouri oti tin katalava prepei na tin ksanadoume!!!
@@ -637,7 +639,9 @@ void printquads() {
         printf("result: ");
         printargstuff(quads[i].result);
         printf("label: ");
-        printf("%d\n",quads[i].label);
+        printf("%d    ",quads[i].label);
+        printf("line: ");
+        printf("%d\n", quads[i].line);
         i++;
     }
     printf("-----------------------------------------------------------\n");

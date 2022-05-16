@@ -114,6 +114,7 @@ program:    stmts
 stmt:       
             expr SEMICOLON  {
                  printf("Stmt: expr;\n");
+                $stmt = make_stmt($stmt);
             }
             |if_stmt     {
                  printf("\tif statement\n");
@@ -138,7 +139,7 @@ stmt:
             |continue {
                 printf("\tcontinue stmt\n");
                 $$ = $1;
-
+                printf("contlist: %d\n",$continue->contlist);
             }
             |block      {
                 printf("\tBlock %p\n", $$);
@@ -146,6 +147,7 @@ stmt:
             }
             |funcdef    {
                 printf("\tFunction definition\n");
+                $stmt = make_stmt($stmt);
                 }
             |SEMICOLON  {}
             ;
@@ -845,7 +847,7 @@ indexedelem: LEFT_BRACE expr COLON expr RIGHT_BRACE {
                 temp->key = $2;
                 temp->value = $4;
                 $indexedelem = temp;
-                //printf("indexedelem: %s\n",$indexedelem->key->sym->name);
+
             }
             ;
 
@@ -1035,12 +1037,15 @@ elseprefix: ELSE {
 
 if_stmt:    ifprefix stmt {
                 patchlabel($ifprefix, nextquadlabel());
+                
                 $$ = $2;
             }
             | ifprefix stmt elseprefix stmt {
                 patchlabel($ifprefix, $elseprefix+1);
                 patchlabel($elseprefix, nextquadlabel());
                 $$ = $2;
+                $$->breaklist = mergelist($2->breaklist, $4->breaklist);
+                $$->contlist = mergelist($2->contlist, $4->contlist);
             }
             ;
 
@@ -1063,7 +1068,9 @@ while_stmt:      whilestart whilecond loopstmt {
                 patchlabel($2, nextquadlabel());
                 printf("--------->%d\n", $2);
                     patchlist($3->breaklist, nextquadlabel());
+                    printf("contlist is %d\t%d\n",$3->contlist,$1);
                     patchlist($3->contlist, $1);
+                    printf("contlist is %d\t%d\n",$3->contlist,$1);
                     $$ = $3;
             }
             ;
@@ -1125,7 +1132,6 @@ loopend:     {loopcounter--;}
             ;
 loopstmt:   loopstart stmt loopend {
                 $loopstmt = $2;
-                printf("loopstmt %p\n", $stmt);
             }
             ;
 
@@ -1136,7 +1142,7 @@ break:      BREAK SEMICOLON {
                 }
                 else {
                     //printf("\tkeyword \"break\"\n");
-                    make_stmt($break);
+                    $break = make_stmt($break);
                     $break->breaklist = newlist(nextquadlabel());
                     emit(jump, NULL, NULL, 0, nextquadlabel(), yylineno);
                 }
@@ -1149,8 +1155,7 @@ continue:   CONTINUE SEMICOLON {
                     $$ = NULL;
                 }
                 else {
-                    //printf("\tkeyword \"continue\"\n");
-                    make_stmt($continue);
+                    $continue = make_stmt($continue);
                     $continue->contlist = newlist(nextquadlabel());
                     emit(jump, NULL, NULL, 0, nextquadlabel(), yylineno);
                 }
