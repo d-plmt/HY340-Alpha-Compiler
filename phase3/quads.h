@@ -170,6 +170,7 @@ const char *getName(symt *input);
 unsigned int getScope(symt *input);
 unsigned int getLine(symt *input);
 char *getType(symbol_t type);
+char *getScopeSpace(scopespace_t space);
 
 extern scope_link *lista;
 extern SymTable *lera;

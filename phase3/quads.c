@@ -265,6 +265,16 @@ char *getType(symbol_t type) {
     return "libraryfunc_s";
 }
 
+char *getScopeSpace(scopespace_t space) {
+    if (space == 0) {
+        return "programvar";
+    }
+    if (space == 1) {
+        return "functionlocal";
+    }
+    return "formalarg";
+}
+
 bool isLibraryFunc(const char * funct){
     if( !strcmp(funct,"print") ||
     !strcmp(funct,"input") ||

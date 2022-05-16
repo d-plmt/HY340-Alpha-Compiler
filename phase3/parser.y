@@ -803,7 +803,7 @@ tablemake:  LEFT_BRACKET elist RIGHT_BRACKET  { //dhmiourgia pinakwn [elist]
 
                 expr *temp = $elist;
                 while (temp != NULL) {
-                    emit(tablesetelem, t, newexpr_constnum(i++), temp, currQuad, yylineno);
+                    emit(tablesetelem, temp, newexpr_constnum(i++), t, currQuad, yylineno);
                     temp = temp->next;
                 }
                 
@@ -817,14 +817,14 @@ tablemake:  LEFT_BRACKET elist RIGHT_BRACKET  { //dhmiourgia pinakwn [elist]
                 emit(tablecreate, t, NULL, NULL, currQuad, yylineno);
                 indexedpairs *temp = $indexed;
                 while (temp != NULL) {
-                    emit(tablesetelem, t, temp->key, temp->value, currQuad, yylineno);
+                    emit(tablesetelem, temp->value, temp->key, t, currQuad, yylineno);
                     temp = temp->next;
                 }
                 $tablemake = t;
                 //printf("Tablemake: (indexed)\n");
             }
             ;
-
+//[{x:1},{y:2}, {h:3}]
 indexed:    indexedelem {
                 //printf("Indexed: indexedelem\n");
                 $indexedelem->next = NULL;
@@ -833,8 +833,8 @@ indexed:    indexedelem {
             | indexed COMMA indexedelem {
                 //printf("Indexed: indexedelem,...,indexedelem\n");
 
-                $indexedelem->next = $3;
-                $$ = $indexedelem;
+                $1->next = $3;
+                $$ = $1;
             }
             ;
 
@@ -1244,7 +1244,7 @@ void print_scopes() {
         temp = temp2->scope_head;
         printf("---------\tscope: %d\t---------\n\n",temp2->scope_counter);
         while (temp != NULL) {
-            printf("\"%s\"\t[%s]\t(line: %u)\t(scope: %u)\n",getName(temp),getType(temp->type),getLine(temp), getScope(temp));
+            printf("\"%s\"\t[%s]\t(line: %u)\t(offset: %u)\n",getName(temp),getScopeSpace(temp->space),getLine(temp), temp->offset);
             temp = temp->next_in_scope;
         }
         temp2 = temp2 -> next;
