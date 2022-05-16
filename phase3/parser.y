@@ -829,11 +829,11 @@ indexed:    indexedelem {
                 //printf("Indexed: indexedelem\n");
                 $indexedelem->next = NULL;
                 $indexed = $indexedelem;
-                printf("indexedelem: %s\n",$indexedelem->key->sym->name);
+                //printf("indexedelem: %s\n",$indexedelem->key->sym->name);
             }
             | indexed COMMA indexedelem {
                 //printf("Indexed: indexedelem,...,indexedelem\n");
-                printf("indexed: %s\n",$1->key->sym->name);
+                //printf("indexed: %s\n",$1->key->sym->name);
                 $3->next = $1;
                 $$ = $3;
             }
@@ -845,7 +845,7 @@ indexedelem: LEFT_BRACE expr COLON expr RIGHT_BRACE {
                 temp->key = $2;
                 temp->value = $4;
                 $indexedelem = temp;
-                printf("indexedelem: %s\n",$indexedelem->key->sym->name);
+                //printf("indexedelem: %s\n",$indexedelem->key->sym->name);
             }
             ;
 
