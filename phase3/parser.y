@@ -824,17 +824,18 @@ tablemake:  LEFT_BRACKET elist RIGHT_BRACKET  { //dhmiourgia pinakwn [elist]
                 //printf("Tablemake: (indexed)\n");
             }
             ;
-//[{x:1},{y:2}, {h:3}]
+//{x:0}, {y:1}, {h:2}, {k:3}
 indexed:    indexedelem {
                 //printf("Indexed: indexedelem\n");
                 $indexedelem->next = NULL;
                 $indexed = $indexedelem;
+                printf("indexedelem: %s\n",$indexedelem->key->sym->name);
             }
             | indexed COMMA indexedelem {
                 //printf("Indexed: indexedelem,...,indexedelem\n");
-
-                $1->next = $3;
-                $$ = $1;
+                printf("indexed: %s\n",$1->key->sym->name);
+                $3->next = $1;
+                $$ = $3;
             }
             ;
 
@@ -844,6 +845,7 @@ indexedelem: LEFT_BRACE expr COLON expr RIGHT_BRACE {
                 temp->key = $2;
                 temp->value = $4;
                 $indexedelem = temp;
+                printf("indexedelem: %s\n",$indexedelem->key->sym->name);
             }
             ;
 
