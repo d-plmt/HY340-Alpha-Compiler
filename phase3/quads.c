@@ -471,6 +471,7 @@ expr* lvalue_expr (symt* sym){
 expr* make_call(expr* lv, expr* reversed_elist){
     expr* func = emit_iftableitem(lv);
     while (reversed_elist) {
+        printf("AAAAAA\n");
         emit(param, reversed_elist, NULL, NULL, currQuad, yylineno); 
         reversed_elist = reversed_elist->next;
     }

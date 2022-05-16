@@ -573,6 +573,7 @@ primary:    lvalue  {
                 //printf("Primary: lvalue\n");
             }
             |call   {
+                $primary = $call;
                 printf("Primary: call\n");
                 }
             |tablemake {
@@ -733,7 +734,6 @@ call:       call {call_flag = 1;}LEFT_PAR elist RIGHT_PAR {
                 if ($callsuffix->method){
                     expr *t = $lvalue;
                     $lvalue = emit_iftableitem(member_item(t, $callsuffix->name));
-                    $callsuffix->elist->next = t; //insert san prwto argument antestrameno ara teleutaio
                 }
                 $$ = make_call($lvalue, $callsuffix->elist); 
                 //printf("Call: lvalue callsuffix\n");
@@ -783,7 +783,6 @@ elist:      expr {
                 //printf("Elist: expr\n");
             }
             |elist COMMA expr {
-                printf("elist: %s\n",$expr->sym->name);
                 $expr->next = $1;
                 $$ = $expr;
                 //printf("Elist: expr,...,expr\n");
