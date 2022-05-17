@@ -460,6 +460,7 @@ unsigned nextquadlabel(void){
 
 void patchlabel(unsigned quadNo, unsigned label){
     assert(quadNo < currQuad);
+    printf("quad[%d].label from %d to %d\n",quadNo,quads[quadNo].label,label);
     quads[quadNo].label = label;
 }
 
@@ -549,6 +550,13 @@ list *newlist(int i){
     return temp;
 }
 
+list *newlistnode(unsigned int label) {
+    list *new_node = malloc(sizeof(list));
+    new_node->next = NULL;
+    new_node->label = label;
+    return new_node;
+}
+
 list *mergelist(list *l1, list *l2){ //den eimai sigouri oti tin katalava prepei na tin ksanadoume!!!
     if(l1==NULL) return l2;
     if (l2==NULL) return l1;
@@ -572,7 +580,14 @@ void patchlist(list *lista, int label){
 void backpatch(list *lista, unsigned label) {
     list *temp = lista;
     while (temp != NULL) {
-        quads[temp->label].label = label;
+        printf("quad[%d].label from %d to %d\n",temp->label,quads[temp->label].label,label);
+        if (temp->label < label) {
+            quads[temp->label].label = label;
+            
+        }
+        else {
+            break;
+        }
         temp = temp->next;
     }
 }

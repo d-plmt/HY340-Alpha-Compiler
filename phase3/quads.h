@@ -220,6 +220,7 @@ void check_arith(expr* e, const char* context); //sunartisi pou tsekarei an xris
 
 stmt_t *make_stmt(stmt_t* s);
 list *newlist(int i);
+list *newlistnode(unsigned int label);
 list *mergelist(list *l1, list *l2);
 void patchlist(list *lista, int label);
 void backpatch(list *lista, unsigned label);

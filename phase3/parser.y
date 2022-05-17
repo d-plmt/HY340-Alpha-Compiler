@@ -57,7 +57,6 @@
 %type <intVal>  whilecond
 %type <intVal>  N
 %type <intVal>  M
-%type <intVal>  Malakia
 
 %type <exprVal> expr
 %type <exprVal> lvalue
@@ -119,8 +118,8 @@ stmt:
                     $stmt = NULL;
                 } else {
                     $stmt = make_stmt($stmt);   //teleiwnei to statement opote theloume na ftiaksoume ta quads
-                    backpatch($1->truelist, nextquadlabel());
-                    backpatch($1->falselist, nextquadlabel());
+                    // backpatch($1->truelist, nextquadlabel());
+                    // backpatch($1->falselist, nextquadlabel());
                 }
             }
             |if_stmt     {
@@ -314,7 +313,7 @@ expr:       assignexpr      {
                     $$->sym = newtemp();
                 }
 
-                emit(if_lesseq, $1, $3, $$, nextquadlabel()+2, yylineno);   //tha to ftiaksoume meta me backpatch
+                emit(if_lesseq, $1, $3, $$, nextquadlabel()+2, yylineno); 
                 emit(jump, NULL, NULL, NULL, nextquadlabel()+3, yylineno);
                 emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
                 emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
@@ -371,7 +370,17 @@ expr:       assignexpr      {
 
                 emit(and, $1, $3, $$, nextquadlabel(), yylineno);
             }
-            |expr OR Malakia expr {
+            |expr OR{
+                if ($1->type != boolexpr_e) {
+                    $1->truelist = newlistnode(nextquadlabel()); //gia thn akrivws apo katw entolh
+                    emit(if_eq, $1, newexpr_constbool(1), NULL, 0, yylineno); //tha kanoume backpatch sto telos
+
+                    $1->falselist = newlistnode(nextquadlabel());
+                    emit(jump, NULL, NULL, NULL, nextquadlabel()+1, yylineno);
+                }
+            }
+            
+            expr {
                 //printf("Expr: expr or expr\n");
 
                 $$ = newexpr(boolexpr_e);
@@ -383,11 +392,29 @@ expr:       assignexpr      {
                 } else {
                     $$->sym = newtemp();
                 }
+                
+                if ($4->type != boolexpr_e) {
 
-                emit(or, $1, $4, $$, nextquadlabel(), yylineno);
-                backpatch($1->falselist, $Malakia);
+                    $4->truelist = newlistnode(nextquadlabel());
+                    emit(if_eq, $4, newexpr_constbool(1), NULL, 0, yylineno); //backpatch meta
+
+                    $4->falselist = newlistnode(nextquadlabel());
+                    emit(jump, NULL, NULL, NULL, 0, yylineno); //to 1o false
+                }
+
+                int assignquad = nextquadlabel();
+                emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno); //mas petaei meta to assign false
+                int falsequad = nextquadlabel();
+                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
+
+                
                 $$->truelist = mergelist($1->truelist, $4->truelist);
-                $$->falselist = mergelist($1->falselist, $4->falselist);
+                $$->falselist = $4->falselist;
+                backpatch($$->truelist, assignquad);
+                backpatch($$->falselist, falsequad);
+                
+
             }
             |term   {
                 $$ = $term;
@@ -395,7 +422,6 @@ expr:       assignexpr      {
             }
             ;
 
-Malakia:    {$Malakia = nextquadlabel();}
 
 term:       LEFT_PAR expr RIGHT_PAR {
                 printf("Term: (expr)\n");
