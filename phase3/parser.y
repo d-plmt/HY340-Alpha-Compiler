@@ -1108,6 +1108,7 @@ for_stmt:   forprefix N elist RIGHT_PAR N loopstmt N {
             }
             ;
 returnstmt: RETURN SEMICOLON {
+                $returnstmt = make_stmt($returnstmt);
                 if (func_flag > 0) {
                     emit(ret, NULL, NULL, NULL, nextquadlabel(), yylineno);
                     //printf("Returnstmt: return;\n");
@@ -1117,6 +1118,7 @@ returnstmt: RETURN SEMICOLON {
                 }
             }
             |RETURN expr SEMICOLON {
+                $returnstmt = make_stmt($returnstmt);
                 if (func_flag > 0) {
                     emit(ret, NULL, NULL, $expr, nextquadlabel(), yylineno);
                     //printf("Returnstmt: return;\n");
