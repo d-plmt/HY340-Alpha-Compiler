@@ -402,6 +402,8 @@ expr* newexpr(expr_t t){
     expr* e = (expr*)malloc(sizeof(expr));
     memset(e, 0, sizeof(expr));
     e->type = t;
+    e->truelist = NULL;
+    e->falselist = NULL;
     return e;
 }
 
@@ -468,6 +470,8 @@ expr* lvalue_expr (symt* sym){
 
     e->next = (expr*) 0;
     e->sym = sym;
+    e->truelist = NULL;
+    e->falselist = NULL;
 
     switch (sym->type){
         case var_s          : e->type = var_e; break;
@@ -481,7 +485,6 @@ expr* lvalue_expr (symt* sym){
 expr* make_call(expr* lv, expr* reversed_elist){
     expr* func = emit_iftableitem(lv);
     while (reversed_elist) {
-        printf("AAAAAA\n");
         emit(param, reversed_elist, NULL, NULL, currQuad, yylineno); 
         reversed_elist = reversed_elist->next;
     }
@@ -539,31 +542,38 @@ stmt_t *make_stmt(stmt_t* s){
     s->breaklist = s->contlist = 0;
     return s;
 }
-int newlist(int i){
-    quads[i].label = 0;
-    return i;
+list *newlist(int i){
+    list *temp = malloc(sizeof(list));
+    temp->label = i;
+    temp->next = NULL;
+    return temp;
 }
-int mergelist(int l1, int l2){ //den eimai sigouri oti tin katalava prepei na tin ksanadoume!!!
-    if(!l1) return l2;
-    else {
-        if (!l2) return l1;
-        else{
-            int i = l1;
-            while(quads[i].label){
-                i = quads[i].label;
-                quads[i].label = l2;
-                return l1;
-            }
-        }
+
+list *mergelist(list *l1, list *l2){ //den eimai sigouri oti tin katalava prepei na tin ksanadoume!!!
+    if(l1==NULL) return l2;
+    if (l2==NULL) return l1;
+    list *temp = l1;
+    while (temp->next != NULL) {
+        temp = temp->next;
+    }
+    temp->next = l2;
+    return temp;
+}
+
+void patchlist(list *lista, int label){
+    
+    while (lista != NULL){
+        printf("patchlist\n");
+        patchlabel(lista->label, label);
+        lista = lista->next;
     }
 }
-void patchlist(int list, int label){
-    
-    while (list){
-        printf("patchlist\n");
-        int next = quads[list].label;
-        quads[list].label = label;
-        list = next;
+
+void backpatch(list *lista, unsigned label) {
+    list *temp = lista;
+    while (temp != NULL) {
+        quads[temp->label].label = label;
+        temp = temp->next;
     }
 }
 

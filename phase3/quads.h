@@ -95,6 +95,9 @@ typedef struct expr {
 
     unsigned int enter;
     unsigned int test;
+
+    struct list* truelist;
+    struct list* falselist;
     struct expr*    next;
 } expr;
 
@@ -120,13 +123,15 @@ typedef struct indexedpairs {
 } indexedpairs;
 
 typedef struct stmt_t{
-    int breaklist;
-    int contlist;
+    struct list  *breaklist;
+    struct list *contlist;
+
 }stmt_t;
 
-typedef struct forprefix{
-    
-}forprefix;
+typedef struct list {
+    unsigned int label;
+    struct list *next;
+} list;
 
 extern quad*           quads;
 extern unsigned        total;
@@ -214,7 +219,10 @@ void patchlabel(unsigned quadNo, unsigned label); //sumplirwnei ena arxika undef
 void check_arith(expr* e, const char* context); //sunartisi pou tsekarei an xrisimopoieitai swsta to expr se ariumhtiko 
 
 stmt_t *make_stmt(stmt_t* s);
-int newlist(int i);
-int mergelist(int l1, int l2);
-void patchlist(int list, int label);
+list *newlist(int i);
+list *mergelist(list *l1, list *l2);
+void patchlist(list *lista, int label);
+void backpatch(list *lista, unsigned label);
+
+
 void printquads();

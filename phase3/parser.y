@@ -57,6 +57,7 @@
 %type <intVal>  whilecond
 %type <intVal>  N
 %type <intVal>  M
+%type <intVal>  Malakia
 
 %type <exprVal> expr
 %type <exprVal> lvalue
@@ -114,7 +115,13 @@ program:    stmts
 stmt:       
             expr SEMICOLON  {
                  printf("Stmt: expr;\n");
-                $stmt = make_stmt($stmt);
+                if ($expr == NULL) {
+                    $stmt = NULL;
+                } else {
+                    $stmt = make_stmt($stmt);   //teleiwnei to statement opote theloume na ftiaksoume ta quads
+                    backpatch($1->truelist, nextquadlabel());
+                    backpatch($1->falselist, nextquadlabel());
+                }
             }
             |if_stmt     {
                  printf("\tif statement\n");
@@ -139,7 +146,6 @@ stmt:
             |continue {
                 printf("\tcontinue stmt\n");
                 $$ = $1;
-                printf("contlist: %d\n",$continue->contlist);
             }
             |block      {
                 printf("\tBlock %p\n", $$);
@@ -164,6 +170,7 @@ stmts:      stmts stmt {
             
             ;
 
+//find_expr
 expr:       assignexpr      {
                 $$ = $1;
             }
@@ -250,7 +257,8 @@ expr:       assignexpr      {
                     $$->sym = newtemp();
                 }
                 
-                emit(if_greater, $1, $3, $$, nextquadlabel()+3, yylineno);
+                emit(if_greater, $1, $3, $$, nextquadlabel()+2, yylineno);
+                emit(jump, NULL, NULL, NULL, nextquadlabel()+3, yylineno);
                 emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
                 emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
                 emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
@@ -268,10 +276,11 @@ expr:       assignexpr      {
                     $$->sym = newtemp();
                 }
 
-                emit(if_greatereq, $1, $3, $$, nextquadlabel()+3, yylineno);
-                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
-                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                emit(if_greatereq, $1, $3, $$, nextquadlabel()+2, yylineno);
+                emit(jump, NULL, NULL, NULL, nextquadlabel()+3, yylineno);
                 emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
             }
             |expr OP_LESSER expr {
                 //printf("Expr: expr op_lesser expr\n");
@@ -286,10 +295,11 @@ expr:       assignexpr      {
                     $$->sym = newtemp();
                 }
 
-                emit(if_less, $1, $3, $$, nextquadlabel()+3, yylineno);
-                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
-                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                emit(if_less, $1, $3, $$, nextquadlabel()+2, yylineno);
+                emit(jump, NULL, NULL, NULL, nextquadlabel()+3, yylineno);
                 emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
             }
             |expr OP_LESSER_EQ expr {
                 //printf("Expr: expr op_lesser_eq expr\n");
@@ -304,10 +314,11 @@ expr:       assignexpr      {
                     $$->sym = newtemp();
                 }
 
-                emit(if_lesseq, $1, $3, $$, nextquadlabel()+3, yylineno);
-                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
-                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                emit(if_lesseq, $1, $3, $$, nextquadlabel()+2, yylineno);   //tha to ftiaksoume meta me backpatch
+                emit(jump, NULL, NULL, NULL, nextquadlabel()+3, yylineno);
                 emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
             }
             |expr OP_EQ_EQ expr {
                 //printf("Expr: expr op_eq_eq expr\n");
@@ -323,9 +334,9 @@ expr:       assignexpr      {
                 }
 
                 emit(if_eq, $1, $3, $$, nextquadlabel()+3, yylineno);
-                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
-                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
                 emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
             }
             |expr OP_NOT_EQ expr {
                 //printf("Expr: expr op_not_eq expr\n");
@@ -341,9 +352,9 @@ expr:       assignexpr      {
                 }
 
                 emit(if_noteq, $1, $3, $$, nextquadlabel()+3, yylineno);
-                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
-                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
                 emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
             }
             |expr AND expr {
                 //printf("Expr: expr and expr\n");
@@ -360,26 +371,31 @@ expr:       assignexpr      {
 
                 emit(and, $1, $3, $$, nextquadlabel(), yylineno);
             }
-            |expr OR expr {
+            |expr OR Malakia expr {
                 //printf("Expr: expr or expr\n");
 
                 $$ = newexpr(boolexpr_e);
 
                 if (istempexpr($1)) {
                     $$->sym = $1->sym;
-                } else if (istempexpr($3)) {
-                    $$->sym = $3->sym;
+                } else if (istempexpr($4)) {
+                    $$->sym = $4->sym;
                 } else {
                     $$->sym = newtemp();
                 }
 
-                emit(or, $1, $3, $$, nextquadlabel(), yylineno);
+                emit(or, $1, $4, $$, nextquadlabel(), yylineno);
+                backpatch($1->falselist, $Malakia);
+                $$->truelist = mergelist($1->truelist, $4->truelist);
+                $$->falselist = mergelist($1->falselist, $4->falselist);
             }
             |term   {
                 $$ = $term;
                 printf("Term expression %p %f\n",$expr, $expr->numConst);
             }
             ;
+
+Malakia:    {$Malakia = nextquadlabel();}
 
 term:       LEFT_PAR expr RIGHT_PAR {
                 printf("Term: (expr)\n");
@@ -530,41 +546,28 @@ term:       LEFT_PAR expr RIGHT_PAR {
             ;
 
 assignexpr: lvalue OP_EQUALS expr {
-                int found_flag = 0;
-                if (!local_flag)  {
-                    symt *tmp_symbol = NULL;
-                    
-                    int tmp_scope = currscope();
-                    while (tmp_scope >= 0) { //psaxnw ta scopes apo mesa pros ta eksw
-                        tmp_symbol = SymTable_lookup(ourVar, tmp_scope, "local");
-                        if (tmp_symbol != NULL) {
-                            if (tmp_symbol->type > 2) {
-                                fprintf(stdout, "\033[0;31mError. Line %d: Attempting to use function  %s as lvalue\n\033[0m",yylineno, ourVar);
-                                found_flag = 1;
-                                break;
-                            }
-                        }
-                        tmp_scope--;
-                    }
-                    //fprintf(stdout, "Assign expression: lvalue = expr\n");
+                if ($lvalue->type == tableitem_e) { //lvalue[index] = expr
+                    //printf("AAAAAAAAAAAAAA");
+                    emit(tablesetelem, $lvalue, $lvalue->index, $expr, currQuad, yylineno);
+                    $assignexpr = emit_iftableitem($lvalue);
+                    $assignexpr->type = assignexpr_e;
+                }
+                else if ($lvalue->type == programfunc_e || $lvalue->type == libraryfunc_e) {
+                    fprintf(stdout, "\033[0;31mError. Line %d: Attempting to use function %s as lvalue\n\033[0m",yylineno, $1->sym->name);
                 }
                 else {
-                    //printf("Assign expression: lvalue = expr\n");
-                }
-                if (!found_flag) {
-                    if ($lvalue->type == tableitem_e) { //lvalue[index] = expr
-                        //printf("AAAAAAAAAAAAAA");
-                        emit(tablesetelem, $lvalue, $lvalue->index, $expr, currQuad, yylineno);
-                        $assignexpr = emit_iftableitem($lvalue);
-                        $assignexpr->type = assignexpr_e;
-                    }
-                    else { //lvalue = expr;
+                    if ($expr->type != boolexpr_e) {
+                        printf("expr != boolexpr_e\n");
                         emit(assign, $expr, NULL, $lvalue, currQuad, yylineno);
                         $assignexpr = newexpr(assignexpr_e);
                         $assignexpr->sym = newtemp();
                         emit(assign, $lvalue, NULL, $assignexpr, currQuad, yylineno);
                     }
+                    else {
+                        printf("expr = boolexpr_e\n");
+                    }
                 }
+
                  local_flag = 0;
             }
             ;
@@ -1068,9 +1071,7 @@ while_stmt:      whilestart whilecond loopstmt {
                 patchlabel($2, nextquadlabel());
                 printf("--------->%d\n", $2);
                     patchlist($3->breaklist, nextquadlabel());
-                    printf("contlist is %d\t%d\n",$3->contlist,$1);
                     patchlist($3->contlist, $1);
-                    printf("contlist is %d\t%d\n",$3->contlist,$1);
                     $$ = $3;
             }
             ;
