@@ -558,7 +558,9 @@ int mergelist(int l1, int l2){ //den eimai sigouri oti tin katalava prepei na ti
     }
 }
 void patchlist(int list, int label){
+    
     while (list){
+        printf("patchlist\n");
         int next = quads[list].label;
         quads[list].label = label;
         list = next;
