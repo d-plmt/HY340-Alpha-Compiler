@@ -20,6 +20,7 @@ extern unsigned int scopeSpaceCounter;
 extern unsigned int loopcounter;
 extern int andorflag;
 extern int notflag;
+extern int retflag;
 
 typedef enum symbol_t  {
     var_s, 
@@ -148,16 +149,27 @@ typedef struct scopeOffsetStack {
 
 typedef struct loopCounterStack {
     int loopCounter;
+    struct list  *breaklist;
+    struct list *contlist;
     struct loopCounterStack *next;
 }loopStack;
 
+typedef struct loopCounter{
+    int loopCounter;
+    struct loopCounter *next;
+} loopCounter;
+
 void pushOffsetStack(int offset);
 int popOffsetStack();
-void pushLoopStack(int loopCounter);
+void pushLoopStack(loopStack *node);
 int popLoopStack();
+void pushLoopCounter(int currentloop);
+int popLoopCounter();
+
 
 extern offsetStack *offsetTop;
 extern loopStack *loopCounterTop;
+extern loopCounter *loopTop;
 
 /*Hash Table functions*/
 unsigned int SymTable_hash(const char *key);

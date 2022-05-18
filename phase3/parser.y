@@ -113,13 +113,10 @@ program:    stmts
 
 stmt:       
             expr SEMICOLON  {
+                $stmt = make_stmt($stmt);
                  //printf("Stmt: expr;\n");
-                if ($expr == NULL) {
-                    $stmt = NULL;
-                } else {
-                    $stmt = make_stmt($stmt);   //teleiwnei to statement opote theloume na ftiaksoume ta quads
-                    // backpatch($1->truelist, nextquadlabel());
-                    // backpatch($1->falselist, nextquadlabel());
+                if ($expr != NULL) {
+                       //teleiwnei to statement opote theloume na ftiaksoume ta quads
                     if ($expr->type == boolexpr_e) {
                         int assignquad = nextquadlabel();
                         int falsequad = nextquadlabel()+2;
@@ -169,7 +166,9 @@ stmt:
                 printf("\tFunction definition\n");
                 $stmt = make_stmt($stmt);
                 }
-            |SEMICOLON  {}
+            |SEMICOLON  {
+                $stmt = make_stmt($stmt);
+            }
             ;
 
 stmts:      stmts stmt {
@@ -816,10 +815,16 @@ call:       call {call_flag = 1;}LEFT_PAR elist RIGHT_PAR {
                 //printf("Call: call(elist)\n");
              }
             |lvalue {call_flag=1;}callsuffix {
-                $lvalue = emit_iftableitem($lvalue); //se periptwsi pou itan table item
+                expr *temp = $lvalue;
+                
                 if ($callsuffix->method){
                     expr *t = $lvalue;
                     $lvalue = emit_iftableitem(member_item(t, $callsuffix->name));
+                }
+                if ($lvalue->type == tableitem_e) {
+                    $lvalue = emit_iftableitem($lvalue); //se periptwsi pou itan table item
+                } else {
+                    emit(param, NULL, NULL, temp, nextquadlabel(), yylineno);
                 }
                 $$ = make_call($lvalue, $callsuffix->elist); 
                 //printf("Call: lvalue callsuffix\n");
@@ -845,6 +850,7 @@ callsuffix: normcall {
 
 normcall:   LEFT_PAR {call_flag = 1;} elist RIGHT_PAR {
                 call_flag = 0; 
+                $normcall = malloc(sizeof(callstruct));
                 $normcall->elist     = $elist;
                 $normcall->method    = 0;
                 $normcall->name      = NULL; 
@@ -854,9 +860,11 @@ normcall:   LEFT_PAR {call_flag = 1;} elist RIGHT_PAR {
 
 methodcall: DOT_DOT {call_flag = 1;} IDENTIFIER LEFT_PAR  elist RIGHT_PAR {
                 call_flag = 0; 
+                $methodcall = malloc(sizeof(callstruct));
                 $methodcall->elist    = $elist;
                 $methodcall->method   = 1;
                 $methodcall->name     = $IDENTIFIER;
+
 
                 //printf("Methodcall: ..identifier(elist) in line %u\n", yylineno);
             }
@@ -943,7 +951,7 @@ block:      LEFT_BRACE {
                     if (scope_flag == 1) {
                         SymTable_hide(currscope()+1);
                     }
-                    $block = calloc(1, sizeof(struct stmt_t));
+                    $block = make_stmt($block);
                 }
             |LEFT_BRACE {
                     currentscope = currscope() + scope_flag;
@@ -1033,18 +1041,24 @@ funcdef:    funcprefix funcargs funcbody {
                 $funcdef = $funcprefix;
                 expr *temp = lvalue_expr($funcprefix);
                 emit(funcend, NULL, NULL, temp, currQuad, yylineno);
+                if (retflag) {
+                    patchlabel(retflag, nextquadlabel());
+                }
+                
+
+                retflag = -1;
             }
             ;
 
 funcblockstart: {
     //printf("AAAAAAAAAAAAAAAA\n");
-                pushLoopStack(loopcounter);
+                pushLoopCounter(loopcounter);
                 loopcounter = 0;   
             }
             ;
 
 funcblockend:   {
-                loopcounter = popLoopStack();
+                loopcounter = popLoopCounter();
             }
             ;
 
@@ -1108,9 +1122,27 @@ idlist:     IDENTIFIER  {
             ;
 
 ifprefix:   IF LEFT_PAR expr RIGHT_PAR {
+                int assignquad = nextquadlabel();
+                int falsequad = nextquadlabel()+2;
+
+                if($expr->type == boolexpr_e) {
+                    emit(assign, newexpr_constbool(1), NULL, $expr, nextquadlabel(), yylineno);
+                    emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                    emit(assign, newexpr_constbool(0), NULL, $expr, nextquadlabel(), yylineno);
+                }
+
+
+                if (andorflag) {  
+                    backpatch($expr->truelist, assignquad);
+                    backpatch($expr->falselist, falsequad);
+                }
                 emit(if_eq, $expr, newexpr_constbool(1), NULL, nextquadlabel()+2, yylineno);
                 $ifprefix = nextquadlabel();
                 emit(jump, NULL, NULL, NULL, 0, yylineno);
+
+                
+
+                andorflag = 0;
             }
             ;
 
@@ -1141,6 +1173,20 @@ whilestart: WHILE {
             ;
 
 whilecond:  LEFT_PAR expr RIGHT_PAR {
+                int assignquad = nextquadlabel();
+                int falsequad = nextquadlabel()+2;
+                if ($expr->type == boolexpr_e) {
+                    emit(assign, newexpr_constbool(1), NULL, $expr, nextquadlabel(), yylineno);
+                    emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                    emit(assign, newexpr_constbool(0), NULL, $expr, nextquadlabel(), yylineno);
+                }
+                
+
+                if (andorflag) {  
+                    backpatch($expr->truelist, assignquad);
+                    backpatch($expr->falselist, falsequad);
+                }
+
                 emit(if_eq, $2, newexpr_constbool(1), NULL, nextquadlabel()+2, yylineno);
                 $$ = nextquadlabel();
                 emit(jump, NULL, NULL, NULL, 0, yylineno);
@@ -1152,9 +1198,13 @@ while_stmt:      whilestart whilecond loopstmt {
                 emit(jump, NULL, NULL, NULL, $1, yylineno);
                 patchlabel($2, nextquadlabel());
                 printf("--------->%d\n", $2);
-                    patchlist($3->breaklist, nextquadlabel());
-                    patchlist($3->contlist, $1);
+                if ($3 != NULL) {
+                    backpatch(loopCounterTop->breaklist, nextquadlabel());
+                    backpatch(loopCounterTop->contlist, $1);
                     $$ = $3;
+                    popLoopStack();
+                }
+                    
             }
             ;
 
@@ -1173,20 +1223,26 @@ forprefix:  FOR LEFT_PAR elist SEMICOLON M expr SEMICOLON {
                 $forprefix->test = $M;
                 $forprefix->enter = nextquadlabel();
                 
+                if ($expr->type == boolexpr_e) {
+                    emit(assign, newexpr_constbool(1), NULL, $expr, nextquadlabel(), yylineno);
+                    emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                    emit(assign, newexpr_constbool(0), NULL, $expr, nextquadlabel(), yylineno);
+                }
+
                 emit(if_eq, $expr, newexpr_constbool(1), NULL, nextquadlabel(), yylineno);
                 
             }
             ;
 for_stmt:   forprefix N elist RIGHT_PAR N loopstmt N {
-                
-                patchlabel($1->enter, $5 + 1);
+                printf("N1: %d, N2: %d, N3: %d\n",$2,$5,$7);
+                patchlabel($2-1, $5+1);
                 patchlabel($2, nextquadlabel());
                 patchlabel($5, $1->test);
                 patchlabel($7, $2 + 1);
 
-                patchlist($loopstmt->breaklist, nextquadlabel());
-                patchlist($loopstmt->contlist, $2 + 1);
-                
+                patchlist(loopCounterTop->breaklist, nextquadlabel());
+                patchlist(loopCounterTop->contlist, $2 + 1);
+                popLoopStack();
                 $for_stmt = $loopstmt;
             }
             ;
@@ -1194,6 +1250,8 @@ returnstmt: RETURN SEMICOLON {
                 $returnstmt = make_stmt($returnstmt);
                 if (func_flag > 0) {
                     emit(ret, NULL, NULL, NULL, nextquadlabel(), yylineno);
+                    retflag = nextquadlabel();
+                    emit(jump, NULL, NULL, NULL, nextquadlabel(), yylineno);
                     //printf("Returnstmt: return;\n");
                 }
                 else {
@@ -1204,6 +1262,8 @@ returnstmt: RETURN SEMICOLON {
                 $returnstmt = make_stmt($returnstmt);
                 if (func_flag > 0) {
                     emit(ret, NULL, NULL, $expr, nextquadlabel(), yylineno);
+                    retflag = nextquadlabel();
+                    emit(jump, NULL, NULL, NULL, nextquadlabel(), yylineno);
                     //printf("Returnstmt: return;\n");
                 }
                 else {
@@ -1211,38 +1271,55 @@ returnstmt: RETURN SEMICOLON {
                 }
             }
             ;
-loopstart:   {++loopcounter;}
+loopstart:   {
+                ++loopcounter;
+                loopStack *temp = malloc(sizeof(loopStack));
+                temp->breaklist = NULL;
+                temp->contlist = NULL;
+                temp->loopCounter = loopcounter;
+                pushLoopStack(temp);
+
+            }
             ;
 loopend:     {loopcounter--;}
             ;
 loopstmt:   loopstart stmt loopend {
-                $loopstmt = $2;
+                if ($stmt == NULL) {
+                    $loopstmt = make_stmt($loopstmt);
+                }
+                else {
+                    $loopstmt = $2;
+                }
+                
             }
             ;
 
 break:      BREAK SEMICOLON {
+                $break = make_stmt($break);
                 if (loopcounter < 1) {
                     fprintf(stderr, "\033[0;31mERROR. Line %d: Keyword \"break\" can't be used without a loop.\n\033[0m", yylineno);
-                    $$ = NULL;
                 }
                 else {
-                    //printf("\tkeyword \"break\"\n");
-                    $break = make_stmt($break);
-                    $break->breaklist = newlist(nextquadlabel());
+                    list *temp;
+                    temp = newlist(nextquadlabel());
+                    loopCounterTop->breaklist = mergelist(loopCounterTop->breaklist, temp);
                     emit(jump, NULL, NULL, 0, nextquadlabel(), yylineno);
+                    $$->breaklist = loopCounterTop->breaklist;
                 }
             }
             ;
 
 continue:   CONTINUE SEMICOLON {
+                $continue = make_stmt($continue);
                 if (loopcounter < 1) {
                     fprintf(stderr, "\033[0;31mERROR. Line %d: Keyword \"continue\" can't be used without a loop.\n\033[0m", yylineno);
-                    $$ = NULL;
                 }
                 else {
-                    $continue = make_stmt($continue);
-                    $continue->contlist = newlist(nextquadlabel());
+                    list *temp;
+                    temp = newlist(nextquadlabel());
+                    loopCounterTop->contlist = mergelist(loopCounterTop->contlist, temp);
                     emit(jump, NULL, NULL, 0, nextquadlabel(), yylineno);
+                    $$->contlist = loopCounterTop->contlist;
                 }
             }
             ;    

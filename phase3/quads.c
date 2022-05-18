@@ -9,6 +9,7 @@ unsigned int scopeSpaceCounter = 1;
 unsigned int loopcounter = 0;
 int andorflag = 0;
 int notflag = 0;
+int retflag = 0;
 
 quad* quads = (quad*) 0;
 unsigned int total = 0;
@@ -329,9 +330,11 @@ int popOffsetStack() {
     return to_return;
 }
 
-void pushLoopStack(int loopCounter){
+void pushLoopStack(loopStack *node){
     loopStack *temp_node = malloc(sizeof(loopStack));
-    temp_node->loopCounter = loopCounter;
+    temp_node->loopCounter = node->loopCounter;
+    temp_node->breaklist = node->breaklist;
+    temp_node->contlist = node->contlist;
     if(loopCounterTop == NULL){
         temp_node->next = NULL;
     }else{
@@ -356,8 +359,38 @@ int popLoopStack(){
     return to_return;
 }
 
+void pushLoopCounter(int currentloop) {
+    loopCounter *new_node = malloc(sizeof(loopCounter));
+    new_node -> loopCounter = currentloop;
+    if (loopTop == NULL) {
+        new_node->next = NULL;
+    }
+    else {
+        new_node->next = loopTop;
+    }
+    loopTop = new_node;
+}
+
+int popLoopCounter() {
+    if (loopTop == NULL) {
+        return -1;
+    }
+    int to_return = loopTop->loopCounter;
+    if (loopTop->next == NULL) {
+        free(loopTop);
+        loopTop = NULL;
+    }
+    else {
+        loopCounter *temp = loopTop;
+        loopTop = loopTop->next;
+        free(temp);
+    }
+    return to_return;
+}
+
 offsetStack *offsetTop = NULL;
 loopStack *loopCounterTop = NULL;
+loopCounter *loopTop = NULL;
 
 //////////////QUADS////////////////
 int tempcounter = 0;
@@ -489,7 +522,7 @@ expr* lvalue_expr (symt* sym){
 expr* make_call(expr* lv, expr* reversed_elist){
     expr* func = emit_iftableitem(lv);
     while (reversed_elist) {
-        emit(param, reversed_elist, NULL, NULL, currQuad, yylineno); 
+        emit(param, NULL, NULL, reversed_elist, currQuad, yylineno); 
         reversed_elist = reversed_elist->next;
     }
     emit(call, func, NULL, NULL, currQuad, yylineno); 
