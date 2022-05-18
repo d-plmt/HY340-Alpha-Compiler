@@ -113,14 +113,29 @@ program:    stmts
 
 stmt:       
             expr SEMICOLON  {
-                 printf("Stmt: expr;\n");
+                 //printf("Stmt: expr;\n");
                 if ($expr == NULL) {
                     $stmt = NULL;
                 } else {
                     $stmt = make_stmt($stmt);   //teleiwnei to statement opote theloume na ftiaksoume ta quads
                     // backpatch($1->truelist, nextquadlabel());
                     // backpatch($1->falselist, nextquadlabel());
+                    if ($expr->type == boolexpr_e) {
+                        int assignquad = nextquadlabel();
+                        int falsequad = nextquadlabel()+2;
+                        printf("falsequad %d\n",falsequad);
+                        emit(assign, newexpr_constbool(1), NULL, $1, nextquadlabel(), yylineno);
+                        emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                        emit(assign, newexpr_constbool(0), NULL, $1, nextquadlabel(), yylineno);
+
+                        if (andorflag) {  
+                            backpatch($1->truelist, assignquad);
+                            backpatch($1->falselist, falsequad);
+                        }
+                    }
+                    
                 }
+                andorflag = 0;
             }
             |if_stmt     {
                  printf("\tif statement\n");
@@ -147,7 +162,7 @@ stmt:
                 $$ = $1;
             }
             |block      {
-                printf("\tBlock %p\n", $$);
+                //printf("\tBlock %p\n", $$);
                 $$=$1;
             }
             |funcdef    {
@@ -172,6 +187,7 @@ stmts:      stmts stmt {
 //find_expr
 expr:       assignexpr      {
                 $$ = $1;
+
             }
             |expr OP_PLUS expr  {
                 //printf("Expr: expr op_plus expr\n");
@@ -258,9 +274,9 @@ expr:       assignexpr      {
                 
                 emit(if_greater, $1, $3, $$, nextquadlabel()+2, yylineno);
                 emit(jump, NULL, NULL, NULL, nextquadlabel()+3, yylineno);
-                emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
-                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
-                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
+                // emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+                // emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                // emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
             }
             |expr OP_GREATER_EQ expr {
                 //printf("Expr: expr op_greater_eq expr\n");
@@ -277,9 +293,9 @@ expr:       assignexpr      {
 
                 emit(if_greatereq, $1, $3, $$, nextquadlabel()+2, yylineno);
                 emit(jump, NULL, NULL, NULL, nextquadlabel()+3, yylineno);
-                emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
-                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
-                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
+                // emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+                // emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                // emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
             }
             |expr OP_LESSER expr {
                 //printf("Expr: expr op_lesser expr\n");
@@ -296,9 +312,9 @@ expr:       assignexpr      {
 
                 emit(if_less, $1, $3, $$, nextquadlabel()+2, yylineno);
                 emit(jump, NULL, NULL, NULL, nextquadlabel()+3, yylineno);
-                emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
-                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
-                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
+                // emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+                // emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                // emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
             }
             |expr OP_LESSER_EQ expr {
                 //printf("Expr: expr op_lesser_eq expr\n");
@@ -315,9 +331,9 @@ expr:       assignexpr      {
 
                 emit(if_lesseq, $1, $3, $$, nextquadlabel()+2, yylineno); 
                 emit(jump, NULL, NULL, NULL, nextquadlabel()+3, yylineno);
-                emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
-                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
-                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
+                // emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+                // emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                // emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
             }
             |expr OP_EQ_EQ expr {
                 //printf("Expr: expr op_eq_eq expr\n");
@@ -332,10 +348,11 @@ expr:       assignexpr      {
                     $$->sym = newtemp();
                 }
 
-                emit(if_eq, $1, $3, $$, nextquadlabel()+3, yylineno);
-                emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
-                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
-                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
+                emit(if_eq, $1, $3, $$, nextquadlabel()+2, yylineno);
+                emit(jump, NULL, NULL, NULL, nextquadlabel()+3, yylineno);
+                // emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+                // emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                // emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
             }
             |expr OP_NOT_EQ expr {
                 //printf("Expr: expr op_not_eq expr\n");
@@ -350,10 +367,11 @@ expr:       assignexpr      {
                     $$->sym = newtemp();
                 }
 
-                emit(if_noteq, $1, $3, $$, nextquadlabel()+3, yylineno);
-                emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
-                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
-                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
+                emit(if_noteq, $1, $3, $$, nextquadlabel()+2, yylineno);
+                emit(jump, NULL, NULL, NULL, nextquadlabel()+3, yylineno);
+                // emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+                // emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                // emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
             }
             |expr AND expr {
                 //printf("Expr: expr and expr\n");
@@ -370,55 +388,53 @@ expr:       assignexpr      {
 
                 emit(and, $1, $3, $$, nextquadlabel(), yylineno);
             }
-            |expr OR{
+            |expr OR expr{
+                andorflag = 1;
                 if ($1->type != boolexpr_e) {
                     $1->truelist = newlistnode(nextquadlabel()); //gia thn akrivws apo katw entolh
                     emit(if_eq, $1, newexpr_constbool(1), NULL, 0, yylineno); //tha kanoume backpatch sto telos
 
-                    $1->falselist = newlistnode(nextquadlabel());
+                    //$1->falselist = newlistnode(nextquadlabel());
                     emit(jump, NULL, NULL, NULL, nextquadlabel()+1, yylineno);
                 }
-            }
-            
-            expr {
                 //printf("Expr: expr or expr\n");
 
                 $$ = newexpr(boolexpr_e);
 
                 if (istempexpr($1)) {
                     $$->sym = $1->sym;
-                } else if (istempexpr($4)) {
-                    $$->sym = $4->sym;
+                } else if (istempexpr($3)) {
+                    $$->sym = $3->sym;
                 } else {
                     $$->sym = newtemp();
                 }
                 
-                if ($4->type != boolexpr_e) {
+                if ($3->type != boolexpr_e) {
 
-                    $4->truelist = newlistnode(nextquadlabel());
-                    emit(if_eq, $4, newexpr_constbool(1), NULL, 0, yylineno); //backpatch meta
+                    $3->truelist = newlistnode(nextquadlabel());
+                    emit(if_eq, $3, newexpr_constbool(1), NULL, 0, yylineno); //backpatch meta
 
-                    $4->falselist = newlistnode(nextquadlabel());
-                    emit(jump, NULL, NULL, NULL, 0, yylineno); //to 1o false
+                    $3->falselist = newlistnode(nextquadlabel());
+                    emit(jump, NULL, NULL, NULL, nextquadlabel()+1, yylineno); //to 1o false
                 }
+                //printf("dollar1 truelist: %d", $1->truelist->label);
+                $$->truelist = mergelist($1->truelist, $3->truelist);
+                $$->falselist = $3->falselist;
 
-                int assignquad = nextquadlabel();
-                emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
-                emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno); //mas petaei meta to assign false
-                int falsequad = nextquadlabel();
-                emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
+                // emit(assign, newexpr_constbool(1), NULL, $$, nextquadlabel(), yylineno);
+                // emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno); //mas petaei meta to assign false
+                // emit(assign, newexpr_constbool(0), NULL, $$, nextquadlabel(), yylineno);
 
                 
-                $$->truelist = mergelist($1->truelist, $4->truelist);
-                $$->falselist = $4->falselist;
-                backpatch($$->truelist, assignquad);
-                backpatch($$->falselist, falsequad);
+                
+                // backpatch($$->truelist, assignquad);
+                // backpatch($$->falselist, falsequad);
                 
 
             }
             |term   {
                 $$ = $term;
-                printf("Term expression %p %f\n",$expr, $expr->numConst);
+                //printf("Term expression %p %f\n",$expr, $expr->numConst);
             }
             ;
 
@@ -567,7 +583,7 @@ term:       LEFT_PAR expr RIGHT_PAR {
             }
             |primary {
                 $term = $primary;
-                printf("Term: primary %p %f\n", $term, $term->numConst);
+                //printf("Term: primary %p %f\n", $term, $term->numConst);
                 }
             ;
 
@@ -583,14 +599,14 @@ assignexpr: lvalue OP_EQUALS expr {
                 }
                 else {
                     if ($expr->type != boolexpr_e) {
-                        printf("expr != boolexpr_e\n");
+                        //printf("expr != boolexpr_e\n");
                         emit(assign, $expr, NULL, $lvalue, currQuad, yylineno);
                         $assignexpr = newexpr(assignexpr_e);
                         $assignexpr->sym = newtemp();
                         emit(assign, $lvalue, NULL, $assignexpr, currQuad, yylineno);
                     }
                     else {
-                        printf("expr = boolexpr_e\n");
+                        //printf("expr = boolexpr_e\n");
                     }
                 }
 
@@ -619,7 +635,7 @@ primary:    lvalue  {
             }
             |const {
                 $primary = $const;
-                printf("Primary = %p %f\n", $primary, $primary->numConst);
+                //printf("Primary = %p %f\n", $primary, $primary->numConst);
                 //printf("Primary: const\n");
                 }
             ;

@@ -7,6 +7,8 @@ unsigned int functionLocalOffset = 0;
 unsigned int formalArgOffset = 0;
 unsigned int scopeSpaceCounter = 1;
 unsigned int loopcounter = 0;
+int andorflag = 0;
+
 quad* quads = (quad*) 0;
 unsigned int total = 0;
 unsigned int currQuad = 0;
@@ -562,16 +564,17 @@ list *mergelist(list *l1, list *l2){ //den eimai sigouri oti tin katalava prepei
     if (l2==NULL) return l1;
     list *temp = l1;
     while (temp->next != NULL) {
+        //printf("mergearw to quad %d\n",temp->label);
         temp = temp->next;
     }
     temp->next = l2;
-    return temp;
+    return l1;
 }
 
 void patchlist(list *lista, int label){
     
     while (lista != NULL){
-        printf("patchlist\n");
+        //printf("patchlist\n");
         patchlabel(lista->label, label);
         lista = lista->next;
     }
@@ -580,7 +583,7 @@ void patchlist(list *lista, int label){
 void backpatch(list *lista, unsigned label) {
     list *temp = lista;
     while (temp != NULL) {
-        printf("quad[%d].label from %d to %d\n",temp->label,quads[temp->label].label,label);
+        //printf("quad[%d].label from %d to %d\n",temp->label,quads[temp->label].label,label);
         if (temp->label < label) {
             quads[temp->label].label = label;
             
