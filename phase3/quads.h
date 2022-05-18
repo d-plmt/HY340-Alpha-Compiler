@@ -19,6 +19,7 @@ extern unsigned int formalArgOffset;
 extern unsigned int scopeSpaceCounter;
 extern unsigned int loopcounter;
 extern int andorflag;
+extern int notflag;
 
 typedef enum symbol_t  {
     var_s, 

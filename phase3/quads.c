@@ -8,6 +8,7 @@ unsigned int formalArgOffset = 0;
 unsigned int scopeSpaceCounter = 1;
 unsigned int loopcounter = 0;
 int andorflag = 0;
+int notflag = 0;
 
 quad* quads = (quad*) 0;
 unsigned int total = 0;

@@ -123,7 +123,6 @@ stmt:
                     if ($expr->type == boolexpr_e) {
                         int assignquad = nextquadlabel();
                         int falsequad = nextquadlabel()+2;
-                        printf("falsequad %d\n",falsequad);
                         emit(assign, newexpr_constbool(1), NULL, $1, nextquadlabel(), yylineno);
                         emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
                         emit(assign, newexpr_constbool(0), NULL, $1, nextquadlabel(), yylineno);
@@ -136,6 +135,7 @@ stmt:
                     
                 }
                 andorflag = 0;
+                notflag = 0;
             }
             |if_stmt     {
                  printf("\tif statement\n");
@@ -375,7 +375,7 @@ expr:       assignexpr      {
             }
             |expr AND expr {
                 //printf("Expr: expr and expr\n");
-
+                andorflag = 1;
                 $$ = newexpr(boolexpr_e);
                 
                 if (istempexpr($1)) {
@@ -386,19 +386,26 @@ expr:       assignexpr      {
                     $$->sym = newtemp();
                 }
 
-                emit(and, $1, $3, $$, nextquadlabel(), yylineno);
+                if ($1->type != boolexpr_e) {
+                    emit(if_eq, $1, newexpr_constbool(1), NULL, nextquadlabel()+2, yylineno);
+
+                    $1->falselist = newlistnode(nextquadlabel());
+                    emit(jump, NULL, NULL, NULL, 0, yylineno); //backpatch
+                }
+
+                if ($3->type != boolexpr_e) {
+                    emit(if_eq, $3, newexpr_constbool(1), NULL, nextquadlabel()+2, yylineno); //backpatch meta
+
+                    $3->falselist = newlistnode(nextquadlabel());
+                    emit(jump, NULL, NULL, NULL, 0, yylineno);
+                }
+                
+                $$->truelist = $3->truelist;
+                $$->falselist = mergelist($1->falselist, $3->falselist);               
+
             }
             |expr OR expr{
                 andorflag = 1;
-                if ($1->type != boolexpr_e) {
-                    $1->truelist = newlistnode(nextquadlabel()); //gia thn akrivws apo katw entolh
-                    emit(if_eq, $1, newexpr_constbool(1), NULL, 0, yylineno); //tha kanoume backpatch sto telos
-
-                    //$1->falselist = newlistnode(nextquadlabel());
-                    emit(jump, NULL, NULL, NULL, nextquadlabel()+1, yylineno);
-                }
-                //printf("Expr: expr or expr\n");
-
                 $$ = newexpr(boolexpr_e);
 
                 if (istempexpr($1)) {
@@ -407,6 +414,13 @@ expr:       assignexpr      {
                     $$->sym = $3->sym;
                 } else {
                     $$->sym = newtemp();
+                }
+
+                if ($1->type != boolexpr_e) {
+                    $1->truelist = newlistnode(nextquadlabel()); //gia thn akrivws apo katw entolh
+                    emit(if_eq, $1, newexpr_constbool(1), NULL, 0, yylineno); //tha kanoume backpatch sto telos
+
+                    emit(jump, NULL, NULL, NULL, nextquadlabel()+1, yylineno);
                 }
                 
                 if ($3->type != boolexpr_e) {
@@ -432,6 +446,28 @@ expr:       assignexpr      {
                 
 
             }
+            |NOT expr {
+                andorflag = 1;
+                notflag = 1;
+                $$ = newexpr(boolexpr_e);
+
+                if (istempexpr($2)) {
+                    $$->sym = $2->sym;
+                } else {
+                    $$->sym = newtemp();
+                }
+
+                if ($2->type != boolexpr_e) {
+                    $2->falselist = newlistnode(nextquadlabel()); //gia thn akrivws apo katw entolh
+                    emit(if_eq, $2, newexpr_constbool(1), NULL, 0, yylineno); //tha kanoume backpatch sto telos
+
+                    $2->truelist = newlistnode(nextquadlabel());
+                    emit(jump, NULL, NULL, NULL, nextquadlabel()+1, yylineno);
+                }
+                
+                $$->truelist = $2->truelist;
+                $$->falselist = $2->falselist;
+            }
             |term   {
                 $$ = $term;
                 //printf("Term expression %p %f\n",$expr, $expr->numConst);
@@ -456,18 +492,6 @@ term:       LEFT_PAR expr RIGHT_PAR {
                 }
 
                 emit(uminus, $expr, NULL, $term, currQuad, yylineno);
-            }
-            |NOT expr {
-                //printf("Term: not expr\n");
-
-                $term = newexpr(boolexpr_e);
-
-                if (istempexpr($2)) {
-                    $$->sym = $2->sym;
-                } else {
-                    $$->sym = newtemp();
-                }
-                emit(not, $expr, NULL, $term, currQuad, yylineno);
             }
             |OP_PLUS_PLUS lvalue {
                 if (lvalue_checker(ourVar)) {
@@ -606,7 +630,22 @@ assignexpr: lvalue OP_EQUALS expr {
                         emit(assign, $lvalue, NULL, $assignexpr, currQuad, yylineno);
                     }
                     else {
-                        //printf("expr = boolexpr_e\n");
+                        int assignquad = nextquadlabel();
+                        int falsequad = nextquadlabel()+2;
+                        emit(assign, newexpr_constbool(1), NULL, $3, nextquadlabel(), yylineno);
+                        emit(jump, NULL, NULL, NULL, nextquadlabel()+2, yylineno);
+                        emit(assign, newexpr_constbool(0), NULL, $3, nextquadlabel(), yylineno);
+
+                        if (andorflag) {  
+                            backpatch($3->truelist, assignquad);
+                            backpatch($3->falselist, falsequad);
+                        }
+
+                        emit(assign, $expr, NULL, $lvalue, currQuad, yylineno);
+                        $assignexpr = newexpr(assignexpr_e);
+                        $assignexpr->sym = newtemp();
+                        emit(assign, $lvalue, NULL, $assignexpr, currQuad, yylineno);
+                        andorflag = 0;
                     }
                 }
 
@@ -850,6 +889,7 @@ tablemake:  LEFT_BRACKET elist RIGHT_BRACKET  { //dhmiourgia pinakwn [elist]
 
                 expr *temp = $elist;
                 while (temp != NULL) {
+                    printf("temp to %d\n",i+1);
                     emit(tablesetelem, temp, newexpr_constnum(i++), t, currQuad, yylineno);
                     temp = temp->next;
                 }
@@ -861,7 +901,7 @@ tablemake:  LEFT_BRACKET elist RIGHT_BRACKET  { //dhmiourgia pinakwn [elist]
             |LEFT_BRACKET indexed RIGHT_BRACKET { //dhmiourgia pinakwn [{x:y}, ...]
                 expr *t = newexpr(newtable_e);
                 t->sym = newtemp();
-                emit(tablecreate, t, NULL, NULL, currQuad, yylineno);
+                emit(tablecreate, NULL, NULL, t, currQuad, yylineno);
                 indexedpairs *temp = $indexed;
                 while (temp != NULL) {
                     emit(tablesetelem, temp->value, temp->key, t, currQuad, yylineno);
