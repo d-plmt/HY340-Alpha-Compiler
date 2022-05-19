@@ -496,7 +496,7 @@ unsigned nextquadlabel(void){
 
 void patchlabel(unsigned quadNo, unsigned label){
     assert(quadNo < currQuad);
-    printf("quad[%d].label from %d to %d\n",quadNo,quads[quadNo].label,label);
+    //printf("quad[%d].label from %d to %d\n",quadNo,quads[quadNo].label,label);
     quads[quadNo].label = label;
 }
 

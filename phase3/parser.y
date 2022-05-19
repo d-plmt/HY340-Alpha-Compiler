@@ -135,27 +135,27 @@ stmt:
                 notflag = 0;
             }
             |if_stmt     {
-                 printf("\tif statement\n");
+                 //printf("\tif statement\n");
                  $$ = $1;
             }
             |while_stmt  {
-                 printf("\twhile statement\n");
+                 //printf("\twhile statement\n");
                  $$ = $1;
             }
             |for_stmt    {
-                printf("\tfor statement\n");
+                //printf("\tfor statement\n");
                 $$ = $1;
                 }
             |returnstmt {
-                printf("\treturn statement\n");
+                //printf("\treturn statement\n");
                 $$ = $1;
             }
             |break    {
-                printf("\tbreak stmt\n");
+                //printf("\tbreak stmt\n");
                 $$ = $1;
             }
             |continue {
-                printf("\tcontinue stmt\n");
+                //printf("\tcontinue stmt\n");
                 $$ = $1;
             }
             |block      {
@@ -163,7 +163,7 @@ stmt:
                 $$=$1;
             }
             |funcdef    {
-                printf("\tFunction definition\n");
+                //printf("\tFunction definition\n");
                 $stmt = make_stmt($stmt);
                 }
             |SEMICOLON  {
@@ -475,7 +475,7 @@ expr:       assignexpr      {
 
 
 term:       LEFT_PAR expr RIGHT_PAR {
-                printf("Term: (expr)\n");
+                //printf("Term: (expr)\n");
                 $term = $expr;
             }
             |OP_MINUS expr  {
@@ -659,7 +659,7 @@ primary:    lvalue  {
             }
             |call   {
                 $primary = $call;
-                printf("Primary: call\n");
+                //printf("Primary: call\n");
                 }
             |tablemake {
                 $primary = $tablemake;
@@ -669,7 +669,7 @@ primary:    lvalue  {
                 //printf("Primary: (funcdef)\n");
                 $primary = newexpr(programfunc_e);
                 $primary->sym = $funcdef;
-                printf("primary->sym: %s", $primary->sym->name);
+                //printf("primary->sym: %s", $primary->sym->name);
             }
             |const {
                 $primary = $const;
@@ -897,7 +897,7 @@ tablemake:  LEFT_BRACKET elist RIGHT_BRACKET  { //dhmiourgia pinakwn [elist]
 
                 expr *temp = $elist;
                 while (temp != NULL) {
-                    printf("temp to %d\n",i+1);
+                    //printf("temp to %d\n",i+1);
                     emit(tablesetelem, temp, newexpr_constnum(i++), t, currQuad, yylineno);
                     temp = temp->next;
                 }
@@ -1041,7 +1041,7 @@ funcdef:    funcprefix funcargs funcbody {
                 $funcdef = $funcprefix;
                 expr *temp = lvalue_expr($funcprefix);
                 emit(funcend, NULL, NULL, temp, currQuad, yylineno);
-                if (retflag) {
+                if (retflag>-1) {
                     patchlabel(retflag, nextquadlabel());
                 }
                 
@@ -1168,7 +1168,7 @@ if_stmt:    ifprefix stmt {
 
 whilestart: WHILE {
                 $whilestart = nextquadlabel();
-                printf("Quad: %d\n", $whilestart);
+                //printf("Quad: %d\n", $whilestart);
             }
             ;
 
@@ -1197,7 +1197,7 @@ while_stmt:      whilestart whilecond loopstmt {
                 
                 emit(jump, NULL, NULL, NULL, $1, yylineno);
                 patchlabel($2, nextquadlabel());
-                printf("--------->%d\n", $2);
+                //printf("--------->%d\n", $2);
                 if ($3 != NULL) {
                     backpatch(loopCounterTop->breaklist, nextquadlabel());
                     backpatch(loopCounterTop->contlist, $1);
@@ -1234,7 +1234,7 @@ forprefix:  FOR LEFT_PAR elist SEMICOLON M expr SEMICOLON {
             }
             ;
 for_stmt:   forprefix N elist RIGHT_PAR N loopstmt N {
-                printf("N1: %d, N2: %d, N3: %d\n",$2,$5,$7);
+                //printf("N1: %d, N2: %d, N3: %d\n",$2,$5,$7);
                 patchlabel($2-1, $5+1);
                 patchlabel($2, nextquadlabel());
                 patchlabel($5, $1->test);
