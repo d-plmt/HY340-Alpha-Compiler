@@ -1,3 +1,5 @@
-phase1/tests/* linguist-generated
-phase2/testfiles/* linguist-generated
-phase3/testfiles/* linguist-generated
+phase1/tests/* linguist-vendored
+phase2/testfiles/Errors/* linguist-vendored
+phase2/testfiles/Working/* linguist-vendored
+phase3/testfiles/Errors/* linguist-vendored
+phase3/testfiles/Working/* linguist-vendored
